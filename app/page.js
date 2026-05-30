@@ -9,6 +9,49 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // ── Waitlist form state ───────────────────────────────────────────────────
+  const [form, setForm] = useState({
+    contact_name: '',
+    work_email: '',
+    company_name: '',
+    platform_url: '',
+    platform_type: '',
+    monthly_upload_volume: '',
+    referral_source: '',
+    use_case: '',
+  });
+  const [formStatus, setFormStatus] = useState('idle'); // idle | submitting | success | error
+  const [formError, setFormError] = useState('');
+
+  const handleFormChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleFormSubmit = async () => {
+    setFormError('');
+    if (!form.contact_name || !form.work_email || !form.company_name || !form.platform_url || !form.platform_type || !form.monthly_upload_volume) {
+      setFormError('Please fill in all required fields.');
+      return;
+    }
+    setFormStatus('submitting');
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_CORVINTH_API_URL || 'https://corvinth-api.onrender.com';
+      const res = await fetch(`${API_URL}/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Submission failed. Please try again.');
+      }
+      setFormStatus('success');
+    } catch (e) {
+      setFormError(e.message || 'Something went wrong. Please try again.');
+      setFormStatus('idle');
+    }
+  };
+
   const simulateCheck = async () => {
     setLoading(true);
     try {
@@ -303,6 +346,63 @@ export default function Home() {
           .pricing-note b { color: var(--text-muted); font-weight: 500; }
 
           .contact-section { background: var(--bg-card); }
+
+          .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 2rem;
+            text-align: left;
+          }
+          .form-field { display: flex; flex-direction: column; gap: 6px; }
+          .form-field.full { grid-column: 1 / -1; }
+          .form-field label {
+            font-size: 11px; font-weight: 500;
+            color: var(--text-faint);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            font-family: 'DM Mono', monospace;
+          }
+          .form-field label span { color: var(--green); }
+          .form-input {
+            background: var(--bg-card);
+            border: 0.5px solid var(--border-mid);
+            border-radius: var(--radius);
+            padding: 11px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+            appearance: none;
+          }
+          .form-input:focus { border-color: var(--green); }
+          .form-input::placeholder { color: var(--text-faint); }
+          .form-submit {
+            width: 100%; margin-top: 16px;
+            background: var(--green); color: #fff;
+            border: none; border-radius: var(--radius);
+            padding: 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+          }
+          .form-submit:hover:not(:disabled) { background: var(--green-dark); }
+          .form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+          .form-error { font-size: 13px; color: #e05555; margin-top: 10px; text-align: center; }
+          .form-success {
+            margin-top: 2rem; padding: 1.5rem;
+            background: var(--green-light);
+            border: 0.5px solid var(--green-mid);
+            border-radius: var(--radius-lg);
+            text-align: center;
+          }
+          .form-success p { font-size: 15px; color: var(--green); font-weight: 500; }
+          .form-success span { font-size: 13px; color: var(--text-muted); display: block; margin-top: 4px; }
+          @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+          }
           .contact-box {
             background: var(--bg-off);
             border: 0.5px solid var(--border);
@@ -598,15 +698,80 @@ export default function Home() {
       <hr />
 
       <section className="contact-section" id="contact">
-        <div className="inner-sm">
-          <div className="contact-box">
-            <p className="section-tag" style={{ textAlign: 'center' }}>early access</p>
-            <h2>Give small platforms serious safety infrastructure.</h2>
-            <p>Use Corvinth to reduce repost risk, speed up takedown response, and build a clear audit trail for harmful-image reports.</p>
-            <div className="contact-actions">
-              <a className="email-link" href="mailto:foundercorvinth@gmail.com">foundercorvinth@gmail.com</a>
-              <span className="pricing-note">Early access from <b>$299 / month</b> &nbsp;·&nbsp; Enterprise plans available</span>
-            </div>
+        <div className="inner" style={{ maxWidth: '640px' }}>
+          <div className="contact-box" style={{ textAlign: 'left' }}>
+            <p className="section-tag" style={{ textAlign: 'center' }}>get started</p>
+            <h2 style={{ textAlign: 'center' }}>Ready to integrate?</h2>
+            <p style={{ textAlign: 'center' }}>Tell us about your platform and we&apos;ll get you API credentials within 24 hours.</p>
+
+            {formStatus === 'success' ? (
+              <div className="form-success">
+                <p>✓ Request received.</p>
+                <span>We&apos;ll be in touch within 24 hours with your API credentials.</span>
+              </div>
+            ) : (
+              <>
+                <div className="form-grid">
+                  <div className="form-field">
+                    <label>Contact name <span>*</span></label>
+                    <input className="form-input" name="contact_name" placeholder="Jane Smith" value={form.contact_name} onChange={handleFormChange} />
+                  </div>
+                  <div className="form-field">
+                    <label>Work email <span>*</span></label>
+                    <input className="form-input" name="work_email" type="email" placeholder="jane@company.com" value={form.work_email} onChange={handleFormChange} />
+                  </div>
+                  <div className="form-field">
+                    <label>Company / Platform name <span>*</span></label>
+                    <input className="form-input" name="company_name" placeholder="Acme Dating Inc." value={form.company_name} onChange={handleFormChange} />
+                  </div>
+                  <div className="form-field">
+                    <label>Platform URL <span>*</span></label>
+                    <input className="form-input" name="platform_url" placeholder="https://yourapp.com" value={form.platform_url} onChange={handleFormChange} />
+                  </div>
+                  <div className="form-field">
+                    <label>Platform type <span>*</span></label>
+                    <select className="form-input" name="platform_type" value={form.platform_type} onChange={handleFormChange}>
+                      <option value="">Select type…</option>
+                      <option value="dating">Dating app</option>
+                      <option value="social">Social platform</option>
+                      <option value="messaging">Messaging app</option>
+                      <option value="creator">Creator platform</option>
+                      <option value="marketplace">Marketplace</option>
+                      <option value="gaming">Gaming</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Monthly upload volume <span>*</span></label>
+                    <select className="form-input" name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange}>
+                      <option value="">Select volume…</option>
+                      <option value="under_10k">Under 10,000 / month</option>
+                      <option value="10k_100k">10,000 – 100,000 / month</option>
+                      <option value="100k_1m">100,000 – 1M / month</option>
+                      <option value="over_1m">Over 1M / month</option>
+                    </select>
+                  </div>
+                  <div className="form-field full">
+                    <label>How did you hear about us?</label>
+                    <input className="form-input" name="referral_source" placeholder="Twitter, a colleague, YC forum…" value={form.referral_source} onChange={handleFormChange} />
+                  </div>
+                  <div className="form-field full">
+                    <label>Use case / message</label>
+                    <textarea className="form-input" name="use_case" placeholder="Tell us briefly what you&apos;re building and how Corvinth fits in…" rows={3} value={form.use_case} onChange={handleFormChange} style={{ resize: 'vertical' }} />
+                  </div>
+                </div>
+
+                {formError && <p className="form-error">{formError}</p>}
+
+                <button className="form-submit" onClick={handleFormSubmit} disabled={formStatus === 'submitting'}>
+                  {formStatus === 'submitting' ? 'Sending…' : 'request API access'}
+                </button>
+
+                <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '13px', color: 'var(--text-faint)' }}>
+                  Early access from <b style={{ color: 'var(--text-muted)' }}>$299 / month</b> · Enterprise plans available
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>
