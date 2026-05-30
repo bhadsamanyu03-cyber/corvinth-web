@@ -697,40 +697,99 @@ export default function Home() {
 
       <hr />
 
-      <section className="contact-section" id="contact">
-        <div className="inner" style={{ maxWidth: '640px' }}>
-          <div className="contact-box" style={{ textAlign: 'left' }}>
-            <p className="section-tag" style={{ textAlign: 'center' }}>get started</p>
-            <h2 style={{ textAlign: 'center' }}>Ready to integrate?</h2>
-            <p style={{ textAlign: 'center' }}>Tell us about your platform and we&apos;ll get you API credentials within 24 hours.</p>
+      <section id="contact" style={{ background: '#111110', padding: '5.5rem 2.5rem' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{
+            background: '#161614',
+            border: '0.5px solid rgba(255,255,255,0.07)',
+            borderRadius: '16px',
+            padding: '3rem 2.5rem',
+          }}>
+            <p style={{
+              textAlign: 'center', fontSize: '11px', fontWeight: 500,
+              color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.12em',
+              fontFamily: "'DM Mono', monospace", marginBottom: '1rem'
+            }}>get started</p>
+            <h2 style={{
+              textAlign: 'center', fontSize: 'clamp(24px, 3vw, 32px)',
+              fontWeight: 500, color: '#ededea', letterSpacing: '-0.5px',
+              marginBottom: '0.75rem', lineHeight: 1.15
+            }}>Ready to integrate?</h2>
+            <p style={{
+              textAlign: 'center', fontSize: '15px', color: '#9a9a95',
+              marginBottom: '2rem', lineHeight: 1.7, fontWeight: 300
+            }}>Tell us about your platform and we&apos;ll get you API credentials within 24 hours.</p>
 
             {formStatus === 'success' ? (
-              <div className="form-success">
-                <p>✓ Request received.</p>
-                <span>We&apos;ll be in touch within 24 hours with your API credentials.</span>
+              <div style={{
+                marginTop: '1.5rem', padding: '1.5rem 2rem',
+                background: 'rgba(29,158,117,0.10)',
+                border: '0.5px solid rgba(29,158,117,0.3)',
+                borderRadius: '12px', textAlign: 'center'
+              }}>
+                <p style={{ fontSize: '16px', color: '#1D9E75', fontWeight: 500, marginBottom: '6px' }}>✓ Request received.</p>
+                <span style={{ fontSize: '13px', color: '#9a9a95' }}>We&apos;ll be in touch within 24 hours with your API credentials.</span>
               </div>
             ) : (
               <>
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Contact name <span>*</span></label>
-                    <input className="form-input" name="contact_name" placeholder="Jane Smith" value={form.contact_name} onChange={handleFormChange} />
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '14px',
+                }}>
+                  {/* Contact name */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Contact name <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <input
+                      name="contact_name" placeholder="Jane Smith"
+                      value={form.contact_name} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div className="form-field">
-                    <label>Work email <span>*</span></label>
-                    <input className="form-input" name="work_email" type="email" placeholder="jane@company.com" value={form.work_email} onChange={handleFormChange} />
+                  {/* Work email */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Work email <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <input
+                      name="work_email" type="email" placeholder="jane@company.com"
+                      value={form.work_email} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div className="form-field">
-                    <label>Company / Platform name <span>*</span></label>
-                    <input className="form-input" name="company_name" placeholder="Acme Dating Inc." value={form.company_name} onChange={handleFormChange} />
+                  {/* Company name */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Company / Platform <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <input
+                      name="company_name" placeholder="Acme Dating Inc."
+                      value={form.company_name} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div className="form-field">
-                    <label>Platform URL <span>*</span></label>
-                    <input className="form-input" name="platform_url" placeholder="https://yourapp.com" value={form.platform_url} onChange={handleFormChange} />
+                  {/* Platform URL */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Platform URL <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <input
+                      name="platform_url" placeholder="https://yourapp.com"
+                      value={form.platform_url} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div className="form-field">
-                    <label>Platform type <span>*</span></label>
-                    <select className="form-input" name="platform_type" value={form.platform_type} onChange={handleFormChange}>
+                  {/* Platform type */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Platform type <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <select
+                      name="platform_type" value={form.platform_type} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: form.platform_type ? '#ededea' : '#5a5a56', outline: 'none', width: '100%', boxSizing: 'border-box', appearance: 'none', cursor: 'pointer' }}
+                    >
                       <option value="">Select type…</option>
                       <option value="dating">Dating app</option>
                       <option value="social">Social platform</option>
@@ -741,9 +800,15 @@ export default function Home() {
                       <option value="other">Other</option>
                     </select>
                   </div>
-                  <div className="form-field">
-                    <label>Monthly upload volume <span>*</span></label>
-                    <select className="form-input" name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange}>
+                  {/* Monthly volume */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Monthly uploads <span style={{ color: '#1D9E75' }}>*</span>
+                    </label>
+                    <select
+                      name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: form.monthly_upload_volume ? '#ededea' : '#5a5a56', outline: 'none', width: '100%', boxSizing: 'border-box', appearance: 'none', cursor: 'pointer' }}
+                    >
                       <option value="">Select volume…</option>
                       <option value="under_10k">Under 10,000 / month</option>
                       <option value="10k_100k">10,000 – 100,000 / month</option>
@@ -751,24 +816,53 @@ export default function Home() {
                       <option value="over_1m">Over 1M / month</option>
                     </select>
                   </div>
-                  <div className="form-field full">
-                    <label>How did you hear about us?</label>
-                    <input className="form-input" name="referral_source" placeholder="Twitter, a colleague, YC forum…" value={form.referral_source} onChange={handleFormChange} />
+                  {/* Referral — full width */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      How did you hear about us?
+                    </label>
+                    <input
+                      name="referral_source" placeholder="Twitter, a colleague, YC forum…"
+                      value={form.referral_source} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
-                  <div className="form-field full">
-                    <label>Use case / message</label>
-                    <textarea className="form-input" name="use_case" placeholder="Tell us briefly what you&apos;re building and how Corvinth fits in…" rows={3} value={form.use_case} onChange={handleFormChange} style={{ resize: 'vertical' }} />
+                  {/* Use case — full width */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: '1 / -1' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace" }}>
+                      Use case / message
+                    </label>
+                    <textarea
+                      name="use_case" rows={3}
+                      placeholder="Tell us briefly what you're building and how Corvinth fits in…"
+                      value={form.use_case} onChange={handleFormChange}
+                      style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '10px', padding: '11px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#ededea', outline: 'none', width: '100%', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.6 }}
+                    />
                   </div>
                 </div>
 
-                {formError && <p className="form-error">{formError}</p>}
+                {formError && (
+                  <p style={{ fontSize: '13px', color: '#e05555', marginTop: '12px', textAlign: 'center' }}>{formError}</p>
+                )}
 
-                <button className="form-submit" onClick={handleFormSubmit} disabled={formStatus === 'submitting'}>
+                <button
+                  onClick={handleFormSubmit}
+                  disabled={formStatus === 'submitting'}
+                  style={{
+                    width: '100%', marginTop: '18px',
+                    background: formStatus === 'submitting' ? '#0F6E56' : '#1D9E75',
+                    color: '#fff', border: 'none', borderRadius: '10px',
+                    padding: '14px', fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '15px', fontWeight: 500, cursor: formStatus === 'submitting' ? 'not-allowed' : 'pointer',
+                    opacity: formStatus === 'submitting' ? 0.7 : 1,
+                    transition: 'background 0.15s, opacity 0.15s'
+                  }}
+                >
                   {formStatus === 'submitting' ? 'Sending…' : 'request API access'}
                 </button>
 
-                <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '13px', color: 'var(--text-faint)' }}>
-                  Early access from <b style={{ color: 'var(--text-muted)' }}>$299 / month</b> · Enterprise plans available
+                <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '13px', color: '#5a5a56', fontFamily: "'DM Mono', monospace" }}>
+                  Early access from <b style={{ color: '#9a9a95', fontWeight: 500 }}>$299 / month</b> · Enterprise plans available
                 </p>
               </>
             )}
