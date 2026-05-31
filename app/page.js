@@ -9,6 +9,13 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Liability calculator
+  const [uploadsPerMonth, setUploadsPerMonth] = useState(500000);
+  const nciiRate = 0.001; // 0.1% industry estimate
+  const finePerViolation = 53088;
+  const estimatedExposure = Math.round(uploadsPerMonth * nciiRate * finePerViolation);
+
+  // Waitlist form
   const [form, setForm] = useState({
     contact_name: '',
     work_email: '',
@@ -71,18 +78,24 @@ export default function Home() {
     setLoading(false);
   };
 
+  const formatExposure = (n) => {
+    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
+    return `$${n}`;
+  };
+
   return (
     <>
       <Head>
         <title>Corvinth — Stop NCII Before It Reaches Your Users</title>
-        <meta name="description" content="One API call. Scan every upload in under 200ms. Block known NCII re-uploads before they spread across your platform." />
+        <meta name="description" content="One API call. Scan every upload in under 200ms. Block known NCII re-uploads before they spread across your platform. TIDA compliant." />
         <meta property="og:title" content="Corvinth — Stop NCII Before It Reaches Your Users" />
         <meta property="og:description" content="One API call. Scan every upload in under 200ms. Block known NCII before it spreads." />
         <meta property="og:type" content="website" />
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
       </Head>
 
-      {/* ── NAV ─────────────────────────────────────────────────────────────── */}
+      {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <nav>
         <a className="logo" href="#">cor<span className="accent">vinth</span></a>
         <div className="nav-right">
@@ -93,15 +106,17 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ── NOTICE BAR ──────────────────────────────────────────────────────── */}
+      {/* ── NOTICE BAR ───────────────────────────────────────────────────────── */}
       <div className="notice">
         The FTC now enforces TIDA — <b>$53,088 per violation</b> for platforms that fail to remove NCII within 48 hours. Effective May 19, 2026.
       </div>
 
-      {/* ── HERO ────────────────────────────────────────────────────────────── */}
+      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <div className="hero">
         <div className="badge">
-          <svg className="icon" style={{ width: '12px', height: '12px' }} viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+          <svg className="icon" style={{ width: '10px', height: '10px', fill: 'currentColor', stroke: 'none' }} viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
           TIDA compliant · PDQ perceptual hashing · audit-ready
         </div>
         <h1>
@@ -109,30 +124,51 @@ export default function Home() {
           it <em>reaches your users.</em>
         </h1>
         <p>One API call. Scan every upload in under 200ms. Block known NCII re-uploads before they spread — even after rotation, cropping, or re-encoding.</p>
+
+        {/* ── INLINE CODE SNIPPET ── */}
+        <div className="hero-snippet">
+          <div className="snippet-header">
+            <span className="snippet-dot"></span>
+            <span className="snippet-dot"></span>
+            <span className="snippet-dot"></span>
+            <span className="snippet-lang">node.js · integrate in minutes</span>
+          </div>
+          <pre className="snippet-body">{`const { match } = await corvinth.check({
+  image: req.file.buffer,   // your upload buffer
+  source: 'profile_photo'
+});
+
+if (match.action === 'block') {
+  return res.status(403).json({ blocked: true });
+}
+// → { case_uuid, action, classification, ms: 72 }`}</pre>
+        </div>
+
         <div className="hero-cta">
           <a className="btn-primary lg" href="#contact">request early access</a>
           <a className="btn-ghost lg" href="#product">see the product</a>
         </div>
       </div>
 
-      {/* ── FLOW DIAGRAM ────────────────────────────────────────────────────── */}
-      <div style={{ padding: '0 2rem 4rem', maxWidth: '700px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
+      {/* ── FLOW DIAGRAM ─────────────────────────────────────────────────────── */}
+      <div style={{ padding: '0 2rem 5rem', maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px' }}>
           {['Every upload', 'PDQ fingerprint', 'Corvinth match engine', 'Allow · Review · Block'].map((step, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{
-                padding: '8px 16px',
-                background: i === 3 ? 'rgba(29,158,117,0.12)' : '#111110',
-                border: `0.5px solid ${i === 3 ? 'rgba(29,158,117,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                padding: '9px 18px',
+                background: i === 3 ? 'rgba(0,229,155,0.08)' : '#0e0e0c',
+                border: `0.5px solid ${i === 3 ? 'rgba(0,229,155,0.25)' : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: '8px',
-                fontSize: '13px',
-                color: i === 3 ? '#1D9E75' : '#9a9a95',
-                fontFamily: "'DM Mono', monospace",
+                fontSize: '12px',
+                color: i === 3 ? '#00E59B' : '#8C8B84',
+                fontFamily: "'JetBrains Mono', monospace",
                 whiteSpace: 'nowrap',
-              }}>
-                {step}
-              </div>
-              {i < 3 && <span style={{ color: '#5a5a56', fontSize: '16px', margin: '0 2px' }}>→</span>}
+                letterSpacing: '0.01em',
+              }}>{step}</div>
+              {i < 3 && (
+                <span style={{ color: '#2a2a25', fontSize: '14px', userSelect: 'none' }}>→</span>
+              )}
             </div>
           ))}
         </div>
@@ -140,7 +176,7 @@ export default function Home() {
 
       <hr />
 
-      {/* ── PROOF STRIP ─────────────────────────────────────────────────────── */}
+      {/* ── PROOF STRIP ──────────────────────────────────────────────────────── */}
       <div className="proof">
         <div className="proof-item">
           <div className="proof-num">$53,088</div>
@@ -162,65 +198,174 @@ export default function Home() {
 
       <hr />
 
-      {/* ── PRODUCT / DASHBOARD MOCKUP ──────────────────────────────────────── */}
+      {/* ── LIABILITY CALCULATOR ─────────────────────────────────────────────── */}
+      <section id="calculator" style={{ background: '#060605', padding: '6rem 2.5rem' }}>
+        <div className="inner-sm" style={{ textAlign: 'center' }}>
+          <p className="section-tag">exposure calculator</p>
+          <h2 className="section-title">What&apos;s your platform&apos;s risk?</h2>
+          <p style={{ fontSize: '15px', color: '#8C8B84', marginBottom: '2.5rem', fontWeight: 300, lineHeight: 1.75 }}>
+            Slide to your monthly upload volume. See your worst-case FTC exposure under TIDA.
+          </p>
+          <div className="calc-box">
+            <div className="calc-top">
+              <div className="calc-label">Monthly uploads</div>
+              <div className="calc-value">{uploadsPerMonth.toLocaleString()}</div>
+            </div>
+            <input
+              type="range"
+              min="10000"
+              max="5000000"
+              step="10000"
+              value={uploadsPerMonth}
+              onChange={(e) => setUploadsPerMonth(Number(e.target.value))}
+              className="calc-slider"
+            />
+            <div className="calc-ticks">
+              <span>10K</span><span>500K</span><span>1M</span><span>5M</span>
+            </div>
+            <div className="calc-result">
+              <div className="calc-result-label">Estimated max FTC exposure</div>
+              <div className="calc-result-num">{formatExposure(estimatedExposure)}</div>
+              <div className="calc-result-sub">
+                Based on ~0.1% NCII rate · {Math.round(uploadsPerMonth * nciiRate).toLocaleString()} potential violations · $53,088 each
+              </div>
+            </div>
+            <div className="calc-cta-row">
+              <span className="calc-corvinth-cost">
+                Corvinth costs from <b>$299/mo</b> to cover this.
+              </span>
+              <a className="btn-primary" href="#contact">get protected →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── TIDA TIMELINE ────────────────────────────────────────────────────── */}
+      <section id="tida" style={{ padding: '6rem 2.5rem' }}>
+        <div className="inner">
+          <p className="section-tag">the regulation</p>
+          <h2 className="section-title">TIDA is law. Enforcement is active.</h2>
+          <p className="section-sub">The Take It Down Act didn&apos;t sneak up quietly. Here&apos;s the timeline every platform needs to understand.</p>
+          <div className="tida-timeline">
+            {[
+              { date: 'Feb 2025', label: 'TIDA introduced', body: 'Bipartisan bill introduced in both House and Senate with broad support. Named partly in response to the Taylor Swift deepfake incident.' },
+              { date: 'Apr 2025', label: 'Passed Senate 95–1', body: 'Near-unanimous vote. Senators cited the explosion of AI-generated NCII targeting minors and adults across social and dating platforms.' },
+              { date: 'May 19 2026', label: 'Signed into law · FTC enforcement begins', body: 'Platforms now have 48 hours to remove flagged NCII after a valid request. Failure = $53,088 per violation. The FTC has active jurisdiction.', highlight: true },
+              { date: 'Now', label: 'Your platform is covered', body: 'If users can upload images on your platform, you are in scope. Dating apps, social platforms, messaging apps, creator tools — no exceptions for size.', highlight: true },
+            ].map((item, i, arr) => (
+              <div key={i} className={`tl-item${item.highlight ? ' tl-highlight' : ''}`}>
+                {i < arr.length - 1 && <div className="tl-line"></div>}
+                <div className={`tl-dot${item.highlight ? ' tl-dot-hot' : ''}`}>{item.highlight ? '!' : String(i + 1).padStart(2, '0')}</div>
+                <div className="tl-content">
+                  <div className="tl-date">{item.date}</div>
+                  <h3>{item.label}</h3>
+                  <p>{item.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── PRODUCT / DASHBOARD MOCKUP ───────────────────────────────────────── */}
       <section id="product" className="bg-section">
-        <div className="inner" style={{ maxWidth: '960px' }}>
+        <div className="inner" style={{ maxWidth: '980px' }}>
           <p className="section-tag">the product</p>
           <h2 className="section-title">What your team sees every day.</h2>
           <p className="section-sub">A real-time view of every scan decision — matches, blocks, and review queue items — with a full audit trail behind every case.</p>
-
-          {/* Dashboard mockup */}
-          <div style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.11)', borderRadius: '16px', overflow: 'hidden' }}>
-            {/* Dashboard header */}
-            <div style={{ padding: '1rem 1.5rem', borderBottom: '0.5px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1D9E75' }}></div>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', color: '#9a9a95' }}>corvinth dashboard · TestDating</span>
+          <div style={{
+            background: '#060605',
+            border: '0.5px solid rgba(255,255,255,0.10)',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
+          }}>
+            {/* Dashboard title bar */}
+            <div style={{
+              padding: '12px 1.5rem',
+              borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: '#0a0a08',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#00E59B', boxShadow: '0 0 6px rgba(0,229,155,0.6)' }}></div>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#8C8B84' }}>corvinth dashboard · TestDating</span>
               </div>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#5a5a56' }}>live</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.08em' }}>live</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '0' }}>
-              {/* Left — case list */}
-              <div style={{ padding: '1.5rem', borderRight: '0.5px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: "'DM Mono', monospace", marginBottom: '1rem' }}>Recent decisions</div>
+            <div className="dashboard-grid">
+              {/* Recent decisions panel */}
+              <div style={{ padding: '1.5rem', borderRight: '0.5px solid rgba(255,255,255,0.06)' }}>
+                <div style={{
+                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
+                  textTransform: 'uppercase', letterSpacing: '0.12em',
+                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
+                }}>Recent decisions</div>
                 {[
-                  { id: 'CASE-3829', conf: '99.2%', status: 'Blocked', color: '#e05555', bg: 'rgba(224,85,85,0.08)', time: '2s ago' },
-                  { id: 'CASE-3830', conf: '87.1%', status: 'Review',  color: '#e0a435', bg: 'rgba(224,164,53,0.08)', time: '14s ago' },
-                  { id: 'CASE-3831', conf: '100%',  status: 'Blocked', color: '#e05555', bg: 'rgba(224,85,85,0.08)', time: '41s ago' },
-                  { id: 'CASE-3832', conf: '12.4%', status: 'Allowed', color: '#1D9E75', bg: 'rgba(29,158,117,0.08)', time: '1m ago' },
-                  { id: 'CASE-3833', conf: '98.9%', status: 'Blocked', color: '#e05555', bg: 'rgba(224,85,85,0.08)', time: '2m ago' },
-                  { id: 'CASE-3834', conf: '3.1%',  status: 'Allowed', color: '#1D9E75', bg: 'rgba(29,158,117,0.08)', time: '3m ago' },
+                  { id: 'CASE-3829', conf: '99.2%', status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',  time: '2s ago' },
+                  { id: 'CASE-3830', conf: '87.1%', status: 'Review',  color: '#FFB224', bg: 'rgba(255,178,36,0.07)', time: '14s ago' },
+                  { id: 'CASE-3831', conf: '100%',  status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',  time: '41s ago' },
+                  { id: 'CASE-3832', conf: '12.4%', status: 'Allowed', color: '#00E59B', bg: 'rgba(0,229,155,0.07)', time: '1m ago' },
+                  { id: 'CASE-3833', conf: '98.9%', status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',  time: '2m ago' },
+                  { id: 'CASE-3834', conf: '3.1%',  status: 'Allowed', color: '#00E59B', bg: 'rgba(0,229,155,0.07)', time: '3m ago' },
                 ].map((c) => (
-                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '8px', marginBottom: '4px', background: c.bg, border: `0.5px solid ${c.color}22` }}>
+                  <div key={c.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '9px 12px', borderRadius: '8px', marginBottom: '4px',
+                    background: c.bg, border: `0.5px solid ${c.color}1A`,
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: '#9a9a95' }}>{c.id}</span>
-                      <span style={{ fontSize: '12px', color: '#5a5a56' }}>Confidence: {c.conf}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#8C8B84' }}>{c.id}</span>
+                      <span style={{ fontSize: '11px', color: '#4A4A45' }}>Confidence: {c.conf}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '11px', color: '#5a5a56', fontFamily: "'DM Mono', monospace" }}>{c.time}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 500, color: c.color, background: c.bg, padding: '3px 10px', borderRadius: '999px', border: `0.5px solid ${c.color}44` }}>{c.status}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace" }}>{c.time}</span>
+                      <span style={{
+                        fontSize: '11px', fontWeight: 500, color: c.color,
+                        background: c.bg, padding: '3px 10px',
+                        borderRadius: '999px', border: `0.5px solid ${c.color}33`,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        letterSpacing: '0.04em',
+                      }}>{c.status}</span>
                     </div>
                   </div>
                 ))}
               </div>
-              {/* Right — metrics */}
+              {/* Stats panel */}
               <div style={{ padding: '1.5rem' }}>
-                <div style={{ fontSize: '11px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: "'DM Mono', monospace", marginBottom: '1rem' }}>Today</div>
+                <div style={{
+                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
+                  textTransform: 'uppercase', letterSpacing: '0.12em',
+                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1.25rem',
+                }}>Today</div>
                 {[
-                  { label: 'Uploads scanned', value: '1,248,991', color: '#ededea' },
-                  { label: 'Matches found',   value: '317',       color: '#e05555' },
-                  { label: 'Sent to review',  value: '84',        color: '#e0a435' },
-                  { label: 'Avg response',    value: '72ms',      color: '#1D9E75' },
-                  { label: 'Active cases',    value: '12',        color: '#ededea' },
+                  { label: 'Uploads scanned', value: '1,248,991', color: '#F0EFE8' },
+                  { label: 'Matches found',   value: '317',        color: '#FF4D4D' },
+                  { label: 'Sent to review',  value: '84',         color: '#FFB224' },
+                  { label: 'Avg response',    value: '72ms',       color: '#00E59B' },
+                  { label: 'Active cases',    value: '12',         color: '#F0EFE8' },
                 ].map((m) => (
                   <div key={m.label} style={{ marginBottom: '1.25rem' }}>
-                    <div style={{ fontSize: '11px', color: '#5a5a56', fontFamily: "'DM Mono', monospace", marginBottom: '3px' }}>{m.label}</div>
-                    <div style={{ fontSize: '22px', fontWeight: 500, color: m.color, letterSpacing: '-0.5px', fontFamily: "'DM Mono', monospace" }}>{m.value}</div>
+                    <div style={{ fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace", marginBottom: '3px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{m.label}</div>
+                    <div style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: '24px', fontWeight: 700,
+                      color: m.color, letterSpacing: '-0.5px', lineHeight: 1,
+                    }}>{m.value}</div>
                   </div>
                 ))}
-                <div style={{ marginTop: '1.5rem', padding: '10px 12px', background: 'rgba(29,158,117,0.08)', border: '0.5px solid rgba(29,158,117,0.2)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#1D9E75', fontFamily: "'DM Mono', monospace", marginBottom: '4px' }}>48h compliance</div>
-                  <div style={{ fontSize: '13px', color: '#9a9a95' }}>All cases within deadline</div>
+                <div style={{
+                  marginTop: '1.5rem', padding: '10px 14px',
+                  background: 'rgba(0,229,155,0.07)',
+                  border: '0.5px solid rgba(0,229,155,0.18)',
+                  borderRadius: '8px',
+                }}>
+                  <div style={{ fontSize: '10px', color: '#00E59B', fontFamily: "'JetBrains Mono', monospace", marginBottom: '4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>48h compliance</div>
+                  <div style={{ fontSize: '13px', color: '#8C8B84' }}>All cases within deadline</div>
                 </div>
               </div>
             </div>
@@ -230,28 +375,49 @@ export default function Home() {
 
       <hr />
 
-      {/* ── LIVE API DEMO ────────────────────────────────────────────────────── */}
-      <section style={{ padding: '3rem 2rem', background: '#0a0a09' }}>
+      {/* ── LIVE API DEMO ─────────────────────────────────────────────────────── */}
+      <section style={{ padding: '6rem 2.5rem', background: '#060605' }}>
         <div className="inner-sm" style={{ textAlign: 'center' }}>
-          <p className="section-tag">Live API Demo</p>
-          <h2 className="section-title" style={{ fontSize: '24px' }}>Test the Engine</h2>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <p className="section-tag">live api demo</p>
+          <h2 className="section-title" style={{ fontSize: 'clamp(26px, 3vw, 36px)' }}>Test the Engine</h2>
+          <p style={{ fontSize: '15px', color: '#8C8B84', marginBottom: '2rem', fontWeight: 300 }}>
+            Submit a PDQ hash and see a real API response from the match engine.
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <input
               type="text"
               value={hashInput}
               onChange={(e) => setHashInput(e.target.value)}
-              style={{ padding: '12px', width: '300px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.11)', background: '#111110', color: '#fff', fontFamily: 'monospace', outline: 'none', fontSize: '13px' }}
+              style={{
+                padding: '12px 16px',
+                width: '300px',
+                borderRadius: '8px',
+                border: '0.5px solid rgba(255,255,255,0.10)',
+                background: '#0e0e0c',
+                color: '#F0EFE8',
+                fontFamily: "'JetBrains Mono', monospace",
+                outline: 'none',
+                fontSize: '12px',
+                letterSpacing: '0.02em',
+              }}
             />
             <button onClick={simulateCheck} className="btn-primary lg" disabled={loading}>
               {loading ? 'Scanning...' : 'Run Sub-Linear Lookup'}
             </button>
           </div>
           {result && (
-            <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#111110', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.07)', textAlign: 'left', fontFamily: 'monospace', fontSize: '13px' }}>
-              <p style={{ color: '#1D9E75' }}>{'>'} 200 HTTP OK</p>
-              <p style={{ color: '#9a9a95' }}>Latency: ~18ms</p>
-              <p style={{ color: '#ededea' }}>Classification: <b style={{ color: result.classification === 'EXACT' ? '#e05555' : '#1D9E75' }}>{result.classification || 'CLEAN'}</b></p>
-              <p style={{ color: '#ededea' }}>Action Required: {result.action || 'content_allowed'}</p>
+            <div style={{
+              marginTop: '2rem', padding: '1.5rem',
+              background: '#0e0e0c', borderRadius: '12px',
+              border: '0.5px solid rgba(255,255,255,0.07)',
+              textAlign: 'left',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '12px', lineHeight: 1.9,
+            }}>
+              <p style={{ color: '#00E59B' }}>{'>'} 200 HTTP OK</p>
+              <p style={{ color: '#8C8B84' }}>Latency: ~18ms</p>
+              <p style={{ color: '#F0EFE8' }}>Classification: <b style={{ color: result.classification === 'EXACT' ? '#FF4D4D' : '#00E59B' }}>{result.classification || 'CLEAN'}</b></p>
+              <p style={{ color: '#F0EFE8' }}>Action Required: {result.action || 'content_allowed'}</p>
             </div>
           )}
         </div>
@@ -259,22 +425,34 @@ export default function Home() {
 
       <hr />
 
-      {/* ── WHY PLATFORMS BUY — OUTCOMES ────────────────────────────────────── */}
+      {/* ── WHY PLATFORMS BUY ────────────────────────────────────────────────── */}
       <section>
         <div className="inner">
           <p className="section-tag">why platforms deploy corvinth</p>
           <h2 className="section-title">Built around outcomes, not features.</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1px', background: 'rgba(255,255,255,0.055)', border: '0.5px solid rgba(255,255,255,0.055)', borderRadius: '16px', overflow: 'hidden', marginTop: '2.5rem' }}>
             {[
               { icon: '🛑', title: 'Prevent known NCII re-uploads', body: 'Stop repeat uploads before publication. Images already reported to StopNCII are caught at the hash level — before any user ever sees them.' },
               { icon: '⚡', title: 'Reduce manual moderation load', body: 'Send only uncertain matches to review. Exact matches are blocked automatically. Your team focuses on edge cases, not obvious violations.' },
               { icon: '🗂️', title: 'Build compliance evidence', body: 'Every decision receives a case UUID and a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
               { icon: '🔒', title: 'Keep images off third-party servers', body: 'Only hashes leave your infrastructure. The original image never crosses the network boundary. Privacy is the architecture, not a feature.' },
             ].map((item) => (
-              <div key={item.title} style={{ background: '#111110', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.75rem' }}>
-                <div style={{ fontSize: '24px', marginBottom: '1rem' }}>{item.icon}</div>
-                <h4 style={{ fontSize: '15px', fontWeight: 500, color: '#ededea', marginBottom: '0.6rem' }}>{item.title}</h4>
-                <p style={{ fontSize: '13px', color: '#9a9a95', lineHeight: 1.65 }}>{item.body}</p>
+              <div key={item.title} style={{
+                background: '#0e0e0c',
+                padding: '1.75rem',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#141412'}
+              onMouseLeave={e => e.currentTarget.style.background = '#0e0e0c'}
+              >
+                <div style={{ fontSize: '22px', marginBottom: '1rem', filter: 'grayscale(0.2)' }}>{item.icon}</div>
+                <h4 style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontSize: '15px', fontWeight: 600,
+                  color: '#F0EFE8', marginBottom: '0.6rem',
+                  letterSpacing: '-0.2px',
+                }}>{item.title}</h4>
+                <p style={{ fontSize: '13px', color: '#8C8B84', lineHeight: 1.7 }}>{item.body}</p>
               </div>
             ))}
           </div>
@@ -283,7 +461,7 @@ export default function Home() {
 
       <hr />
 
-      {/* ── WHO USES CORVINTH ────────────────────────────────────────────────── */}
+      {/* ── WHO USES CORVINTH ─────────────────────────────────────────────────── */}
       <section className="bg-section">
         <div className="inner">
           <p className="section-tag">who uses corvinth</p>
@@ -326,22 +504,22 @@ export default function Home() {
 
       <hr />
 
-      {/* ── DETECTION CONFIDENCE ────────────────────────────────────────────── */}
+      {/* ── DETECTION CONFIDENCE ──────────────────────────────────────────────── */}
       <section id="detection">
         <div className="inner">
           <p className="section-tag">detection confidence</p>
           <h2 className="section-title">Not every match should be treated the same.</h2>
           <p className="section-sub">Edited images are messy. Corvinth separates obvious matches from uncertain derivatives so platforms can act quickly without overclaiming accuracy.</p>
           <div className="confidence-grid">
-            <div className="conf-card">
+            <div className="conf-card" style={{ borderTop: '2px solid #FF4D4D' }}>
               <b>Exact / near-exact</b>
               <p>Same or visually close media. Best for automatic blocking when platform policy allows.</p>
             </div>
-            <div className="conf-card">
+            <div className="conf-card" style={{ borderTop: '2px solid #FFB224' }}>
               <b>Likely derivative</b>
               <p>Rotated, filtered, compressed, or lightly cropped media. Best for high-priority review queue.</p>
             </div>
-            <div className="conf-card">
+            <div className="conf-card" style={{ borderTop: '2px solid #4D9EFF' }}>
               <b>Needs review</b>
               <p>Low-confidence similarity. Escalate instead of silently allowing or wrongly blocking.</p>
             </div>
@@ -351,43 +529,61 @@ export default function Home() {
 
       <hr />
 
-      {/* ── API REFERENCE ────────────────────────────────────────────────────── */}
+      {/* ── API REFERENCE ─────────────────────────────────────────────────────── */}
       <section className="bg-section">
         <div className="inner">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center' }}>
+          <div className="api-grid">
             <div>
               <p className="section-tag">api reference</p>
-              <h2 className="section-title" style={{ fontSize: 'clamp(24px, 3vw, 32px)' }}>One request. Structured response.</h2>
+              <h2 className="section-title" style={{ fontSize: 'clamp(24px, 3vw, 34px)' }}>One request. Structured response.</h2>
               <p className="section-sub" style={{ marginBottom: '2rem' }}>No SDK required. If you can make an HTTP POST, you can integrate Corvinth. Most platforms are live within a day.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-                  { method: 'POST', endpoint: '/hash/check',        color: '#1D9E75', bg: 'rgba(29,158,117,0.1)' },
-                  { method: 'POST', endpoint: '/hash/add',          color: '#1D9E75', bg: 'rgba(29,158,117,0.1)' },
-                  { method: 'GET',  endpoint: '/cases/{uuid}',      color: '#4a9eff', bg: 'rgba(74,158,255,0.1)' },
-                  { method: 'GET',  endpoint: '/cases/{uuid}/audit',color: '#4a9eff', bg: 'rgba(74,158,255,0.1)' },
-                  { method: 'POST', endpoint: '/appeals',           color: '#1D9E75', bg: 'rgba(29,158,117,0.1)' },
+                  { method: 'POST', endpoint: '/hash/check',         color: '#00E59B', bg: 'rgba(0,229,155,0.08)'   },
+                  { method: 'POST', endpoint: '/hash/add',           color: '#00E59B', bg: 'rgba(0,229,155,0.08)'   },
+                  { method: 'GET',  endpoint: '/cases/{uuid}',       color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)'  },
+                  { method: 'GET',  endpoint: '/cases/{uuid}/audit', color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)'  },
+                  { method: 'POST', endpoint: '/appeals',            color: '#00E59B', bg: 'rgba(0,229,155,0.08)'   },
                 ].map((ep) => (
-                  <div key={ep.endpoint} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '8px', fontFamily: "'DM Mono', monospace", fontSize: '12px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 500, padding: '2px 7px', borderRadius: '4px', background: ep.bg, color: ep.color, flexShrink: 0 }}>{ep.method}</span>
-                    <span style={{ color: '#9a9a95' }}>{ep.endpoint}</span>
+                  <div key={ep.endpoint} style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '9px 14px',
+                    background: '#060605',
+                    border: '0.5px solid rgba(255,255,255,0.07)',
+                    borderRadius: '8px',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '12px',
+                  }}>
+                    <span style={{
+                      fontSize: '10px', fontWeight: 500, padding: '2px 8px',
+                      borderRadius: '4px', background: ep.bg, color: ep.color,
+                      flexShrink: 0, letterSpacing: '0.06em',
+                    }}>{ep.method}</span>
+                    <span style={{ color: '#8C8B84' }}>{ep.endpoint}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <div style={{ background: '#0a0a09', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1.5rem', fontFamily: "'DM Mono', monospace", fontSize: '12px', lineHeight: 1.9 }}>
-                <div style={{ color: '#5a5a56', marginBottom: '8px' }}># POST /hash/check response</div>
-                <div style={{ color: '#ededea' }}>{'{'}</div>
-                <div style={{ paddingLeft: '16px' }}>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;case_uuid&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#e0a435' }}>&quot;cse_83f1a2b3...&quot;</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;match_found&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#4a9eff' }}>true</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;classification&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#e05555' }}>&quot;EXACT&quot;</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;action&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#e05555' }}>&quot;content_removed&quot;</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;hamming_distance&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#4a9eff' }}>2</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;pipeline_2_queued&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#4a9eff' }}>false</span><span style={{ color: '#9a9a95' }}>,</span></div>
-                  <div><span style={{ color: '#1D9E75' }}>&quot;timestamp&quot;</span><span style={{ color: '#9a9a95' }}>: </span><span style={{ color: '#e0a435' }}>&quot;2026-05-31T...&quot;</span></div>
+              <div style={{
+                background: '#060605',
+                border: '0.5px solid rgba(255,255,255,0.07)',
+                borderRadius: '12px', padding: '1.5rem',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '12px', lineHeight: 1.9,
+              }}>
+                <div style={{ color: '#4A4A45', marginBottom: '10px', fontSize: '11px', letterSpacing: '0.04em' }}># POST /hash/check response</div>
+                <div style={{ color: '#F0EFE8' }}>{'{'}</div>
+                <div style={{ paddingLeft: '18px' }}>
+                  <div><span style={{ color: '#00E59B' }}>&quot;case_uuid&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;cse_83f1a2b3...&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;match_found&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>true</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;classification&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;EXACT&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;action&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;content_removed&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;hamming_distance&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>2</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;pipeline_2_queued&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>false</span><span style={{ color: '#5E5E57' }}>,</span></div>
+                  <div><span style={{ color: '#00E59B' }}>&quot;timestamp&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;2026-05-31T...&quot;</span></div>
                 </div>
-                <div style={{ color: '#ededea' }}>{'}'}</div>
+                <div style={{ color: '#F0EFE8' }}>{'}'}</div>
               </div>
             </div>
           </div>
@@ -396,62 +592,103 @@ export default function Home() {
 
       <hr />
 
-      {/* ── PRICING ──────────────────────────────────────────────────────────── */}
+      {/* ── PRICING ───────────────────────────────────────────────────────────── */}
       <section id="pricing">
-        <div className="inner" style={{ maxWidth: '860px' }}>
+        <div className="inner" style={{ maxWidth: '900px' }}>
           <p className="section-tag">pricing</p>
           <h2 className="section-title">Transparent, usage-based pricing.</h2>
           <p className="section-sub">Pay for what you scan. No per-seat fees. All plans include full API access, audit logs, and case management.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: '1rem' }}>
             {[
               {
-                name: 'Starter', price: '$299', period: '/month',
+                name: 'Starter', price: '$299', period: '/month', perScan: '$0.006 / scan',
                 desc: 'For platforms getting compliant fast.',
                 features: ['50,000 scans / month', 'Full API access', 'Case management', 'Audit log export', 'Email support'],
                 cta: 'request access', featured: false,
               },
               {
-                name: 'Growth', price: '$799', period: '/month',
+                name: 'Growth', price: '$799', period: '/month', perScan: '$0.0016 / scan',
                 desc: 'For live platforms with real upload volume.',
                 features: ['500,000 scans / month', 'Priority support', 'Webhook notifications', 'Custom thresholds', 'Review queue workflows'],
                 cta: 'request access', featured: true,
               },
               {
-                name: 'Enterprise', price: 'Custom', period: '',
+                name: 'Enterprise', price: 'Custom', period: '', perScan: 'volume pricing',
                 desc: 'For high-volume platforms and custom needs.',
                 features: ['Unlimited scans', 'Dedicated infrastructure', 'On-premise option', 'SLA 99.9% uptime', 'Legal & compliance support'],
                 cta: 'contact us', featured: false,
               },
             ].map((plan) => (
               <div key={plan.name} style={{
-                background: plan.featured ? 'rgba(29,158,117,0.06)' : '#111110',
-                border: `0.5px solid ${plan.featured ? 'rgba(29,158,117,0.4)' : 'rgba(255,255,255,0.07)'}`,
+                background: plan.featured ? 'rgba(0,229,155,0.05)' : '#0e0e0c',
+                border: `0.5px solid ${plan.featured ? 'rgba(0,229,155,0.35)' : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: '16px', padding: '1.75rem',
                 display: 'flex', flexDirection: 'column',
+                position: 'relative',
+                boxShadow: plan.featured ? '0 0 40px rgba(0,229,155,0.08)' : 'none',
               }}>
-                <div style={{ fontSize: '12px', fontWeight: 500, color: '#5a5a56', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'DM Mono', monospace", marginBottom: '0.5rem' }}>
+                {plan.featured && (
+                  <div style={{
+                    position: 'absolute', top: 0, left: 0, right: 0,
+                    height: '2px',
+                    background: 'linear-gradient(90deg, transparent, #00E59B, transparent)',
+                    borderRadius: '16px 16px 0 0',
+                  }} />
+                )}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  fontSize: '11px', fontWeight: 500, color: '#4A4A45',
+                  textTransform: 'uppercase', letterSpacing: '0.10em',
+                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '0.75rem',
+                }}>
                   {plan.name}
-                  {plan.featured && <span style={{ marginLeft: '8px', color: '#1D9E75', fontSize: '10px', padding: '2px 6px', background: 'rgba(29,158,117,0.15)', borderRadius: '4px' }}>popular</span>}
+                  {plan.featured && (
+                    <span style={{
+                      color: '#00E59B', fontSize: '9px', padding: '2px 8px',
+                      background: 'rgba(0,229,155,0.12)',
+                      border: '0.5px solid rgba(0,229,155,0.25)',
+                      borderRadius: '999px', letterSpacing: '0.08em',
+                    }}>popular</span>
+                  )}
                 </div>
-                <div style={{ fontSize: '32px', fontWeight: 500, color: '#ededea', letterSpacing: '-1px', marginBottom: '0.25rem', fontFamily: "'DM Mono', monospace" }}>
-                  {plan.price}<span style={{ fontSize: '14px', fontWeight: 400, color: '#9a9a95' }}>{plan.period}</span>
+                <div style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontSize: '36px', fontWeight: 800,
+                  color: '#F0EFE8', letterSpacing: '-1.5px',
+                  marginBottom: '0.15rem', lineHeight: 1,
+                }}>
+                  {plan.price}
+                  <span style={{ fontSize: '14px', fontWeight: 400, color: '#8C8B84', letterSpacing: '0px' }}>{plan.period}</span>
                 </div>
-                <div style={{ fontSize: '13px', color: '#9a9a95', marginBottom: '1.5rem', lineHeight: 1.5 }}>{plan.desc}</div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.75rem', flex: 1 }}>
+                <div style={{
+                  fontSize: '11px', color: '#4A4A45',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  marginBottom: '1rem', letterSpacing: '0.04em',
+                }}>{plan.perScan}</div>
+                <div style={{ fontSize: '13px', color: '#8C8B84', marginBottom: '1.5rem', lineHeight: 1.6 }}>{plan.desc}</div>
+                <ul style={{
+                  listStyle: 'none', display: 'flex', flexDirection: 'column',
+                  gap: '8px', marginBottom: '1.75rem', flex: 1,
+                }}>
                   {plan.features.map((f) => (
-                    <li key={f} style={{ fontSize: '13px', color: '#9a9a95', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1D9E75', flexShrink: 0, display: 'inline-block' }}></span>
+                    <li key={f} style={{ fontSize: '13px', color: '#8C8B84', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{
+                        width: '5px', height: '5px', borderRadius: '50%',
+                        background: '#00E59B', flexShrink: 0, display: 'inline-block',
+                        boxShadow: '0 0 4px rgba(0,229,155,0.5)',
+                      }}></span>
                       {f}
                     </li>
                   ))}
                 </ul>
                 <a href="#contact" style={{
-                  display: 'block', textAlign: 'center', padding: '10px', borderRadius: '10px',
-                  fontSize: '14px', fontWeight: 500,
-                  background: plan.featured ? '#1D9E75' : 'transparent',
-                  color: plan.featured ? '#fff' : '#9a9a95',
-                  border: plan.featured ? 'none' : '0.5px solid rgba(255,255,255,0.11)',
-                  textDecoration: 'none', transition: 'background 0.15s',
+                  display: 'block', textAlign: 'center', padding: '11px',
+                  borderRadius: '10px', fontSize: '14px', fontWeight: 500,
+                  background: plan.featured ? '#00E59B' : 'transparent',
+                  color: plan.featured ? '#060605' : '#8C8B84',
+                  border: plan.featured ? 'none' : '0.5px solid rgba(255,255,255,0.10)',
+                  textDecoration: 'none', transition: 'all 0.15s',
+                  letterSpacing: '0.01em',
                 }}>{plan.cta}</a>
               </div>
             ))}
@@ -461,51 +698,35 @@ export default function Home() {
 
       <hr />
 
-      {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
+      {/* ── HOW IT WORKS ──────────────────────────────────────────────────────── */}
       <section id="how" className="bg-section">
         <div className="inner">
           <p className="section-tag">how it works</p>
           <h2 className="section-title">One endpoint inside your upload pipeline.</h2>
           <p className="section-sub">Designed as infrastructure, not a moderation dashboard your team has to babysit.</p>
           <div className="timeline">
-            <div className="tl-item">
-              <div className="tl-line"></div>
-              <div className="tl-dot">01</div>
-              <div className="tl-content">
-                <h3>Normalize the upload on your server</h3>
-                <p>Your platform handles EXIF orientation, resizing, and compression using the Corvinth SDK — running entirely on your infrastructure. The SDK computes a perceptual hash from the image bytes. No pixels are sent to Corvinth.</p>
+            {[
+              { n: '01', title: 'Normalize the upload on your server', body: 'Your platform handles EXIF orientation, resizing, and compression using the Corvinth SDK — running entirely on your infrastructure. The SDK computes a perceptual hash from the image bytes. No pixels are sent to Corvinth.', last: false },
+              { n: '02', title: 'Generate a robust perceptual fingerprint', body: 'The SDK uses open-source perceptual hashing — Meta PDQ — and generates fingerprints for all 8 orientations simultaneously. Rotation, filters, and re-encoding are tolerated by design.', last: false },
+              { n: '03', title: 'Match against the NCII hash database', body: "The hash is sent to Corvinth's API and compared against a database of reported non-consensual intimate imagery using Hamming-distance comparison across all 8 orientations.", last: false },
+              { n: '04', title: 'Return a decision — you enforce your policy', body: 'Your platform receives a structured response: allow, block, or send to review with a confidence tier and case UUID. Corvinth is the detection layer. You stay in control of what happens next.', last: true },
+            ].map((step) => (
+              <div key={step.n} className="tl-item">
+                {!step.last && <div className="tl-line"></div>}
+                <div className="tl-dot">{step.n}</div>
+                <div className="tl-content">
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </div>
               </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-line"></div>
-              <div className="tl-dot">02</div>
-              <div className="tl-content">
-                <h3>Generate a robust perceptual fingerprint</h3>
-                <p>The SDK uses open-source perceptual hashing — Meta PDQ — and generates fingerprints for all 8 orientations simultaneously. Rotation, filters, and re-encoding are tolerated by design.</p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-line"></div>
-              <div className="tl-dot">03</div>
-              <div className="tl-content">
-                <h3>Match against the NCII hash database</h3>
-                <p>The hash is sent to Corvinth&apos;s API and compared against a database of reported non-consensual intimate imagery using Hamming-distance comparison across all 8 orientations.</p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="tl-dot">04</div>
-              <div className="tl-content">
-                <h3>Return a decision — you enforce your policy</h3>
-                <p>Your platform receives a structured response: allow, block, or send to review with a confidence tier and case UUID. Corvinth is the detection layer. You stay in control of what happens next.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       <hr />
 
-      {/* ── TRUST & COMPLIANCE ───────────────────────────────────────────────── */}
+      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
       <section>
         <div className="inner">
           <p className="section-tag">trust and compliance</p>
@@ -543,7 +764,6 @@ export default function Home() {
               <p>Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.</p>
             </div>
           </div>
-
           <div className="pills">
             <span className="pill">Meta PDQ</span>
             <span className="pill">Open-source hashing</span>
@@ -552,7 +772,6 @@ export default function Home() {
             <span className="pill">Review queue</span>
             <span className="pill">Case management</span>
           </div>
-
           <div className="disclaimer-box">
             <p>Partnerships with safety organizations may be pursued in the future. Corvinth does not represent or speak for StopNCII, Microsoft, Meta, or any listed organization unless a formal agreement exists. Corvinth is an independent trust and safety infrastructure company.</p>
           </div>
@@ -561,21 +780,103 @@ export default function Home() {
 
       <hr />
 
-      {/* ── CONTACT / WAITLIST FORM ──────────────────────────────────────────── */}
+      {/* ── FAQ ───────────────────────────────────────────────────────────────── */}
+      <section id="faq" className="bg-section">
+        <div className="inner" style={{ maxWidth: '700px' }}>
+          <p className="section-tag">faq</p>
+          <h2 className="section-title">Questions platforms actually ask.</h2>
+          <div className="faq-list">
+            {[
+              {
+                q: "What happens if there's a false positive and a legitimate image gets blocked?",
+                a: 'Every decision from Corvinth returns a confidence tier and a case UUID. For anything below the "exact match" threshold, the API returns a "review" action rather than an automatic block — your platform decides what to do. You can also use the /appeals endpoint to flag a case and we maintain a permanent audit log of every decision so there\'s always a paper trail for disputes.',
+              },
+              {
+                q: "Are you actually integrated with StopNCII's database, or just PDQ-compatible?",
+                a: "Corvinth uses the same open-source Meta PDQ hashing algorithm that StopNCII uses, which means our hash format is compatible. We are an independent company and do not represent StopNCII or claim a formal data-sharing partnership unless one is announced. Our hash database is populated through our own intake process. We are transparent about this.",
+              },
+              {
+                q: 'Does Corvinth ever see or store the actual images?',
+                a: "No. The Corvinth SDK runs on your infrastructure and computes the hash locally. Only the hash — a 256-bit number — is sent to our API. The original image bytes never leave your servers. This is the architecture, not a promise that could change.",
+              },
+              {
+                q: 'How small is "too small" to need this?',
+                a: "TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team.",
+              },
+              {
+                q: "What's the integration effort for an engineering team?",
+                a: "One API endpoint and no required SDK — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. We've written integration guides for Node.js, Python, and Go. Most platforms are live within a working day.",
+              },
+            ].map((item, i) => (
+              <FaqItem key={i} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── FOUNDER SECTION ───────────────────────────────────────────────────── */}
+      <section id="founder">
+        <div className="inner" style={{ maxWidth: '700px' }}>
+          <p className="section-tag">who built this</p>
+          <h2 className="section-title">There&apos;s a human accountable for this.</h2>
+          <div className="founder-card">
+            <div className="founder-avatar">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '52px', height: '52px' }}>
+                <circle cx="24" cy="24" r="24" fill="rgba(0,229,155,0.10)" />
+                <circle cx="24" cy="19" r="7" stroke="#00E59B" strokeWidth="1.5" fill="none" />
+                <path d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#00E59B" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div className="founder-body">
+              <div className="founder-name">Founder, Corvinth</div>
+              <p className="founder-text">
+                I built Corvinth because I watched small platforms get caught flat-footed by TIDA — not because they didn&apos;t care, but because building trust and safety infrastructure is expensive and hard and usually comes after a crisis, not before. The compliance tools that exist are built for companies with legal teams and seven-figure engineering budgets.
+              </p>
+              <p className="founder-text">
+                Corvinth is the version of this that fits in a startup&apos;s infrastructure budget, integrates in a day, and gives you the audit trail you need to show the FTC you took this seriously.
+              </p>
+              <a href="mailto:foundercorvinth@gmail.com" className="founder-email">foundercorvinth@gmail.com</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── CONTACT / WAITLIST FORM ───────────────────────────────────────────── */}
       <section id="contact" className="contact-section">
         <div className="inner-sm">
           <div style={{
-            background: '#161614',
-            border: '0.5px solid rgba(255,255,255,0.07)',
-            borderRadius: '16px',
-            padding: '3rem 2.5rem',
+            background: '#0e0e0c',
+            border: '0.5px solid rgba(255,255,255,0.08)',
+            borderRadius: '20px', padding: '3rem 2.5rem',
+            position: 'relative', overflow: 'hidden',
           }}>
-            <p style={{ textAlign: 'center', fontSize: '11px', fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.12em', fontFamily: "'DM Mono', monospace", marginBottom: '1rem' }}>get started</p>
-            <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 500, color: '#ededea', letterSpacing: '-0.5px', marginBottom: '0.75rem', lineHeight: 1.15 }}>Ready to integrate?</h2>
-            <p style={{ textAlign: 'center', fontSize: '15px', color: '#9a9a95', marginBottom: '2rem', lineHeight: 1.7, fontWeight: 300 }}>
+            {/* Top accent line */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(0,229,155,0.5), transparent)',
+            }} />
+            <p style={{
+              textAlign: 'center', fontSize: '10px', fontWeight: 500,
+              color: '#00E59B', textTransform: 'uppercase', letterSpacing: '0.14em',
+              fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
+            }}>get started</p>
+            <h2 style={{
+              textAlign: 'center',
+              fontFamily: "'Syne', sans-serif",
+              fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 800,
+              color: '#F0EFE8', letterSpacing: '-1px',
+              marginBottom: '0.75rem', lineHeight: 1.1,
+            }}>Ready to integrate?</h2>
+            <p style={{
+              textAlign: 'center', fontSize: '15px', color: '#8C8B84',
+              marginBottom: '2rem', lineHeight: 1.75, fontWeight: 300,
+            }}>
               Tell us about your platform and we&apos;ll get you API credentials within 24 hours.
             </p>
-
             {formStatus === 'success' ? (
               <div className="form-success">
                 <p>✓ Request received.</p>
@@ -602,7 +903,7 @@ export default function Home() {
                   </div>
                   <div className="form-field">
                     <label>Platform type <span>*</span></label>
-                    <select name="platform_type" value={form.platform_type} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.platform_type ? '#ededea' : '#5a5a56' }}>
+                    <select name="platform_type" value={form.platform_type} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.platform_type ? '#F0EFE8' : '#4A4A45' }}>
                       <option value="">Select type…</option>
                       <option value="dating">Dating app</option>
                       <option value="social">Social platform</option>
@@ -615,7 +916,7 @@ export default function Home() {
                   </div>
                   <div className="form-field">
                     <label>Monthly uploads <span>*</span></label>
-                    <select name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.monthly_upload_volume ? '#ededea' : '#5a5a56' }}>
+                    <select name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.monthly_upload_volume ? '#F0EFE8' : '#4A4A45' }}>
                       <option value="">Select volume…</option>
                       <option value="under_10k">Under 10,000 / month</option>
                       <option value="10k_100k">10,000 – 100,000 / month</option>
@@ -629,22 +930,19 @@ export default function Home() {
                   </div>
                   <div className="form-field full">
                     <label>Use case / message</label>
-                    <textarea name="use_case" rows={3} placeholder="Tell us briefly what you're building and how Corvinth fits in…" value={form.use_case} onChange={handleFormChange} className="form-input" style={{ resize: 'vertical', lineHeight: 1.6 }} />
+                    <textarea name="use_case" rows={3} placeholder="Tell us briefly what you're building and how Corvinth fits in…" value={form.use_case} onChange={handleFormChange} className="form-input" style={{ resize: 'vertical', lineHeight: 1.65 }} />
                   </div>
                 </div>
-
                 {formError && <p className="form-error">{formError}</p>}
-
-                <button
-                  onClick={handleFormSubmit}
-                  disabled={formStatus === 'submitting'}
-                  className="form-submit"
-                >
+                <button onClick={handleFormSubmit} disabled={formStatus === 'submitting'} className="form-submit">
                   {formStatus === 'submitting' ? 'Sending…' : 'request API access →'}
                 </button>
-
-                <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '13px', color: '#5a5a56', fontFamily: "'DM Mono', monospace" }}>
-                  Early access from <b style={{ color: '#9a9a95', fontWeight: 500 }}>$299 / month</b> · Enterprise plans available
+                <p style={{
+                  textAlign: 'center', marginTop: '1rem',
+                  fontSize: '11px', color: '#4A4A45',
+                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
+                }}>
+                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$299 / month</b> · Enterprise plans available
                 </p>
               </>
             )}
@@ -654,7 +952,7 @@ export default function Home() {
 
       <hr />
 
-      {/* ── FOOTER ───────────────────────────────────────────────────────────── */}
+      {/* ── FOOTER ────────────────────────────────────────────────────────────── */}
       <footer>
         <p>CORVINTH · Trust &amp; safety infrastructure · 2026</p>
         <div className="footer-links">
@@ -663,5 +961,21 @@ export default function Home() {
         </div>
       </footer>
     </>
+  );
+}
+
+// ── FAQ accordion sub-component ──────────────────────────────────────────────
+function FaqItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`faq-item${open ? ' faq-open' : ''}`}>
+      <button className="faq-q" onClick={() => setOpen(!open)}>
+        <span>{q}</span>
+        <svg className="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      {open && <div className="faq-a"><p>{a}</p></div>}
+    </div>
   );
 }
