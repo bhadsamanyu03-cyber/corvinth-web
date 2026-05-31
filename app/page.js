@@ -256,48 +256,7 @@ if (match.action === 'block') {
 
       <hr />
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────────────────────── */}
-      <section className="testimonials-section">
-        <div className="inner">
-          <p className="section-tag">what early partners say</p>
-          <h2 className="section-title">Built with feedback from real platform engineers.</h2>
-          <div className="testimonials-grid">
-            {[
-              {
-                quote: "We had our legal team asking us for three months what we were doing about TIDA. Corvinth gave us an answer in a day — and an audit log we could actually show them.",
-                name: "Head of Engineering",
-                role: "Dating app · 200K MAU",
-                initials: "HE",
-              },
-              {
-                quote: "The fact that only hashes leave our infrastructure was the thing that finally got legal sign-off. We don't store or transmit images and Corvinth doesn't either. That's the architecture we needed.",
-                name: "CTO",
-                role: "Creator platform · private beta",
-                initials: "CT",
-              },
-              {
-                quote: "We looked at building this ourselves. Three sprints in we realized we didn't understand perceptual hashing at all. Corvinth was cheaper than the engineering time we'd already spent.",
-                name: "VP Product",
-                role: "Social messaging app",
-                initials: "VP",
-              },
-            ].map((t, i) => (
-              <div key={i} className="testimonial-card">
-                <p className="testimonial-quote">{t.quote}</p>
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">{t.initials}</div>
-                  <div>
-                    <div className="testimonial-name">{t.name}</div>
-                    <div className="testimonial-role">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <hr />
 
       {/* ── LIABILITY CALCULATOR ─────────────────────────────────────────────── */}
       <section id="calculator" style={{ background: '#060605', padding: '6rem 2.5rem' }}>
