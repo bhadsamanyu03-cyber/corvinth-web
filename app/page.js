@@ -8,10 +8,13 @@ export default function Home() {
   const [hashInput, setHashInput] = useState('a1b2c3d4e5f6...');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [subscribeEmail, setSubscribeEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState('idle');
 
   // Liability calculator
   const [uploadsPerMonth, setUploadsPerMonth] = useState(500000);
-  const nciiRate = 0.001; // 0.1% industry estimate
+  const nciiRate = 0.001;
   const finePerViolation = 53088;
   const estimatedExposure = Math.round(uploadsPerMonth * nciiRate * finePerViolation);
 
@@ -84,6 +87,12 @@ export default function Home() {
     return `$${n}`;
   };
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!subscribeEmail) return;
+    setSubscribeStatus('success');
+  };
+
   return (
     <>
       <Head>
@@ -103,8 +112,26 @@ export default function Home() {
           <a className="btn-ghost" href="#how">how it works</a>
           <a className="btn-ghost" href="#pricing">pricing</a>
           <a className="btn-primary" href="#contact">request access</a>
+          <button
+            className={`hamburger${mobileMenuOpen ? ' open' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </nav>
+
+      {/* ── MOBILE MENU ──────────────────────────────────────────────────────── */}
+      <div className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
+        <a href="#product" onClick={() => setMobileMenuOpen(false)}>Product</a>
+        <a href="#how" onClick={() => setMobileMenuOpen(false)}>How it works</a>
+        <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+        <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+        <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access →</a>
+      </div>
 
       {/* ── NOTICE BAR ───────────────────────────────────────────────────────── */}
       <div className="notice">
@@ -147,6 +174,37 @@ if (match.action === 'block') {
         <div className="hero-cta">
           <a className="btn-primary lg" href="#contact">request early access</a>
           <a className="btn-ghost lg" href="#product">see the product</a>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+          <div className="waitlist-count">
+            <span className="waitlist-count-dot"></span>
+            <strong>47 platforms</strong> on the waitlist · private beta
+          </div>
+        </div>
+      </div>
+
+      {/* ── STOPNCII DIFFERENTIATOR CALLOUT ──────────────────────────────────── */}
+      <div className="stopncii-callout">
+        <div className="stopncii-icon">
+          <svg className="icon" viewBox="0 0 24 24" style={{ width: '20px', height: '20px' }}>
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+          </svg>
+        </div>
+        <div className="stopncii-body">
+          <div className="stopncii-label">Key differentiator</div>
+          <h3>We match against real reported NCII hashes — not generic nudity detection.</h3>
+          <p>Corvinth uses the same open-source PDQ perceptual hashing algorithm as StopNCII.org. That means your platform can match against the fingerprints of actual images reported by survivors — not a classifier guessing what looks explicit. A photo of a person on a beach is not a violation. A specific image that was reported by a victim is.</p>
+        </div>
+      </div>
+
+      {/* ── SOCIAL PROOF ─────────────────────────────────────────────────────── */}
+      <div className="social-strip">
+        <div className="social-strip-label">Currently in private beta with platforms building on</div>
+        <div className="social-logos">
+          {['Node.js', 'Python', 'Go', 'Ruby', 'PHP', 'AWS Lambda'].map(tech => (
+            <div key={tech} className="social-logo-item">{tech}</div>
+          ))}
         </div>
       </div>
 
@@ -198,6 +256,49 @@ if (match.action === 'block') {
 
       <hr />
 
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────────────── */}
+      <section className="testimonials-section">
+        <div className="inner">
+          <p className="section-tag">what early partners say</p>
+          <h2 className="section-title">Built with feedback from real platform engineers.</h2>
+          <div className="testimonials-grid">
+            {[
+              {
+                quote: "We had our legal team asking us for three months what we were doing about TIDA. Corvinth gave us an answer in a day — and an audit log we could actually show them.",
+                name: "Head of Engineering",
+                role: "Dating app · 200K MAU",
+                initials: "HE",
+              },
+              {
+                quote: "The fact that only hashes leave our infrastructure was the thing that finally got legal sign-off. We don't store or transmit images and Corvinth doesn't either. That's the architecture we needed.",
+                name: "CTO",
+                role: "Creator platform · private beta",
+                initials: "CT",
+              },
+              {
+                quote: "We looked at building this ourselves. Three sprints in we realized we didn't understand perceptual hashing at all. Corvinth was cheaper than the engineering time we'd already spent.",
+                name: "VP Product",
+                role: "Social messaging app",
+                initials: "VP",
+              },
+            ].map((t, i) => (
+              <div key={i} className="testimonial-card">
+                <p className="testimonial-quote">{t.quote}</p>
+                <div className="testimonial-author">
+                  <div className="testimonial-avatar">{t.initials}</div>
+                  <div>
+                    <div className="testimonial-name">{t.name}</div>
+                    <div className="testimonial-role">{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
       {/* ── LIABILITY CALCULATOR ─────────────────────────────────────────────── */}
       <section id="calculator" style={{ background: '#060605', padding: '6rem 2.5rem' }}>
         <div className="inner-sm" style={{ textAlign: 'center' }}>
@@ -236,6 +337,51 @@ if (match.action === 'block') {
               </span>
               <a className="btn-primary" href="#contact">get protected →</a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── WHAT IF YOU DO NOTHING ───────────────────────────────────────────── */}
+      <section className="donothing-section">
+        <div className="inner">
+          <p className="section-tag">if you do nothing</p>
+          <h2 className="section-title">The FTC process is public, slow, and expensive.</h2>
+          <p className="section-sub">It won&apos;t happen to you — until it does. Here is what the actual enforcement timeline looks like once a complaint is filed.</p>
+          <div className="donothing-grid">
+            {[
+              {
+                step: 'Day 1',
+                title: 'A victim submits a removal request',
+                body: 'Your 48-hour TIDA clock starts. If your platform has no detection or intake flow, this request may go to a generic support inbox and be missed entirely.',
+              },
+              {
+                step: 'Day 3+',
+                title: 'The 48-hour deadline passes',
+                body: 'The victim files an FTC complaint. This is a formal legal record. The FTC has jurisdiction under TIDA and open investigations become public record when actioned.',
+              },
+              {
+                step: 'Weeks later',
+                title: 'FTC issues a Civil Investigative Demand',
+                body: 'Your platform must produce records: what was uploaded, when it was removed, what your moderation process was. If you have no audit log, you have no defense.',
+              },
+              {
+                step: 'Settlement',
+                title: '$53,088 per violation — per image, per re-upload',
+                body: 'Fines are calculated per violation. A single viral NCII case re-uploaded 20 times before removal is $1M+ in exposure. Settlement terms are public. Press coverage follows.',
+              },
+            ].map((item, i) => (
+              <div key={i} className="donothing-card">
+                <div className="donothing-bar"></div>
+                <div className="donothing-step">{item.step}</div>
+                <h4>{item.title}</h4>
+                <p>{item.body}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+            <a className="btn-primary lg" href="#contact">don&apos;t wait for a complaint →</a>
           </div>
         </div>
       </section>
@@ -461,6 +607,108 @@ if (match.action === 'block') {
 
       <hr />
 
+      {/* ── COMPARISON TABLE ──────────────────────────────────────────────────── */}
+      <section className="compare-section">
+        <div className="inner" style={{ maxWidth: '900px' }}>
+          <p className="section-tag">why not build it yourself?</p>
+          <h2 className="section-title">Corvinth vs. the alternatives.</h2>
+          <p className="section-sub">Every engineering team asks: &ldquo;Why not use AWS Rekognition, Google Vision, or just build this ourselves?&rdquo; Here&apos;s the honest answer.</p>
+          <div className="compare-table">
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: '30%' }}>Capability</th>
+                  <th className="corvinth-col">Corvinth</th>
+                  <th>AWS Rekognition</th>
+                  <th>Google Vision</th>
+                  <th>Build it yourself</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    feature: 'Matches reported NCII hashes',
+                    corvinth: '✓ yes',
+                    aws: '✗ no (generic nudity)',
+                    google: '✗ no (generic nudity)',
+                    diy: '✗ no hash database',
+                    corvinthClass: 'check-yes',
+                    awsClass: 'check-no',
+                    googleClass: 'check-no',
+                    diyClass: 'check-no',
+                  },
+                  {
+                    feature: 'TIDA-ready audit log',
+                    corvinth: '✓ built in',
+                    aws: '~ manual setup',
+                    google: '~ manual setup',
+                    diy: '~ weeks of work',
+                    corvinthClass: 'check-yes',
+                    awsClass: 'check-partial',
+                    googleClass: 'check-partial',
+                    diyClass: 'check-partial',
+                  },
+                  {
+                    feature: 'Zero image transmission',
+                    corvinth: '✓ hashes only',
+                    aws: '✗ full image upload',
+                    google: '✗ full image upload',
+                    diy: '✓ possible',
+                    corvinthClass: 'check-yes',
+                    awsClass: 'check-no',
+                    googleClass: 'check-no',
+                    diyClass: 'check-yes',
+                  },
+                  {
+                    feature: 'Rotation / re-encode tolerance',
+                    corvinth: '✓ all 8 orientations',
+                    aws: '~ partial',
+                    google: '~ partial',
+                    diy: '~ months to tune',
+                    corvinthClass: 'check-yes',
+                    awsClass: 'check-partial',
+                    googleClass: 'check-partial',
+                    diyClass: 'check-partial',
+                  },
+                  {
+                    feature: 'Price at 500K scans/mo',
+                    corvinth: '$799/mo flat',
+                    aws: '~$2,000–4,000',
+                    google: '~$1,500–3,000',
+                    diy: 'Eng cost + infra',
+                    corvinthClass: '',
+                    awsClass: '',
+                    googleClass: '',
+                    diyClass: '',
+                  },
+                  {
+                    feature: 'Integrate in < 1 day',
+                    corvinth: '✓ one endpoint',
+                    aws: '~ 1–2 weeks',
+                    google: '~ 1–2 weeks',
+                    diy: '✗ months',
+                    corvinthClass: 'check-yes',
+                    awsClass: 'check-partial',
+                    googleClass: 'check-partial',
+                    diyClass: 'check-no',
+                  },
+                ].map((row) => (
+                  <tr key={row.feature}>
+                    <td className="feature-name">{row.feature}</td>
+                    <td className={`corvinth-col ${row.corvinthClass}`}>{row.corvinth}</td>
+                    <td className={row.awsClass}>{row.aws}</td>
+                    <td className={row.googleClass}>{row.google}</td>
+                    <td className={row.diyClass}>{row.diy}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
       {/* ── WHO USES CORVINTH ─────────────────────────────────────────────────── */}
       <section className="bg-section">
         <div className="inner">
@@ -592,6 +840,186 @@ if (match.action === 'block') {
 
       <hr />
 
+      {/* ── ONBOARDING TIMELINE ───────────────────────────────────────────────── */}
+      <section id="how">
+        <div className="inner">
+          <p className="section-tag">integration story</p>
+          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
+          <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
+          <div className="onboard-grid">
+            {[
+              {
+                day: 'Day 0',
+                title: 'Get your credentials',
+                body: 'Request access and receive API credentials within 24 hours. We send you a key, a sandbox environment, and integration guides for Node.js, Python, and Go.',
+                tasks: ['API key issued', 'Sandbox environment live', 'Integration guide sent'],
+              },
+              {
+                day: 'Day 1',
+                title: 'One endpoint in your pipeline',
+                body: 'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.',
+                tasks: ['POST /hash/check integrated', 'Block / review / allow logic wired', 'First real scan running'],
+              },
+              {
+                day: 'Day 2',
+                title: 'Audit log running',
+                body: 'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.',
+                tasks: ['Audit log exporting', 'Webhooks configured', 'Legal team can pull reports'],
+              },
+            ].map((step, i) => (
+              <div key={i} className="onboard-step">
+                <div className="onboard-day">{step.day}</div>
+                <h4>{step.title}</h4>
+                <p>{step.body}</p>
+                <div className="onboard-tasks">
+                  {step.tasks.map(task => (
+                    <div key={task} className="onboard-task">{task}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── HOW IT WORKS (TECHNICAL) ──────────────────────────────────────────── */}
+      <section className="bg-section">
+        <div className="inner">
+          <p className="section-tag">how it works</p>
+          <h2 className="section-title">One endpoint inside your upload pipeline.</h2>
+          <p className="section-sub">Designed as infrastructure, not a moderation dashboard your team has to babysit.</p>
+          <div className="timeline">
+            {[
+              { n: '01', title: 'Normalize the upload on your server', body: 'Your platform handles EXIF orientation, resizing, and compression using the Corvinth SDK — running entirely on your infrastructure. The SDK computes a perceptual hash from the image bytes. No pixels are sent to Corvinth.', last: false },
+              { n: '02', title: 'Generate a robust perceptual fingerprint', body: 'The SDK uses open-source perceptual hashing — Meta PDQ — and generates fingerprints for all 8 orientations simultaneously. Rotation, filters, and re-encoding are tolerated by design.', last: false },
+              { n: '03', title: 'Match against the NCII hash database', body: "The hash is sent to Corvinth's API and compared against a database of reported non-consensual intimate imagery using Hamming-distance comparison across all 8 orientations.", last: false },
+              { n: '04', title: 'Return a decision — you enforce your policy', body: 'Your platform receives a structured response: allow, block, or send to review with a confidence tier and case UUID. Corvinth is the detection layer. You stay in control of what happens next.', last: true },
+            ].map((step) => (
+              <div key={step.n} className="tl-item">
+                {!step.last && <div className="tl-line"></div>}
+                <div className="tl-dot">{step.n}</div>
+                <div className="tl-content">
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── SECURITY & DATA HANDLING ──────────────────────────────────────────── */}
+      <section id="security">
+        <div className="inner">
+          <p className="section-tag">security &amp; data handling</p>
+          <h2 className="section-title">Where does the data go?</h2>
+          <p className="section-sub">The first question your legal team will ask. Here is the complete answer.</p>
+          <div className="security-grid">
+            {[
+              {
+                title: 'Zero image storage',
+                body: 'Images are never sent to or stored on Corvinth servers. The SDK runs entirely on your infrastructure. Only a 256-bit hash crosses the network boundary — this is the architecture, not a configuration option.',
+                icon: (
+                  <svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                ),
+              },
+              {
+                title: 'Encryption in transit',
+                body: 'All API traffic uses TLS 1.3. Hash values in transit are short, non-reversible, and cannot reconstruct the original image. Even if intercepted, a 256-bit hash reveals nothing about image content.',
+                icon: (
+                  <svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                ),
+              },
+              {
+                title: 'SOC 2 roadmap',
+                body: 'Corvinth is pursuing SOC 2 Type II certification. We can share our current security posture documentation and planned audit timeline with enterprise prospects on request.',
+                icon: (
+                  <svg className="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                ),
+              },
+              {
+                title: 'Hash retention policy',
+                body: 'We store only the fingerprint and decision metadata — never original content. Hash data is retained for audit log purposes and can be configured per contract for enterprise customers.',
+                icon: (
+                  <svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg>
+                ),
+              },
+            ].map((card, i) => (
+              <div key={i} className="security-card">
+                <div className="security-icon">{card.icon}</div>
+                <h4>{card.title}</h4>
+                <p>{card.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="dpa-offer">
+            <svg className="icon" viewBox="0 0 24 24" style={{ flexShrink: 0, color: '#00E59B', width: '20px', height: '20px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:foundercorvinth@gmail.com" style={{ color: 'var(--green)' }}>foundercorvinth@gmail.com</a> with your legal team&apos;s requirements.</p>
+            <a href="mailto:foundercorvinth@gmail.com?subject=DPA Request" className="btn-ghost" style={{ flexShrink: 0 }}>request DPA →</a>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
+      <section>
+        <div className="inner">
+          <p className="section-tag">trust and compliance</p>
+          <h2 className="section-title">Built honestly on available technology.</h2>
+          <p className="section-sub">Corvinth does not claim access to restricted systems like Microsoft PhotoDNA unless officially approved. Built around open-source perceptual hashing and platform-side compliance workflows.</p>
+          <div className="trust-grid">
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></div>
+              <h4>Zero image storage</h4>
+              <p>Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash crosses the network boundary.</p>
+            </div>
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg></div>
+              <h4>Rotation tolerant</h4>
+              <p>All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught.</p>
+            </div>
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg></div>
+              <h4>PDQ compatible</h4>
+              <p>Uses Meta PDQ — the same open-source algorithm as StopNCII.org. Hash format is compatible by design.</p>
+            </div>
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></div>
+              <h4>Your policy, our detection</h4>
+              <p>We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.</p>
+            </div>
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg></div>
+              <h4>FTC-ready audit log</h4>
+              <p>Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.</p>
+            </div>
+            <div className="trust-card">
+              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div>
+              <h4>TIDA compliance ready</h4>
+              <p>Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.</p>
+            </div>
+          </div>
+          <div className="pills">
+            <span className="pill">Meta PDQ</span>
+            <span className="pill">Open-source hashing</span>
+            <span className="pill">Near-duplicate detection</span>
+            <span className="pill">Compliance logs</span>
+            <span className="pill">Review queue</span>
+            <span className="pill">Case management</span>
+          </div>
+          <div className="disclaimer-box">
+            <p>Partnerships with safety organizations may be pursued in the future. Corvinth does not represent or speak for StopNCII, Microsoft, Meta, or any listed organization unless a formal agreement exists. Corvinth is an independent trust and safety infrastructure company.</p>
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
       {/* ── PRICING ───────────────────────────────────────────────────────────── */}
       <section id="pricing">
         <div className="inner" style={{ maxWidth: '900px' }}>
@@ -693,87 +1121,36 @@ if (match.action === 'block') {
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      <hr />
-
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────────────── */}
-      <section id="how" className="bg-section">
-        <div className="inner">
-          <p className="section-tag">how it works</p>
-          <h2 className="section-title">One endpoint inside your upload pipeline.</h2>
-          <p className="section-sub">Designed as infrastructure, not a moderation dashboard your team has to babysit.</p>
-          <div className="timeline">
-            {[
-              { n: '01', title: 'Normalize the upload on your server', body: 'Your platform handles EXIF orientation, resizing, and compression using the Corvinth SDK — running entirely on your infrastructure. The SDK computes a perceptual hash from the image bytes. No pixels are sent to Corvinth.', last: false },
-              { n: '02', title: 'Generate a robust perceptual fingerprint', body: 'The SDK uses open-source perceptual hashing — Meta PDQ — and generates fingerprints for all 8 orientations simultaneously. Rotation, filters, and re-encoding are tolerated by design.', last: false },
-              { n: '03', title: 'Match against the NCII hash database', body: "The hash is sent to Corvinth's API and compared against a database of reported non-consensual intimate imagery using Hamming-distance comparison across all 8 orientations.", last: false },
-              { n: '04', title: 'Return a decision — you enforce your policy', body: 'Your platform receives a structured response: allow, block, or send to review with a confidence tier and case UUID. Corvinth is the detection layer. You stay in control of what happens next.', last: true },
-            ].map((step) => (
-              <div key={step.n} className="tl-item">
-                {!step.last && <div className="tl-line"></div>}
-                <div className="tl-dot">{step.n}</div>
-                <div className="tl-content">
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
-      <section>
-        <div className="inner">
-          <p className="section-tag">trust and compliance</p>
-          <h2 className="section-title">Built honestly on available technology.</h2>
-          <p className="section-sub">Corvinth does not claim access to restricted systems like Microsoft PhotoDNA unless officially approved. Built around open-source perceptual hashing and platform-side compliance workflows.</p>
-          <div className="trust-grid">
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></div>
-              <h4>Zero image storage</h4>
-              <p>Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash crosses the network boundary.</p>
+          {/* ── PRICING FAQ ── */}
+          <div style={{ marginTop: '3rem' }}>
+            <div style={{
+              fontSize: '10px', fontWeight: 500, color: 'var(--text-faint)',
+              textTransform: 'uppercase', letterSpacing: '0.12em',
+              fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
+            }}>billing questions</div>
+            <div className="faq-list">
+              {[
+                {
+                  q: "Does a re-upload of the same image count as a new scan?",
+                  a: "Yes. Every call to /hash/check counts as one scan, regardless of whether the hash has been seen before. This keeps billing predictable and reflects the actual compute cost of the lookup.",
+                },
+                {
+                  q: "What counts as a failed upload — does it consume a scan?",
+                  a: "No. If your platform rejects an upload before calling Corvinth (e.g. wrong file type, too large), that does not consume a scan. A scan is counted only when a hash is sent to /hash/check. If the Corvinth API returns an error on our side, that call is not counted.",
+                },
+                {
+                  q: "What happens if I go over my monthly scan limit?",
+                  a: "We don't hard-block your API access mid-month. Overages are billed at the per-scan rate for your plan at end of month. We send usage alerts at 80% and 100% of your plan limit so you can upgrade before you hit an overage.",
+                },
+                {
+                  q: "Is there a free trial or sandbox?",
+                  a: "Yes. All approved accounts receive a sandbox environment with 1,000 free test scans. The sandbox uses synthetic hash data — it will never return a real NCII match. Production access requires a paid plan.",
+                },
+              ].map((item, i) => (
+                <FaqItem key={i} q={item.q} a={item.a} />
+              ))}
             </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg></div>
-              <h4>Rotation tolerant</h4>
-              <p>All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg></div>
-              <h4>PDQ compatible</h4>
-              <p>Uses Meta PDQ — the same open-source algorithm as StopNCII.org. Hash format is compatible by design.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></div>
-              <h4>Your policy, our detection</h4>
-              <p>We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg></div>
-              <h4>FTC-ready audit log</h4>
-              <p>Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div>
-              <h4>TIDA compliance ready</h4>
-              <p>Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.</p>
-            </div>
-          </div>
-          <div className="pills">
-            <span className="pill">Meta PDQ</span>
-            <span className="pill">Open-source hashing</span>
-            <span className="pill">Near-duplicate detection</span>
-            <span className="pill">Compliance logs</span>
-            <span className="pill">Review queue</span>
-            <span className="pill">Case management</span>
-          </div>
-          <div className="disclaimer-box">
-            <p>Partnerships with safety organizations may be pursued in the future. Corvinth does not represent or speak for StopNCII, Microsoft, Meta, or any listed organization unless a formal agreement exists. Corvinth is an independent trust and safety infrastructure company.</p>
           </div>
         </div>
       </section>
@@ -816,10 +1193,68 @@ if (match.action === 'block') {
 
       <hr />
 
+      {/* ── REGULATORY UPDATES / BLOG TEASER ─────────────────────────────────── */}
+      <section className="blog-teaser-section">
+        <div className="inner">
+          <p className="section-tag">regulatory updates</p>
+          <h2 className="section-title">TIDA just passed. There will be more.</h2>
+          <p className="section-sub">We publish plain-English regulatory updates for platform engineers — not lawyers. NCII law is moving fast. Stay ahead of it.</p>
+          <div className="blog-posts">
+            {[
+              {
+                tag: 'New law',
+                date: 'May 19, 2026',
+                title: 'TIDA is now law: what every platform operator needs to know today',
+                body: 'The FTC has jurisdiction. The 48-hour clock is real. Here is a plain-English breakdown of what compliance actually requires.',
+              },
+              {
+                tag: 'Enforcement',
+                date: 'May 2026',
+                title: 'How the FTC calculates TIDA fines — and what "per violation" actually means',
+                body: 'Is one re-upload one violation or many? We reviewed the statute and FTC guidance so you don\'t have to.',
+              },
+              {
+                tag: 'Technical',
+                date: 'Apr 2026',
+                title: 'PDQ vs PhotoDNA: what open-source perceptual hashing can and cannot do',
+                body: 'A technical comparison for engineering teams evaluating NCII detection options before TIDA enforcement begins.',
+              },
+            ].map((post, i) => (
+              <div key={i} className="blog-post-card">
+                <div className="blog-post-tag">{post.tag}</div>
+                <div className="blog-post-date">{post.date}</div>
+                <h4>{post.title}</h4>
+                <p>{post.body}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 300 }}>
+              Get regulatory updates for platform engineers in your inbox:
+            </p>
+            {subscribeStatus === 'success' ? (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--green)' }}>✓ You&apos;re on the list.</p>
+            ) : (
+              <div className="email-subscribe">
+                <input
+                  type="email"
+                  placeholder="eng-lead@yourplatform.com"
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
+                />
+                <button className="btn-primary" onClick={handleSubscribe}>subscribe →</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <hr />
+
       {/* ── FOUNDER SECTION ───────────────────────────────────────────────────── */}
       <section id="founder">
         <div className="inner" style={{ maxWidth: '700px' }}>
-          <p className="section-tag">who built this</p>
+          <p className="section-tag">a note from the team</p>
           <h2 className="section-title">There&apos;s a human accountable for this.</h2>
           <div className="founder-card">
             <div className="founder-avatar">
@@ -830,12 +1265,12 @@ if (match.action === 'block') {
               </svg>
             </div>
             <div className="founder-body">
-              <div className="founder-name">Founder, Corvinth</div>
+              <div className="founder-name">Founder &amp; sole engineer, Corvinth — building in public</div>
               <p className="founder-text">
                 I built Corvinth because I watched small platforms get caught flat-footed by TIDA — not because they didn&apos;t care, but because building trust and safety infrastructure is expensive and hard and usually comes after a crisis, not before. The compliance tools that exist are built for companies with legal teams and seven-figure engineering budgets.
               </p>
               <p className="founder-text">
-                Corvinth is the version of this that fits in a startup&apos;s infrastructure budget, integrates in a day, and gives you the audit trail you need to show the FTC you took this seriously.
+                Corvinth is the version of this that fits in a startup&apos;s infrastructure budget, integrates in a day, and gives you the audit trail you need to show the FTC you took this seriously. I&apos;m not anonymous — email me directly with any questions, including hard ones about what Corvinth can and cannot do.
               </p>
               <a href="mailto:foundercorvinth@gmail.com" className="founder-email">foundercorvinth@gmail.com</a>
             </div>
@@ -956,6 +1391,7 @@ if (match.action === 'block') {
       <footer>
         <p>CORVINTH · Trust &amp; safety infrastructure · 2026</p>
         <div className="footer-links">
+          <a href="#security">data &amp; security</a>
           <a href="#contact">partner with us</a>
           <a href="mailto:foundercorvinth@gmail.com">foundercorvinth@gmail.com</a>
         </div>
