@@ -326,3 +326,25 @@ svg.icon {
   .confidence-grid { grid-template-columns: 1fr; }
   .btn-ghost:not(.nav-right .btn-ghost) { display: none; }
 }
+/* --- FORM INPUTS --- */
+.form-input {
+  background: var(--bg);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+}
+.form-input::placeholder { color: var(--text-faint); }
+.form-input option { background: var(--bg-card); }

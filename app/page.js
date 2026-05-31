@@ -876,7 +876,7 @@ export default function Home() {
         <p>CORVINTH · Trust & safety infrastructure · 2026</p>
         <div className="footer-links">
           <a href="#contact">partner with us</a>
-          <a href="mailto:foundercorvinth@gmail.com">foundercorvinth@gmail.com</a>
+          <a href="mailto:hello@corvinth.com">hello@corvinth.com</a>
         </div>
       </footer>
     </>
