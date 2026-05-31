@@ -1,6 +1,6 @@
 /* app/globals.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@300;400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,9 +37,9 @@
   --radius-lg:    14px;
   --radius-xl:    20px;
 
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'Instrument Sans', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  --font-display: 'Inter', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'Roboto Mono', monospace;
 }
 
 html { scroll-behavior: smooth; }
