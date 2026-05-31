@@ -292,7 +292,7 @@ if (match.action === 'block') {
             </div>
             <div className="calc-cta-row">
               <span className="calc-corvinth-cost">
-                Corvinth costs from <b>$299/mo</b> to cover this.
+                Corvinth costs from <b>$499/mo</b> to cover this.
               </span>
               <a className="btn-primary" href="#contact">get protected →</a>
             </div>
@@ -988,7 +988,7 @@ if (match.action === 'block') {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: '1rem' }}>
             {[
               {
-                name: 'Starter', price: '$299', period: '/month', perScan: '$0.006 / scan',
+                name: 'Starter', price: '$499', period: '/month', perScan: '$0.006 / scan',
                 desc: 'For platforms getting compliant fast.',
                 features: ['50,000 scans / month', 'Full API access', 'Case management', 'Audit log export', 'Email support'],
                 cta: 'request access', featured: false,
@@ -1137,7 +1137,7 @@ if (match.action === 'block') {
               },
               {
                 q: 'How small is "too small" to need this?',
-                a: "TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team.",
+                a: "TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $499/month is specifically designed for smaller platforms that can't staff a trust-and-safety team.",
               },
               {
                 q: "What's the integration effort for an engineering team?",
@@ -1336,7 +1336,7 @@ if (match.action === 'block') {
                   fontSize: '11px', color: '#4A4A45',
                   fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
                 }}>
-                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$299 / month</b> · Enterprise plans available
+                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$499 / month</b> · Enterprise plans available
                 </p>
               </>
             )}
