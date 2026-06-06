@@ -478,7 +478,7 @@ if (match.action === 'block') {
                   <div key={m.label} style={{ marginBottom: '1.25rem' }}>
                     <div style={{ fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace", marginBottom: '3px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{m.label}</div>
                     <div style={{
-                      fontFamily: "'Syne', sans-serif",
+                      
                       fontSize: '24px', fontWeight: 700,
                       color: m.color, letterSpacing: '-0.5px', lineHeight: 1,
                     }}>{m.value}</div>
@@ -586,7 +586,7 @@ if (match.action === 'block') {
               >
                 <div style={{ fontSize: '22px', marginBottom: '1rem', filter: 'grayscale(0.2)' }}>{item.icon}</div>
                 <h4 style={{
-                  fontFamily: "'Syne', sans-serif",
+                  
                   fontSize: '15px', fontWeight: 600,
                   color: '#F0EFE8', marginBottom: '0.6rem',
                   letterSpacing: '-0.2px',
@@ -1073,7 +1073,7 @@ if (match.action === 'block') {
                   )}
                 </div>
                 <div style={{
-                  fontFamily: "'Syne', sans-serif",
+                  
                   fontSize: '36px', fontWeight: 800,
                   color: '#F0EFE8', letterSpacing: '-1.5px',
                   marginBottom: '0.15rem', lineHeight: 1,
@@ -1265,7 +1265,7 @@ if (match.action === 'block') {
             }}>get started</p>
             <h2 style={{
               textAlign: 'center',
-              fontFamily: "'Syne', sans-serif",
+              
               fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 800,
               color: '#F0EFE8', letterSpacing: '-1px',
               marginBottom: '0.75rem', lineHeight: 1.1,
