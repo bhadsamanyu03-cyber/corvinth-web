@@ -43,8 +43,7 @@ export default function Home() {
     }
     setFormStatus('submitting');
     try {
-      const API_URL = process.env.NEXT_PUBLIC_CORVINTH_API_URL || 'https://corvinth-api.onrender.com';
-      const res = await fetch(`${API_URL}/waitlist`, {
+      const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -105,8 +104,7 @@ export default function Home() {
     if (!subscribeEmail || !subscribeEmail.includes('@')) return;
     setSubscribeStatus('submitting');
     try {
-      const API_URL = process.env.NEXT_PUBLIC_CORVINTH_API_URL || 'https://corvinth-api.onrender.com';
-      const res = await fetch(`${API_URL}/waitlist`, {
+      const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
