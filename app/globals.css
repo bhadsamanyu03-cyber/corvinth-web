@@ -1345,8 +1345,11 @@ svg.icon {
   .onboard-grid { grid-template-columns: 1fr; }
   .compare-table { overflow-x: auto; display: block; }
   .stopncii-callout { flex-direction: column; }
+  /* Pricing grid — force single column on mobile so all 4 cards stack */
+  #pricing [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  /* Founding tier callout line — ensure it wraps and stays readable */
+  #pricing p[style*="text-align: center"] { font-size: 11px !important; padding: 0 0.5rem; }
 }
-
 @media (max-width: 768px) {
   .api-grid { grid-template-columns: 1fr; }
   .confidence-grid { grid-template-columns: 1fr; }

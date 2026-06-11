@@ -960,11 +960,6 @@ if (match.action === 'block') {
               <h4>Content moderation tools</h4>
               <p>Add NCII detection as a signal layer in your existing pipeline alongside current classifiers.</p>
             </div>
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></div>
-              <h4>Search engines</h4>
-              <p>Filter image index results against the hash database before content is indexed and surfaced.</p>
-            </div>
           </div>
         </div>
       </section>
@@ -1289,7 +1284,7 @@ if (match.action === 'block') {
             <span className="pill">Case management</span>
           </div>
           <div className="disclaimer-box">
-            <p>Partnerships with safety organizations may be pursued in the future. Corvinth does not represent or speak for StopNCII, Microsoft, Meta, or any listed organization unless a formal agreement exists. Corvinth is an independent trust and safety infrastructure company.</p>
+            <p>Corvinth syncs against the StopNCII hash feed. We do not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
           </div>
         </div>
       </section>
@@ -1345,7 +1340,7 @@ if (match.action === 'block') {
                 fontSize: '11px', color: '#FFB224',
                 fontFamily: "'JetBrains Mono', monospace",
                 marginBottom: '0.5rem', letterSpacing: '0.04em',
-              }}>or free · full Shield + Pulse access</div>
+              }}>full Shield + Pulse access · 3 platforms only</div>
               <div style={{ marginBottom: '1rem' }}>
                 <span style={{
                   fontSize: '10px', fontFamily: "'JetBrains Mono', monospace",
@@ -1538,11 +1533,11 @@ if (match.action === 'block') {
                 },
                 {
                   q: "What happens if I go over my monthly scan limit?",
-                  a: "We don't hard-block your API access mid-month. Overages are billed at the per-scan rate for your plan at end of month. We send usage alerts at 80% and 100% of your plan limit so you can upgrade before you hit an overage.",
+                  a: "We don't hard-cap at the limit. Your platform keeps scanning and we bill overage at the rate shown on your plan. We email you at 80% and 100% of your allowance so there are no surprises.",
                 },
                 {
                   q: "Is there a free trial or sandbox?",
-                  a: "Yes. All approved accounts receive a sandbox environment with 1,000 free test scans. The sandbox uses synthetic hash data — it will never return a real NCII match. Production access requires a paid plan.",
+                  a: "Yes. Every account gets sandbox credentials at signup. The sandbox accepts real API calls and returns realistic responses — no real NCII hashes are stored in the sandbox environment. Test freely before going live.",
                 },
               ].map((item, i) => (
                 <FaqItem key={i} q={item.q} a={item.a} />
@@ -1595,11 +1590,11 @@ if (match.action === 'block') {
               },
               {
                 q: "Are you actually integrated with StopNCII's database, or just PDQ-compatible?",
-                a: "Corvinth uses the same open-source Meta PDQ hashing algorithm that StopNCII uses, which means our hash format is compatible. We are an independent company and do not represent StopNCII or claim a formal data-sharing partnership unless one is announced. Our hash database is populated through our own intake process. We are transparent about this.",
+                a: "Corvinth syncs against the StopNCII hash feed. When a victim reports an image to StopNCII, that hash enters the shared database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network, not just complaints filed directly with you. We are an independent company and do not represent StopNCII.",
               },
               {
                 q: 'Does Corvinth ever see or store the actual images?',
-                a: "No. The Corvinth SDK runs on your infrastructure and computes the hash and vector locally. Only the hash or 384-dim vector — not image bytes — is sent to our API. The original image bytes never leave your servers. This is the architecture, not a promise that could change.",
+                a: "No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values.",
               },
               {
                 q: 'How small is "too small" to need this?',
@@ -1781,7 +1776,7 @@ if (match.action === 'block') {
                   fontSize: '11px', color: '#4A4A45',
                   fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
                 }}>
-                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$299 / month</b> · Enterprise plans available
+                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$99/mo</b> · Standard plans from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$299/mo</b>
                 </p>
               </>
             )}
