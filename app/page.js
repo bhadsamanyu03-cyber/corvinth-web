@@ -484,7 +484,7 @@ if (match.action === 'block') {
             </p>
             <div className="calc-cta-row">
               <span className="calc-corvinth-cost">
-                Corvinth costs from <b>$299/mo</b> to cover this.
+                Corvinth costs from <b>$99/mo</b> to cover this.
               </span>
               <a className="btn-primary" href="#contact">get protected →</a>
             </div>
