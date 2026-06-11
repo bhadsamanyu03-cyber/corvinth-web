@@ -558,9 +558,9 @@ hr { border: none; border-top: 0.5px solid var(--border); }
 }
 .proof-num {
   font-family: var(--font-display);
-  font-size: 28px; font-weight: 700;
-  color: var(--text); letter-spacing: -1px;
-  line-height: 1;
+  font-size: clamp(14px, 2vw, 22px); font-weight: 700;
+  color: var(--text); letter-spacing: -0.3px;
+  line-height: 1.2;
   margin-bottom: 4px;
 }
 .proof-label {
@@ -1132,27 +1132,7 @@ section { padding: 6rem 2.5rem; }
   margin-bottom: 1rem;
 }
 
-.email-subscribe {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 0;
-}
-.email-subscribe input {
-  flex: 1;
-  min-width: 200px;
-  padding: 11px 14px;
-  background: var(--bg);
-  border: 0.5px solid var(--border-mid);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.email-subscribe input:focus { border-color: var(--green); }
-.email-subscribe input::placeholder { color: var(--text-faint); }
+/* .email-subscribe removed — subscribe form replaced with mailto link (Fix 7) */
 
 /* ── MISC UI ─────────────────────────────────────────────────────────────── */
 .disclaimer-box {
@@ -1536,23 +1516,7 @@ svg.icon {
   font-style: normal;
   color: var(--green);
 }
-.victims-links {
-  display: flex;
-  gap: 1.25rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-}
-.victims-links a {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--green);
-  letter-spacing: 0.04em;
-  border-bottom: 0.5px solid var(--green-mid);
-  padding-bottom: 2px;
-  transition: color 0.15s, border-color 0.15s;
-}
-.victims-links a:hover { color: var(--green-dim); border-color: var(--green); }
+/* .victims-links removed — links deleted in Fix 4 */
 
 /* ── PULSE DASHBOARD MOCKUP ──────────────────────────────────────────────── */
 .pulse-complaint-row {
