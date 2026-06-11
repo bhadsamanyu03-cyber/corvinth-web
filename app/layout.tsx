@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Corvinth — Stop NCII Before It Reaches Your Users",
+  title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
   description:
-    "One API call. Scan every upload in under 200ms. Block known NCII re-uploads before they spread. TIDA compliant. Built for dating apps, social platforms, and creator tools.",
+    "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
   openGraph: {
-    title: "Corvinth — Stop NCII Before It Reaches Your Users",
+    title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
     description:
-      "One API call. Scan every upload in under 200ms. Block known NCII before it spreads.",
+      "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
     type: "website",
     url: "https://corvinth.com",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Corvinth — Stop NCII Before It Reaches Your Users",
+    title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
     description:
-      "One API call. Scan every upload in under 200ms. Block known NCII before it spreads.",
+      "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
   },
 };
 
