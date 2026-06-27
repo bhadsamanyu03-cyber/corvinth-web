@@ -1350,6 +1350,7 @@ svg.icon {
   /* Founding tier callout line — ensure it wraps and stays readable */
   #pricing p[style*="text-align: center"] { font-size: 11px !important; padding: 0 0.5rem; }
 }
+
 @media (max-width: 768px) {
   .api-grid { grid-template-columns: 1fr; }
   .confidence-grid { grid-template-columns: 1fr; }

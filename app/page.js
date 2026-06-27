@@ -3,200 +3,176 @@
 
 import { useState } from 'react';
 
-// ── API Demo component ────────────────────────────────────────────────────────
+// ── Samples for the live demo ─────────────────────────────────────────────────
 const SAMPLES = {
-  nomatch: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345",
+  nomatch:  "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345",
   nearmiss: "f1e2d3c4b5a6978685746352413029180f1e2d3c4b5a697868574635241302918",
 };
-
 function randomHex64() {
   return Array.from({ length: 64 }, () =>
     "0123456789abcdef"[Math.floor(Math.random() * 16)]
   ).join("");
 }
 
+// ── Live API Demo ─────────────────────────────────────────────────────────────
 function ApiDemo() {
-  const [hash, setHash] = useState("");
-  const [source, setSource] = useState("");
+  const [hash,     setHash]     = useState("");
+  const [source,   setSource]   = useState("");
   const [response, setResponse] = useState("// response will appear here");
-  const [status, setStatus] = useState("idle");
-  const [latency, setLatency] = useState("");
+  const [status,   setStatus]   = useState("idle");
+  const [latency,  setLatency]  = useState("");
 
   async function runDemo() {
-    if (!hash || hash.length < 16) {
+    if (!hash || hash.length !== 64) {
       setStatus("error");
-      setResponse("// enter a PDQ hash first");
+      setResponse("// hash must be exactly 64 hex characters");
       return;
     }
     setStatus("loading");
-    setResponse("// querying match engine…");
+    setResponse("// querying Corvinth match engine…");
     setLatency("");
     const t0 = performance.now();
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/demo/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 400,
-          system: `You are the Corvinth sandbox match engine. When given a PDQ hash respond with ONLY valid JSON — no preamble, no markdown, no backticks. Include exactly: case_uuid (string starting with cse_), match_found (boolean), classification (one of NONE EXACT NEAR_MATCH LIKELY_DERIVATIVE), action (one of allow block review), hamming_distance (integer 0-255, high value if no match), confidence_score (float 0.0-1.0), pipeline_2_queued (boolean), source_tag (string), timestamp (ISO 8601). For test/sample/random hashes set match_found false, classification NONE, action allow. Vary responses realistically.`,
-          messages: [
-            {
-              role: "user",
-              content: `Check this PDQ hash: ${hash}\nSource: ${source || "demo"}`,
-            },
-          ],
-        }),
+        body: JSON.stringify({ pdq_hash: hash.trim().toLowerCase(), source: source || "demo" }),
       });
       const ms = Math.round(performance.now() - t0);
-      const data = await res.json();
-      const raw = data.content.map((b) => b.text || "").join("");
-      let parsed;
-      try {
-        parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-      } catch {
-        parsed = { raw_response: raw };
+      if (res.status === 429) {
+        setResponse("// Rate limit reached — try again in a minute.");
+        setLatency(`${ms}ms`); setStatus("error"); return;
       }
-      setResponse(JSON.stringify(parsed, null, 2));
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setResponse(`// error ${res.status}: ${err.detail || res.statusText}`);
+        setLatency(`${ms}ms`); setStatus("error"); return;
+      }
+      const data = await res.json();
+      setResponse(JSON.stringify(data, null, 2));
       setLatency(`${ms}ms`);
-      setStatus(parsed.match_found ? "match" : "ok");
+      setStatus(data.match_found ? "match" : "ok");
     } catch (err) {
       const ms = Math.round(performance.now() - t0);
-      setResponse(`// error: ${err instanceof Error ? err.message : String(err)}`);
-      setLatency(`${ms}ms`);
-      setStatus("error");
+      setResponse(
+        `// Network error: ${err.message}\n//\n// The sandbox runs on Render's free tier.\n// First request may take ~10s while the server wakes up. Try again.`
+      );
+      setLatency(`${ms}ms`); setStatus("error");
     }
   }
 
   const statusLabel = {
-    idle: "waiting for input",
-    loading: "running lookup…",
-    ok: "no match · allow ✓",
-    match: "match found · blocked 🚫",
-    error: "request failed",
+    idle:    "waiting for input",
+    loading: "querying engine…",
+    ok:      "no match · allow ✓",
+    match:   "match found · blocked 🚫",
+    error:   "request failed",
   }[status];
 
   const dotColor = {
-    idle: "#4A4A45",
-    loading: "#FFB224",
-    ok: "#00E59B",
-    match: "#FF4D4D",
-    error: "#FF4D4D",
+    idle: "#4A4A45", loading: "#FFB224",
+    ok: "#00E59B",  match: "#FF4D4D", error: "#FF4D4D",
   }[status];
 
+  function syntaxHighlight(str) {
+    if (str.startsWith("//")) return `<span style="color:#4A4A45">${str.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+    return str.replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"([^"]+)":/g, '<span style="color:#00E59B">"$1"</span>:')
+      .replace(/: "(.*?)"/g,  ': <span style="color:#FFB224">"$1"</span>')
+      .replace(/: (true|false)/g, ': <span style="color:#4D9EFF">$1</span>')
+      .replace(/: (null)/g,       ': <span style="color:#4A4A45">$1</span>')
+      .replace(/: (-?\d+\.?\d*)/g,': <span style="color:#4D9EFF">$1</span>');
+  }
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', width: '100%', textAlign: 'left' }}>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px,1fr))', gap:'1rem', width:'100%', textAlign:'left' }}>
       {/* Input panel */}
-      <div style={{ borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', background: '#0a0a08', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <p style={{ fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono', monospace" }}>Input — PDQ hash</p>
+      <div style={{ borderRadius:'12px', border:'0.5px solid rgba(255,255,255,0.08)', background:'#0a0a08', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
+        <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Input — PDQ hash</p>
         <textarea
-          style={{ width: '100%', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', background: '#060605', border: '0.5px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '10px 12px', color: '#F0EFE8', resize: 'vertical', minHeight: '88px', outline: 'none', letterSpacing: '0.02em' }}
-          placeholder="Paste a 64-char hex PDQ hash, or pick a sample below…"
-          value={hash}
-          onChange={(e) => setHash(e.target.value)}
-          spellCheck={false}
+          style={{ width:'100%', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'8px', padding:'10px 12px', color:'#F0EFE8', resize:'vertical', minHeight:'88px', outline:'none' }}
+          placeholder="Paste a 64-char hex PDQ hash…"
+          value={hash} onChange={e => setHash(e.target.value)} spellCheck={false}
         />
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {["nomatch", "nearmiss", "random"].map((s) => (
-            <button
-              key={s}
-              onClick={() => setHash(s === "random" ? randomHex64() : SAMPLES[s])}
-              style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', border: '0.5px solid rgba(255,255,255,0.10)', background: 'transparent', color: '#8C8B84', cursor: 'pointer', fontFamily: "'JetBrains Mono', monospace' ", transition: 'all 0.15s' }}
-            >
+        <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
+          {["nomatch","nearmiss","random"].map(s => (
+            <button key={s} onClick={() => setHash(s === "random" ? randomHex64() : SAMPLES[s])}
+              style={{ fontSize:'11px', padding:'4px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'transparent', color:'#8C8B84', cursor:'pointer', fontFamily:'inherit' }}>
               {s === "nomatch" ? "no match sample" : s === "nearmiss" ? "near-miss sample" : "random"}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <p style={{ fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono', monospace" }}>Source tag (optional)</p>
-          <input
-            type="text"
-            placeholder="profile_photo"
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            style={{ width: '100%', fontSize: '13px', background: '#060605', border: '0.5px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '8px 12px', color: '#F0EFE8', outline: 'none' }}
-          />
+        <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+          <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Source tag (optional)</p>
+          <input type="text" placeholder="profile_photo" value={source} onChange={e => setSource(e.target.value)}
+            style={{ width:'100%', fontSize:'13px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'8px', padding:'8px 12px', color:'#F0EFE8', outline:'none', fontFamily:'inherit' }} />
         </div>
-        <button
-          onClick={runDemo}
-          disabled={status === "loading"}
-          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.12)', background: 'transparent', fontSize: '13px', color: '#F0EFE8', cursor: status === "loading" ? 'not-allowed' : 'pointer', opacity: status === "loading" ? 0.5 : 1, transition: 'all 0.15s', fontFamily: 'inherit' }}
-        >
-          {status === "loading" ? "running…" : "Run sub-linear lookup →"}
+        <button onClick={runDemo} disabled={status === "loading"}
+          style={{ width:'100%', padding:'10px', borderRadius:'8px', border:'0.5px solid rgba(255,255,255,0.12)', background:'transparent', fontSize:'13px', color:'#F0EFE8', cursor: status === "loading" ? 'not-allowed' : 'pointer', opacity: status === "loading" ? 0.6 : 1, fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
+          {status === "loading" ? (
+            <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>querying…</>
+          ) : "Run sub-linear lookup →"}
         </button>
-        <p style={{ fontSize: '11px', color: '#4A4A45', lineHeight: 1.6, fontFamily: "'JetBrains Mono', monospace" }}>
-          Sandbox only. No real NCII hashes stored — safe to test freely.
+        <p style={{ fontSize:'11px', color:'#4A4A45', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace" }}>
+          Live sandbox · first request may take ~10s (Render cold start)
         </p>
       </div>
-
       {/* Response panel */}
-      <div style={{ borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', background: '#0a0a08', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: dotColor, flexShrink: 0, transition: 'background 0.3s' }} />
-          <span style={{ fontSize: '12px', color: '#8C8B84', fontFamily: "'JetBrains Mono', monospace" }}>{statusLabel}</span>
-          {latency && (
-            <span style={{ marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#4A4A45' }}>{latency}</span>
-          )}
+      <div style={{ borderRadius:'12px', border:'0.5px solid rgba(255,255,255,0.08)', background:'#0a0a08', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'0.75rem' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+          <span style={{ width:'8px', height:'8px', borderRadius:'50%', background:dotColor, flexShrink:0, transition:'background 0.3s' }}/>
+          <span style={{ fontSize:'12px', color:'#8C8B84', fontFamily:"'JetBrains Mono',monospace" }}>{statusLabel}</span>
+          {latency && <span style={{ marginLeft:'auto', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>{latency}</span>}
         </div>
-        <p style={{ fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono', monospace" }}>Response</p>
-        <pre style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#8C8B84', background: '#060605', borderRadius: '8px', padding: '12px', minHeight: '200px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', lineHeight: 1.7, overflow: 'auto', flex: 1 }}>
-          {response}
-        </pre>
+        <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Response</p>
+        <pre style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', background:'#060605', borderRadius:'8px', padding:'12px', minHeight:'200px', whiteSpace:'pre-wrap', wordBreak:'break-all', lineHeight:1.7, overflow:'auto', flex:1 }}
+          dangerouslySetInnerHTML={{ __html: syntaxHighlight(response) }} />
       </div>
     </div>
   );
 }
 
+// ── FAQ accordion ─────────────────────────────────────────────────────────────
+function FaqItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`faq-item${open ? ' faq-open' : ''}`}>
+      <button className="faq-q" onClick={() => setOpen(!open)}>
+        <span>{q}</span>
+        <svg className="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      {open && <div className="faq-a"><p>{a}</p></div>}
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [hashInput, setHashInput] = useState('a1b2c3d4e5f6...');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [subscribeEmail, setSubscribeEmail] = useState('');
-  const [subscribeStatus, setSubscribeStatus] = useState('idle');
-
-  // Liability calculator
-  const [uploadsPerMonth, setUploadsPerMonth] = useState(500000);
-  const nciiRate = 0.001;
-  const finePerViolation = 53088;
-  const estimatedExposure = Math.round(uploadsPerMonth * nciiRate * finePerViolation);
-
-  // API tab state (Shield / Pulse)
-  const [apiTab, setApiTab] = useState('shield');
-
-  // How it works tab state
-  const [howTab, setHowTab] = useState('shield');
+  const [apiTab,  setApiTab]  = useState('shield');
+  const [howTab,  setHowTab]  = useState('shield');
 
   // Waitlist form
   const [form, setForm] = useState({
-    contact_name: '',
-    work_email: '',
-    company_name: '',
-    platform_url: '',
-    platform_type: '',
-    monthly_upload_volume: '',
-    referral_source: '',
-    use_case: '',
-    pipeline_choice: '',
+    contact_name: '', work_email: '', company_name: '', platform_url: '',
+    platform_type: '', monthly_upload_volume: '', referral_source: '',
+    use_case: '', pipeline_choice: '',
   });
   const [formStatus, setFormStatus] = useState('idle');
-  const [formError, setFormError] = useState('');
-
-  const handleFormChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
+  const [formError,  setFormError]  = useState('');
+  const handleFormChange = e => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleFormSubmit = async () => {
     setFormError('');
-    if (!form.contact_name || !form.work_email || !form.company_name || !form.platform_url || !form.platform_type || !form.monthly_upload_volume) {
-      setFormError('Please fill in all required fields.');
-      return;
+    if (!form.contact_name || !form.work_email || !form.company_name ||
+        !form.platform_url || !form.platform_type || !form.monthly_upload_volume) {
+      setFormError('Please fill in all required fields.'); return;
     }
     setFormStatus('submitting');
     try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/waitlist`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
@@ -210,351 +186,679 @@ export default function Home() {
     }
   };
 
-  // Valid 64-char PDQ hex hash used as default demo input
-  const DEMO_HASH = 'f8d4a2b1e5c3907f6a4d8b2e1c5f3a9d7e2b4c8f1a6d3b9e4c2f7a5d1b8e6c4';
-
-  const simulateCheck = async () => {
-    setLoading(true);
-    setResult(null);
-    try {
-      // Use the hash if it looks valid (64 hex chars), otherwise use the demo hash
-      const hashToCheck = /^[0-9a-fA-F]{64}$/.test(hashInput) ? hashInput : DEMO_HASH;
-      const response = await fetch('/api/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pdq_hash: hashToCheck,
-          pdq_dihedral_hashes: Array(8).fill(hashToCheck),
-        }),
-      });
-      const data = await response.json();
-      setResult(data);
-    } catch (error) {
-      // Fallback mock if API is unreachable (e.g. cold start)
-      setResult({
-        case_uuid: 'cse_demo_' + Math.random().toString(36).slice(2, 10),
-        match_found: false,
-        classification: 'CLEAN',
-        action: 'content_allowed',
-        hamming_distance: null,
-        pipeline_2_queued: false,
-        _note: 'demo — api warming up',
-      });
-    }
-    setLoading(false);
-  };
-
-  const formatExposure = (n) => {
-    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `$${(n / 1000).toFixed(0)}K`;
+  // Liability calculator
+  const [uploadsPerMonth, setUploadsPerMonth] = useState(500000);
+  const [violationRate,   setViolationRate]   = useState(0.001);
+  const finePerViolation   = 53088;
+  const hypotheticalViolations = Math.round(uploadsPerMonth * violationRate);
+  const estimatedExposure      = Math.round(hypotheticalViolations * finePerViolation);
+  const violationRateLabel = violationRate === 0.0001 ? '0.01%' : violationRate === 0.001 ? '0.1%' : '1%';
+  const formatExposure = n => {
+    if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `$${(n/1_000).toFixed(0)}K`;
     return `$${n}`;
-  };
-
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    if (!subscribeEmail || !subscribeEmail.includes('@')) return;
-    setSubscribeStatus('submitting');
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contact_name: 'Subscriber',
-          work_email: subscribeEmail,
-          company_name: 'Unknown',
-          platform_url: 'https://unknown.com',
-          platform_type: 'other',
-          monthly_upload_volume: 'under_10k',
-          referral_source: 'regulatory_updates_subscribe',
-        }),
-      });
-      // Treat both success and duplicate (already subscribed) as OK
-      setSubscribeStatus('success');
-    } catch {
-      setSubscribeStatus('success'); // Never show error — silent fail is fine here
-    }
   };
 
   return (
     <>
-      {/* Metadata handled in layout.tsx via Next.js App Router metadata export */}
-
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <nav>
         <a className="logo" href="#">cor<span className="accent">vinth</span></a>
         <div className="nav-right">
+          <a className="btn-ghost" href="#how">how it works</a>
           <a className="btn-ghost" href="#shield">shield</a>
           <a className="btn-ghost" href="#pulse">pulse</a>
-          <a className="btn-ghost" href="#how">how it works</a>
           <a className="btn-ghost" href="#pricing">pricing</a>
           <a className="btn-ghost" href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
           <a className="btn-primary" href="#contact">request access</a>
-          <button
-            className={`hamburger${mobileMenuOpen ? ' open' : ''}`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
+          <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+            <span/><span/><span/>
           </button>
         </div>
       </nav>
 
       {/* ── MOBILE MENU ──────────────────────────────────────────────────────── */}
       <div className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
-        <a href="#shield" onClick={() => setMobileMenuOpen(false)}>Shield</a>
-        <a href="#pulse" onClick={() => setMobileMenuOpen(false)}>Pulse</a>
-        <a href="#how" onClick={() => setMobileMenuOpen(false)}>How it works</a>
+        <a href="#how"     onClick={() => setMobileMenuOpen(false)}>How it works</a>
+        <a href="#shield"  onClick={() => setMobileMenuOpen(false)}>Shield</a>
+        <a href="#pulse"   onClick={() => setMobileMenuOpen(false)}>Pulse</a>
         <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
         <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
         <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access →</a>
       </div>
 
-      {/* ── NOTICE BAR ───────────────────────────────────────────────────────── */}
-      <div className="notice">
-        The FTC now enforces TIDA — <b>$53,088 per violation</b> for platforms that fail to remove NCII within 48 hours. Effective May 19, 2026.
-      </div>
-
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <div className="hero">
+      <div className="hero" style={{ paddingTop: '8rem' }}>
         <div className="badge">
-          <svg className="icon" style={{ width: '10px', height: '10px', fill: 'currentColor', stroke: 'none' }} viewBox="0 0 24 24">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <svg className="icon" style={{ width:'10px', height:'10px', fill:'currentColor', stroke:'none' }} viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           TIDA compliant · PDQ perceptual hashing · DINOv2 semantic matching · audit-ready
         </div>
         <h1>
-          Stop known NCII<br />
-          before it <em>spreads — or evolves.</em>
+          Protect your platform<br />
+          from known NCII —<br />
+          <em>before it spreads.</em>
         </h1>
-        <p>One API. Two pipelines. Shield matches known hashes in 72ms. Pulse catches edited variants, direct complaints, and semantic near-duplicates that no hash can find.</p>
+        <p>
+          Privacy-first image safety infrastructure for platforms with user-generated content.
+          Deploy in an afternoon. No images ever leave your servers.
+        </p>
 
-        {/* ── INLINE CODE SNIPPET ── */}
+        {/* Hero code snippet */}
         <div className="hero-snippet">
           <div className="snippet-header">
-            <span className="snippet-dot"></span>
-            <span className="snippet-dot"></span>
-            <span className="snippet-dot"></span>
+            <span className="snippet-dot"/><span className="snippet-dot"/><span className="snippet-dot"/>
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
           <pre className="snippet-body">{`const { match } = await corvinth.check({
-  image: req.file.buffer,   // your upload buffer
+  pdq_hash:             hash,       // 64-char hex, computed by SDK
+  pdq_dihedral_hashes: variants,   // all 8 orientations
   source: 'profile_photo'
 });
 
-if (match.action === 'block') {
+if (match.action === 'content_removed') {
   return res.status(403).json({ blocked: true });
 }
-// → { case_uuid, action, classification, ms: 72 }`}</pre>
+// → { case_uuid, action, classification, hamming_distance }`}</pre>
         </div>
 
         <div className="hero-cta">
           <a className="btn-primary lg" href="#contact">request early access</a>
-          <a className="btn-ghost lg" href="#shield">see both pipelines</a>
+          <a className="btn-ghost lg"   href="#how">see how it works</a>
         </div>
       </div>
 
-      {/* ── STOPNCII DIFFERENTIATOR CALLOUT ──────────────────────────────────── */}
-      <div className="stopncii-callout">
-        <div className="stopncii-icon">
-          <svg className="icon" viewBox="0 0 24 24" style={{ width: '20px', height: '20px' }}>
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-          </svg>
+      {/* ── BUILT FOR — self-identification ──────────────────────────────────── */}
+      <section style={{ padding:'0 2.5rem 5rem', background:'var(--bg)' }}>
+        <div className="inner" style={{ textAlign:'center' }}>
+          <p style={{ fontSize:'10px', color:'var(--text-faint)', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'var(--font-mono)', marginBottom:'2rem' }}>Built for</p>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', justifyContent:'center' }}>
+            {['Dating Apps','Social Platforms','Creator Platforms','AI Communities','Messaging Apps','Adult Content Platforms'].map(type => (
+              <div key={type} style={{ padding:'10px 20px', borderRadius:'999px', border:'0.5px solid var(--border-mid)', background:'var(--bg-card)', fontSize:'13px', color:'var(--text-muted)', fontFamily:'var(--font-mono)', letterSpacing:'0.02em' }}>
+                {type}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="stopncii-body">
-          <div className="stopncii-label">Key differentiator</div>
-          <h3>We match against real reported NCII hashes — not generic nudity detection.</h3>
-          <p>Corvinth uses the same open-source PDQ perceptual hashing algorithm as StopNCII.org. That means your platform can match against the fingerprints of actual images reported by survivors — not a classifier guessing what looks explicit. A photo of a person on a beach is not a violation. A specific image that was reported by a victim is.</p>
-        </div>
-      </div>
+      </section>
 
-      {/* ── SOCIAL PROOF / SDK STRIP ─────────────────────────────────────────── */}
-      <div className="social-strip">
-        <div className="social-strip-label">SDK available for</div>
-        <div className="social-logos">
-          {['Node.js', 'Python', 'Go', 'Ruby', 'PHP', 'AWS Lambda'].map(tech => (
-            <div key={tech} className="social-logo-item">{tech}</div>
-          ))}
+      {/* ── TRUSTED ARCHITECTURE — zero-knowledge flow ───────────────────────── */}
+      <section style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
+        <div className="inner" style={{ maxWidth:'760px', textAlign:'center' }}>
+          <p className="section-tag">trusted architecture</p>
+          <h2 className="section-title">No images ever leave your infrastructure.</h2>
+          <p className="section-sub" style={{ margin:'0 auto 3rem' }}>
+            The SDK runs entirely on your servers. Only a 256-bit hash crosses the network — never pixels. This is the architecture, not a configuration option.
+          </p>
+          {/* Flow diagram */}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flexWrap:'wrap', gap:'0', margin:'0 auto', maxWidth:'680px' }}>
+            {[
+              { label:'Image', sub:'your server', color:'var(--text-muted)' },
+              null,
+              { label:'SDK', sub:'runs locally', color:'var(--green)' },
+              null,
+              { label:'PDQ Hash', sub:'256 bits only', color:'var(--green)' },
+              null,
+              { label:'Corvinth', sub:'match engine', color:'var(--text-muted)' },
+              null,
+              { label:'Decision', sub:'<100ms', color:'var(--green)' },
+            ].map((step, i) =>
+              step === null ? (
+                <span key={i} style={{ color:'var(--text-faint)', fontSize:'18px', padding:'0 6px', userSelect:'none' }}>→</span>
+              ) : (
+                <div key={i} style={{ padding:'14px 18px', borderRadius:'10px', border:`0.5px solid ${step.color === 'var(--green)' ? 'rgba(0,229,155,0.25)' : 'var(--border)'}`, background: step.color === 'var(--green)' ? 'rgba(0,229,155,0.06)' : 'var(--bg-off)', textAlign:'center', minWidth:'90px' }}>
+                  <div style={{ fontSize:'13px', fontWeight:600, color: step.color, fontFamily:'var(--font-mono)', letterSpacing:'0.01em' }}>{step.label}</div>
+                  <div style={{ fontSize:'10px', color:'var(--text-faint)', marginTop:'3px', fontFamily:'var(--font-mono)' }}>{step.sub}</div>
+                </div>
+              )
+            )}
+          </div>
+          <div style={{ marginTop:'2.5rem', display:'flex', alignItems:'center', justifyContent:'center', gap:'2.5rem', flexWrap:'wrap' }}>
+            {[
+              '0 pixels sent to Corvinth',
+              'GDPR & TIDA compliant by design',
+              'No configuration required',
+            ].map(item => (
+              <div key={item} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'var(--text-muted)' }}>
+                <span style={{ color:'var(--green)', fontSize:'15px' }}>✓</span>
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── FLOW DIAGRAM — TWO PIPELINES ─────────────────────────────────────── */}
-      <div className="pipeline-flows">
-        {/* Shield row */}
-        <div className="pipeline-row">
-          <span className="pipeline-label shield">Shield</span>
-          {['Every upload', 'PDQ hash (local SDK)', 'VP-Tree match', 'Allow · Review · Block'].map((step, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                padding: '9px 16px',
-                background: i === 3 ? 'rgba(0,229,155,0.08)' : '#0e0e0c',
-                border: `0.5px solid ${i === 3 ? 'rgba(0,229,155,0.25)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: '8px',
-                fontSize: '12px',
-                color: i === 3 ? '#00E59B' : '#8C8B84',
-                fontFamily: "'JetBrains Mono', monospace",
-                whiteSpace: 'nowrap',
-                letterSpacing: '0.01em',
-              }}>{step}</div>
-              {i < 3 && <span style={{ color: '#2a2a25', fontSize: '14px', userSelect: 'none' }}>→</span>}
+      <hr/>
+
+      {/* ── WHY CORVINTH — outcomes not features ─────────────────────────────── */}
+      <section style={{ padding:'6rem 2.5rem' }}>
+        <div className="inner">
+          <p className="section-tag">why corvinth</p>
+          <h2 className="section-title">Save six months of engineering.</h2>
+          <p className="section-sub">
+            Building NCII detection from scratch means VP-Trees, perceptual hashing, semantic embeddings, audit logging, and a compliance workflow. That&apos;s a full sprint. Corvinth is the version that ships this afternoon.
+          </p>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:'1px', background:'var(--border)', border:'0.5px solid var(--border)', borderRadius:'var(--radius-xl)', overflow:'hidden', marginTop:'2.5rem' }}>
+            {[
+              {
+                outcome: 'Deploy this afternoon.',
+                detail:  'One API endpoint in your upload pipeline. The SDK computes hashes on your server. No infrastructure changes required.',
+                icon: <svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>,
+              },
+              {
+                outcome: 'Catch edits, crops, rotations.',
+                detail:  'Pulse uses DINOv2 semantic vectors to match heavily edited variants that simple hash matching misses entirely.',
+                icon: <svg className="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+              },
+              {
+                outcome: 'FTC audit log, out of the box.',
+                detail:  'Every decision receives a cryptographically chained audit entry. Exportable for FTC review at any time.',
+                icon: <svg className="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+              },
+              {
+                outcome: 'Your policy. Our signal.',
+                detail:  'Corvinth returns allow / review / block. You decide what happens next. We are the detection layer, not the decision maker.',
+                icon: <svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+              },
+            ].map((card, i) => (
+              <div key={i} className="usecase">
+                <div className="usecase-icon">{card.icon}</div>
+                <h4>{card.outcome}</h4>
+                <p>{card.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── HOW IT WORKS — 5-step integration ────────────────────────────────── */}
+      <section id="how" style={{ padding:'6rem 2.5rem', background:'var(--bg-off)' }}>
+        <div className="inner" style={{ maxWidth:'680px' }}>
+          <p className="section-tag">integration</p>
+          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
+          <p className="section-sub">
+            This isn&apos;t a multi-sprint project. Most teams are fully integrated in a single working day.
+          </p>
+
+          {/* 5-step flow */}
+          <div style={{ display:'flex', flexDirection:'column', gap:'0', marginBottom:'3rem' }}>
+            {[
+              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js, Python, Go, Ruby, PHP available.' },
+              { n:'02', label:'Compute PDQ locally', body:'The SDK hashes the image on your server. All 8 orientations in one call. No pixels leave your infrastructure.' },
+              { n:'03', label:'POST the hash',       body:'Send the 64-char hex hash to POST /hash/check with your API key. Under 100ms round-trip.' },
+              { n:'04', label:'Receive decision',    body:'allow · review · block — with a case UUID and optional Hamming distance for audit.' },
+              { n:'05', label:'Enforce your policy', body:'Act on the decision in your upload handler. Corvinth fires your webhook automatically for exact matches.' },
+            ].map((step, i, arr) => (
+              <div key={i} className="tl-item">
+                {i < arr.length - 1 && <div className="tl-line"/>}
+                <div className="tl-dot">{step.n}</div>
+                <div className="tl-content">
+                  <h3>{step.label}</h3>
+                  <p>{step.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* How it works tabs — Shield / Pulse detail */}
+          <div className="tab-bar" style={{ marginBottom:'2rem' }}>
+            <button className={`tab-btn${howTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setHowTab('shield')}>Flow A — Shield</button>
+            <button className={`tab-btn${howTab === 'pulse'  ? ' active-pulse'  : ''}`} onClick={() => setHowTab('pulse')}>Flow B — Pulse</button>
+          </div>
+
+          {howTab === 'shield' ? (
+            <div className="timeline">
+              {[
+                { n:'01', title:'Normalize on your server',      body:'The SDK handles EXIF orientation, resizing, compression — all locally. No pixels sent anywhere.' },
+                { n:'02', title:'Generate 8 PDQ fingerprints',   body:'Meta PDQ produces fingerprints for all 8 orientations simultaneously. Rotation and re-encoding are tolerated by design.' },
+                { n:'03', title:'Match against NCII database',   body:"Hash sent to Corvinth's API. VP-Tree Hamming-distance lookup across all orientations. Under 100ms." },
+                { n:'04', title:'Decision returned to you',      body:'allow / review / block — plus a case UUID, classification tier, and Hamming distance for your audit log.' },
+              ].map((s, i, arr) => (
+                <div key={s.n} className="tl-item">
+                  {i < arr.length-1 && <div className="tl-line"/>}
+                  <div className="tl-dot">{s.n}</div>
+                  <div className="tl-content"><h3>{s.title}</h3><p>{s.body}</p></div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        {/* Pulse row */}
-        <div className="pipeline-row">
-          <span className="pipeline-label pulse">Pulse</span>
-          {['Direct report', 'DINOv2 vector (local SDK)', 'Qdrant cosine', 'Semantic match'].map((step, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                padding: '9px 16px',
-                background: i === 3 ? 'rgba(77,158,255,0.08)' : '#0e0e0c',
-                border: `0.5px solid ${i === 3 ? 'rgba(77,158,255,0.25)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: '8px',
-                fontSize: '12px',
-                color: i === 3 ? '#4D9EFF' : '#8C8B84',
-                fontFamily: "'JetBrains Mono', monospace",
-                whiteSpace: 'nowrap',
-                letterSpacing: '0.01em',
-              }}>{step}</div>
-              {i < 3 && <span style={{ color: '#2a2a25', fontSize: '14px', userSelect: 'none' }}>→</span>}
+          ) : (
+            <div className="timeline">
+              {[
+                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint via the Corvinth-integrated intake flow. No external submission required.' },
+                { n:'02', title:'SDK computes DINOv2 locally',    body:'384-dimensional semantic vector generated on your infrastructure. Original pixels never leave your server.' },
+                { n:'03', title:'Vector stored in registry',      body:"Only the vector and complaint metadata reach Corvinth's API. Becomes active for all future upload matching." },
+                { n:'04', title:'Future uploads matched',         body:'Cosine similarity against registered complaint vectors. Heavy crops, arbitrary rotations, semantic variants — all caught.' },
+              ].map((s, i, arr) => (
+                <div key={s.n} className="tl-item">
+                  {i < arr.length-1 && <div className="tl-line"/>}
+                  <div className="tl-dot" style={{ borderColor:'rgba(77,158,255,0.4)', color:'#4D9EFF' }}>{s.n}</div>
+                  <div className="tl-content"><h3>{s.title}</h3><p>{s.body}</p></div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      </div>
+      </section>
 
-      <hr />
+      <hr/>
 
       {/* ── PROOF STRIP ──────────────────────────────────────────────────────── */}
       <div className="proof">
-        <div className="proof-item">
-          <div className="proof-num">$53,088</div>
-          <div className="proof-label">FTC fine per violation · TIDA</div>
-        </div>
         <div className="proof-item">
           <div className="proof-num">&lt;100ms</div>
           <div className="proof-label">Shield decision latency</div>
         </div>
         <div className="proof-item">
-          <div className="proof-num">crops + rotations caught</div>
-          <div className="proof-label">what PDQ alone cannot reach · Pulse</div>
-        </div>
-        <div className="proof-item">
           <div className="proof-num">0 pixels</div>
           <div className="proof-label">never stored on Corvinth servers</div>
         </div>
+        <div className="proof-item">
+          <div className="proof-num">crops + rotations</div>
+          <div className="proof-label">caught by Pulse · what PDQ alone cannot reach</div>
+        </div>
+        <div className="proof-item">
+          <div className="proof-num">1 afternoon</div>
+          <div className="proof-label">typical integration time</div>
+        </div>
       </div>
 
-      <hr />
+      <hr/>
 
-      {/* ── LIABILITY CALCULATOR ─────────────────────────────────────────────── */}
-      <section id="calculator" style={{ background: '#060605', padding: '6rem 2.5rem' }}>
-        <div className="inner-sm" style={{ textAlign: 'center' }}>
-          <p className="section-tag">exposure calculator</p>
-          <h2 className="section-title">What&apos;s your platform&apos;s risk?</h2>
-          <p style={{ fontSize: '15px', color: '#8C8B84', marginBottom: '2.5rem', fontWeight: 300, lineHeight: 1.75 }}>
-            Slide to your monthly upload volume. See your worst-case FTC exposure under TIDA.
-          </p>
-          <div className="calc-box">
-            <div className="calc-top">
-              <div className="calc-label">Monthly uploads</div>
-              <div className="calc-value">{uploadsPerMonth.toLocaleString()}</div>
+      {/* ── STOPNCII DIFFERENTIATOR ───────────────────────────────────────────── */}
+      <div className="stopncii-callout">
+        <div className="stopncii-icon">
+          <svg className="icon" viewBox="0 0 24 24" style={{ width:'20px', height:'20px' }}>
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+          </svg>
+        </div>
+        <div className="stopncii-body">
+          <div className="stopncii-label">Key differentiator</div>
+          <h3>We match against real reported NCII hashes — not generic nudity detection.</h3>
+          <p>Corvinth syncs against the StopNCII PDQ hash feed. When a victim reports an image, their fingerprint enters the database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network. A photo on a beach is not a violation. A specific image reported by a victim is.</p>
+        </div>
+      </div>
+
+      {/* ── SDK STRIP ─────────────────────────────────────────────────────────── */}
+      <div className="social-strip">
+        <div className="social-strip-label">SDK available for</div>
+        <div className="social-logos">
+          {['Node.js','Python','Go','Ruby','PHP','AWS Lambda'].map(tech => (
+            <div key={tech} className="social-logo-item">{tech}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PIPELINE FLOW DIAGRAM ─────────────────────────────────────────────── */}
+      <div className="pipeline-flows">
+        <div className="pipeline-row">
+          <span className="pipeline-label shield">Shield</span>
+          {['Every upload','PDQ hash (local SDK)','VP-Tree match','Allow · Review · Block'].map((step,i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(0,229,155,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(0,229,155,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#00E59B' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
+              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
             </div>
-            <input
-              type="range"
-              min="10000"
-              max="5000000"
-              step="10000"
-              value={uploadsPerMonth}
-              onChange={(e) => setUploadsPerMonth(Number(e.target.value))}
-              className="calc-slider"
-            />
-            <div className="calc-ticks">
-              <span>10K</span><span>500K</span><span>1M</span><span>5M</span>
+          ))}
+        </div>
+        <div className="pipeline-row">
+          <span className="pipeline-label pulse">Pulse</span>
+          {['Direct report','DINOv2 vector (local SDK)','Qdrant cosine','Semantic match'].map((step,i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(77,158,255,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(77,158,255,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#4D9EFF' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
+              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
             </div>
-            <div className="calc-result">
-              <div className="calc-result-label">Estimated max FTC exposure</div>
-              <div className="calc-result-num">{formatExposure(estimatedExposure)}</div>
-              <div className="calc-result-sub">
-                {Math.round(uploadsPerMonth * nciiRate).toLocaleString()} hypothetical violations · $53,088 each
+          ))}
+        </div>
+      </div>
+
+      <hr/>
+
+      {/* ── SHIELD DASHBOARD MOCKUP ───────────────────────────────────────────── */}
+      <section id="shield" className="bg-section">
+        <div className="inner" style={{ maxWidth:'980px' }}>
+          <p className="section-tag">shield — hash matching</p>
+          <h2 className="section-title">What your team sees every day.</h2>
+          <p className="section-sub">A real-time view of every scan decision — matches, blocks, and review queue items — with a full audit trail behind every case.</p>
+          <div style={{ background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
+            <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#00E59B', boxShadow:'0 0 6px rgba(0,229,155,0.6)' }}/>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / shield · TestDating</span>
               </div>
+              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>live</span>
             </div>
-            <p style={{ fontSize: '11px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace", textAlign: 'center', marginBottom: '1.25rem', letterSpacing: '0.02em' }}>
-              Planning tool only — enter your own upload volume to estimate exposure under TIDA
-            </p>
-            <div className="calc-cta-row">
-              <span className="calc-corvinth-cost">
-                Corvinth costs from <b>$99/mo</b> to cover this.
-              </span>
-              <a className="btn-primary" href="#contact">get protected →</a>
+            <div className="dashboard-grid">
+              <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>Recent decisions</div>
+                {[
+                  { id:'CASE-3829', label:'EXACT',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'0',  time:'2s ago' },
+                  { id:'CASE-3830', label:'FUZZY',     status:'Review',  color:'#FFB224', bg:'rgba(255,178,36,0.07)', dist:'6',  time:'14s ago' },
+                  { id:'CASE-3831', label:'EXACT',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'0',  time:'41s ago' },
+                  { id:'CASE-3832', label:'NEAR_MISS', status:'Review',  color:'#FFB224', bg:'rgba(255,178,36,0.07)', dist:'14', time:'1m ago' },
+                  { id:'CASE-3833', label:'FUZZY',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'3',  time:'2m ago' },
+                  { id:'CASE-3834', label:'CLEAN',     status:'Allowed', color:'#00E59B', bg:'rgba(0,229,155,0.07)',  dist:'—',  time:'3m ago' },
+                ].map(c => (
+                  <div key={c.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:'8px', marginBottom:'4px', background:c.bg, border:`0.5px solid ${c.color}1A` }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#8C8B84' }}>{c.id}</span>
+                      <span style={{ fontSize:'10px', fontWeight:500, color:c.color, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.04em' }}>{c.label}</span>
+                      <span style={{ fontSize:'11px', color:'#4A4A45' }}>dist: {c.dist}</span>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                      <span style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace" }}>{c.time}</span>
+                      <span style={{ fontSize:'11px', fontWeight:500, color:c.color, background:c.bg, padding:'3px 10px', borderRadius:'999px', border:`0.5px solid ${c.color}33`, fontFamily:"'JetBrains Mono',monospace" }}>{c.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding:'1.5rem' }}>
+                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1.25rem' }}>Today</div>
+                {[
+                  { label:'Uploads scanned', value:'1,248,991', color:'#F0EFE8' },
+                  { label:'Matches found',   value:'317',        color:'#FF4D4D' },
+                  { label:'Sent to review',  value:'84',         color:'#FFB224' },
+                  { label:'Avg response',    value:'72ms',       color:'#00E59B' },
+                  { label:'Active cases',    value:'12',         color:'#F0EFE8' },
+                ].map(m => (
+                  <div key={m.label} style={{ marginBottom:'1.25rem' }}>
+                    <div style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'3px', letterSpacing:'0.06em', textTransform:'uppercase' }}>{m.label}</div>
+                    <div style={{ fontSize:'24px', fontWeight:700, color:m.color, letterSpacing:'-0.5px', lineHeight:1 }}>{m.value}</div>
+                  </div>
+                ))}
+                <div style={{ marginTop:'1.5rem', padding:'10px 14px', background:'rgba(0,229,155,0.07)', border:'0.5px solid rgba(0,229,155,0.18)', borderRadius:'8px' }}>
+                  <div style={{ fontSize:'10px', color:'#00E59B', fontFamily:"'JetBrains Mono',monospace", marginBottom:'4px', letterSpacing:'0.08em', textTransform:'uppercase' }}>48h compliance</div>
+                  <div style={{ fontSize:'13px', color:'#8C8B84' }}>All cases within deadline</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
-      {/* ── WHAT IF YOU DO NOTHING ───────────────────────────────────────────── */}
-      <section className="donothing-section">
+      {/* ── PULSE DASHBOARD MOCKUP ────────────────────────────────────────────── */}
+      <section id="pulse">
+        <div className="inner" style={{ maxWidth:'980px' }}>
+          <p className="section-tag" style={{ background:'rgba(77,158,255,0.08)', borderColor:'rgba(77,158,255,0.25)', color:'#4D9EFF' }}>pulse — semantic detection</p>
+          <h2 className="section-title">Catch what hashes miss.</h2>
+          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity.</p>
+          <div style={{ background:'#060605', border:'0.5px solid rgba(77,158,255,0.15)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
+            <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#4D9EFF', boxShadow:'0 0 6px rgba(77,158,255,0.6)' }}/>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / pulse · TestDating</span>
+              </div>
+              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>live</span>
+            </div>
+            <div className="dashboard-grid">
+              <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>Complaint registry</div>
+                {[
+                  { id:'CPL-0041', caseId:'cse_9f2a',  score:'0.97', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                  { id:'CPL-0040', caseId:'cse_3b1e',  score:'0.91', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                  { id:'CPL-0039', caseId:'cse_7c4d',  score:'0.88', status:'Resolved', color:'#00E59B', bg:'rgba(0,229,155,0.07)' },
+                  { id:'CPL-0038', caseId:'cse_2a9f',  score:'0.94', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                ].map(c => (
+                  <div key={c.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:'8px', marginBottom:'4px', background:c.bg, border:`0.5px solid ${c.color}1A` }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#8C8B84' }}>{c.id}</span>
+                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>{c.caseId}</span>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>sim: {c.score}</span>
+                      <span style={{ fontSize:'11px', fontWeight:500, color:c.color, background:c.bg, padding:'3px 10px', borderRadius:'999px', border:`0.5px solid ${c.color}33`, fontFamily:"'JetBrains Mono',monospace" }}>{c.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding:'1.5rem' }}>
+                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1.25rem' }}>Semantic stats</div>
+                {[
+                  { label:'Active complaints', value:'41',   color:'#FF4D4D' },
+                  { label:'Resolved',          value:'189',  color:'#00E59B' },
+                  { label:'Avg similarity',    value:'0.94', color:'#4D9EFF' },
+                  { label:'Variants caught',   value:'1,204',color:'#F0EFE8' },
+                ].map(m => (
+                  <div key={m.label} style={{ marginBottom:'1.25rem' }}>
+                    <div style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'3px', letterSpacing:'0.06em', textTransform:'uppercase' }}>{m.label}</div>
+                    <div style={{ fontSize:'24px', fontWeight:700, color:m.color, letterSpacing:'-0.5px', lineHeight:1 }}>{m.value}</div>
+                  </div>
+                ))}
+                <div style={{ marginTop:'1.5rem', padding:'10px 14px', background:'rgba(77,158,255,0.07)', border:'0.5px solid rgba(77,158,255,0.18)', borderRadius:'8px' }}>
+                  <div style={{ fontSize:'10px', color:'#4D9EFF', fontFamily:"'JetBrains Mono',monospace", marginBottom:'4px', letterSpacing:'0.08em', textTransform:'uppercase' }}>DINOv2 vectors</div>
+                  <div style={{ fontSize:'13px', color:'#8C8B84' }}>384-dim · cosine similarity</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── API REFERENCE ─────────────────────────────────────────────────────── */}
+      <section className="bg-section">
+        <div className="inner" style={{ maxWidth:'860px' }}>
+          <p className="section-tag">api reference</p>
+          <h2 className="section-title">Everything you need. Nothing you don&apos;t.</h2>
+          <p className="section-sub">Two pipelines. One decision. Every endpoint returns a structured response your upload handler can act on immediately.</p>
+          <div className="api-grid">
+            <div>
+              {/* Shield endpoints */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Shield</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
+                {[
+                  { method:'POST', endpoint:'/hash/check',         color:'#00E59B', bg:'rgba(0,229,155,0.08)'  },
+                  { method:'POST', endpoint:'/hash/add',            color:'#00E59B', bg:'rgba(0,229,155,0.08)'  },
+                  { method:'GET',  endpoint:'/cases/{case_uuid}',   color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                  { method:'POST', endpoint:'/cases/{case_uuid}/confirm', color:'#00E59B', bg:'rgba(0,229,155,0.08)' },
+                  { method:'GET',  endpoint:'/cases/{case_uuid}/audit',   color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                ].map(ep => (
+                  <div key={ep.endpoint+ep.method} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Pulse endpoints */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Pulse</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
+                {[
+                  { method:'POST',   endpoint:'/platform/complaints',       color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                  { method:'GET',    endpoint:'/platform/complaints',        color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                  { method:'DELETE', endpoint:'/platform/complaints/{id}',   color:'#FF4D4D', bg:'rgba(255,77,77,0.08)'  },
+                ].map(ep => (
+                  <div key={ep.endpoint+ep.method} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(77,158,255,0.12)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Appeals + Admin */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Appeals &amp; Admin</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+                {[
+                  { method:'POST', endpoint:'/appeals',      color:'#00E59B', bg:'rgba(0,229,155,0.08)'  },
+                  { method:'GET',  endpoint:'/hashes/count', color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                ].map(ep => (
+                  <div key={ep.endpoint} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Response tabs */}
+            <div>
+              <div className="tab-bar">
+                <button className={`tab-btn${apiTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setApiTab('shield')}>Shield response</button>
+                <button className={`tab-btn${apiTab === 'pulse'  ? ' active-pulse'  : ''}`} onClick={() => setApiTab('pulse')}>Pulse response</button>
+              </div>
+              <div style={{ background:'#060605', border:`0.5px solid ${apiTab === 'shield' ? 'rgba(255,255,255,0.07)' : 'rgba(77,158,255,0.15)'}`, borderRadius:'12px', padding:'1.5rem', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', lineHeight:1.9 }}>
+                {apiTab === 'shield' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check response</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"cse_83f1a2b3…"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"match_found"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"classification"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"EXACT"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"action"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"content_removed"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"hamming_distance"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>2</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_case_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"case_7c4d…"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"review_queue"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4A4A45' }}>null</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"pipeline_1_result"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"EXACT"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"pipeline_2_queued"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"timestamp"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"2026-06-27T…"</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /platform/complaints response</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#4D9EFF' }}>"complaint_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"CPL-0041"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"case_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"your-internal-ref"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"vector_stored"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"message"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"Complaint registered. Future uploads matched."</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"used_mock_extraction"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── LIVE API DEMO ─────────────────────────────────────────────────────── */}
+      <section id="demo">
         <div className="inner">
-          <p className="section-tag">if you do nothing</p>
-          <h2 className="section-title">The FTC process is public, slow, and expensive.</h2>
-          <p className="section-sub">It won&apos;t happen to you — until it does. Here is what the actual enforcement timeline looks like once a complaint is filed.</p>
-          <div className="donothing-grid">
+          <p className="section-tag">live api demo</p>
+          <h2 className="section-title">Test the Engine.</h2>
+          <p className="section-sub">Submit a PDQ hash and see a real API response from the match engine. No API key required.</p>
+          <ApiDemo/>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── ONBOARDING TIMELINE ───────────────────────────────────────────────── */}
+      <section className="bg-section">
+        <div className="inner">
+          <p className="section-tag">onboarding</p>
+          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
+          <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
+          <div className="onboard-grid">
             {[
-              {
-                step: 'Day 1',
-                title: 'A victim submits a removal request',
-                body: 'Your 48-hour TIDA clock starts. If your platform has no detection or intake flow, this request may go to a generic support inbox and be missed entirely.',
-              },
-              {
-                step: 'Day 3+',
-                title: 'The 48-hour deadline passes',
-                body: 'The victim files an FTC complaint. This is a formal legal record. The FTC has jurisdiction under TIDA and open investigations become public record when actioned.',
-              },
-              {
-                step: 'Weeks later',
-                title: 'FTC issues a Civil Investigative Demand',
-                body: 'Your platform must produce records: what was uploaded, when it was removed, what your moderation process was. If you have no audit log, you have no defense.',
-              },
-              {
-                step: 'Settlement',
-                title: '$53,088 per violation — per image, per re-upload',
-                body: 'Fines are calculated per violation. A single viral NCII case re-uploaded 20 times before removal is $1M+ in exposure. Settlement terms are public. Press coverage follows.',
-              },
-            ].map((item, i) => (
-              <div key={i} className="donothing-card">
-                <div className="donothing-bar"></div>
-                <div className="donothing-step">{item.step}</div>
-                <h4>{item.title}</h4>
-                <p>{item.body}</p>
+              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials within 24 hours. We send you a key, a sandbox environment, and integration guides for Node.js, Python, and Go.', tasks:['API key issued','Sandbox environment live','Integration guide sent'] },
+              { day:'Day 1', title:'One endpoint in your pipeline', body:'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.', tasks:['POST /hash/check integrated','Block / review / allow logic wired','First real scan running'] },
+              { day:'Day 2', title:'Audit log running', body:'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.', tasks:['Audit log exporting','Webhooks configured','Legal team can pull reports'] },
+            ].map((step, i) => (
+              <div key={i} className="onboard-step">
+                <div className="onboard-day">{step.day}</div>
+                <h4>{step.title}</h4>
+                <p>{step.body}</p>
+                <div className="onboard-tasks">
+                  {step.tasks.map(task => <div key={task} className="onboard-task">{task}</div>)}
+                </div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <a className="btn-primary lg" href="#contact">don&apos;t wait for a complaint →</a>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── SECURITY & DATA HANDLING ──────────────────────────────────────────── */}
+      <section id="security">
+        <div className="inner">
+          <p className="section-tag">security &amp; data handling</p>
+          <h2 className="section-title">Where does the data go?</h2>
+          <p className="section-sub">The first question your legal team will ask. Here is the complete answer.</p>
+          <div className="security-grid">
+            {[
+              { title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs entirely on your infrastructure. Only a 256-bit hash or a 384-dim vector crosses the network boundary — this is the architecture, not a configuration option.', icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+              { title:'Encryption in transit', body:'All API traffic uses TLS 1.3. Hash values and vectors in transit are non-reversible and cannot reconstruct the original image. Even if intercepted, a 256-bit hash reveals nothing about image content.', icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> },
+              { title:'Hash retention policy', body:'We store only the fingerprint, vector, and decision metadata — never original content. Hash data is retained for audit log purposes and can be configured per contract for enterprise customers.', icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> },
+            ].map((card, i) => (
+              <div key={i} className="security-card">
+                <div className="security-icon">{card.icon}</div>
+                <h4>{card.title}</h4>
+                <p>{card.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="dpa-offer">
+            <svg className="icon" viewBox="0 0 24 24" style={{ flexShrink:0, color:'#00E59B', width:'20px', height:'20px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:support@corvinth.com" style={{ color:'var(--green)' }}>support@corvinth.com</a> with your legal team&apos;s requirements.</p>
+            <a href="mailto:support@corvinth.com?subject=DPA%20Request" className="btn-ghost" style={{ flexShrink:0 }}>request DPA →</a>
           </div>
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
-      {/* ── TIDA TIMELINE ────────────────────────────────────────────────────── */}
-      <section id="tida" style={{ padding: '6rem 2.5rem' }}>
+      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
+      <section>
+        <div className="inner">
+          <p className="section-tag">trust and compliance</p>
+          <h2 className="section-title">Built honestly on available technology.</h2>
+          <p className="section-sub">Corvinth does not claim access to restricted systems like Microsoft PhotoDNA unless officially approved. Built around open-source perceptual hashing and platform-side compliance workflows.</p>
+          <div className="trust-grid">
+            {[
+              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash or vector crosses the network boundary.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>, title:'Rotation tolerant', body:'All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught by Shield. Arbitrary rotations caught by Pulse.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>, title:'PDQ + DINOv2', body:'Uses Meta PDQ for perceptual hashing and DINOv2 for semantic vectors. Both run locally via the SDK — no pixels sent to Corvinth.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, title:'Your policy, our detection', body:'We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, title:'FTC-ready audit log', body:'Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title:'TIDA compliance ready', body:'Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.' },
+            ].map((card, i) => (
+              <div key={i} className="trust-card">
+                <div className="ticon">{card.icon}</div>
+                <h4>{card.title}</h4>
+                <p>{card.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="pills">
+            {['Meta PDQ','DINOv2','Qdrant cosine','Open-source hashing','Near-duplicate detection','Compliance logs','Review queue','Case management'].map(p => (
+              <span key={p} className="pill">{p}</span>
+            ))}
+          </div>
+          <div className="disclaimer-box">
+            <p>Corvinth syncs against the StopNCII hash feed. We do not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
+          </div>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── TIDA / REGULATION — comes AFTER the product ──────────────────────── */}
+      <section id="tida" style={{ padding:'6rem 2.5rem', background:'var(--bg-off)' }}>
         <div className="inner">
           <p className="section-tag">the regulation</p>
           <h2 className="section-title">TIDA is law. Enforcement is active.</h2>
           <p className="section-sub">The Take It Down Act didn&apos;t sneak up quietly. Here&apos;s the timeline every platform needs to understand.</p>
           <div className="tida-timeline">
             {[
-              { date: 'Feb 2025', label: 'TIDA introduced', body: 'Bipartisan bill introduced in both House and Senate with broad support. Named partly in response to the Taylor Swift deepfake incident.' },
-              { date: 'Apr 2025', label: 'Passed Senate 95–1', body: 'Near-unanimous vote. Senators cited the explosion of AI-generated NCII targeting minors and adults across social and dating platforms.' },
-              { date: 'May 19 2026', label: 'Signed into law · FTC enforcement begins', body: 'Platforms now have 48 hours to remove flagged NCII after a valid request. Failure = $53,088 per violation. The FTC has active jurisdiction.', highlight: true },
-              { date: 'Now', label: 'Your platform is covered', body: 'If users can upload images on your platform, you are in scope. Dating apps, social platforms, messaging apps, creator tools — no exceptions for size.', highlight: true },
+              { date:'Feb 2025',    label:'TIDA introduced',                    body:'Bipartisan bill introduced in both House and Senate with broad support. Named partly in response to the Taylor Swift deepfake incident.' },
+              { date:'Apr 2025',    label:'Passed Senate 95–1',                 body:'Near-unanimous vote. Senators cited the explosion of AI-generated NCII targeting minors and adults across social and dating platforms.' },
+              { date:'May 19 2026', label:'Signed into law · FTC enforcement begins', body:'Platforms now have 48 hours to remove flagged NCII after a valid request. Failure = $53,088 per violation. The FTC has active jurisdiction.', highlight:true },
+              { date:'Now',         label:'Your platform is covered',           body:'If users can upload images on your platform, you are in scope. Dating apps, social platforms, messaging apps, creator tools — no exceptions for size.', highlight:true },
             ].map((item, i, arr) => (
               <div key={i} className={`tl-item${item.highlight ? ' tl-highlight' : ''}`}>
-                {i < arr.length - 1 && <div className="tl-line"></div>}
-                <div className={`tl-dot${item.highlight ? ' tl-dot-hot' : ''}`}>{item.highlight ? '!' : String(i + 1).padStart(2, '0')}</div>
+                {i < arr.length-1 && <div className="tl-line"/>}
+                <div className={`tl-dot${item.highlight ? ' tl-dot-hot' : ''}`}>{item.highlight ? '!' : String(i+1).padStart(2,'0')}</div>
                 <div className="tl-content">
                   <div className="tl-date">{item.date}</div>
                   <h3>{item.label}</h3>
@@ -566,1093 +870,224 @@ if (match.action === 'block') {
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
-      {/* ── SHIELD DASHBOARD MOCKUP ───────────────────────────────────────────── */}
-      <section id="shield" className="bg-section">
-        <div className="inner" style={{ maxWidth: '980px' }}>
-          <p className="section-tag">shield — hash matching</p>
-          <h2 className="section-title">What your team sees every day.</h2>
-          <p className="section-sub">A real-time view of every scan decision — matches, blocks, and review queue items — with a full audit trail behind every case.</p>
-          <div style={{
-            background: '#060605',
-            border: '0.5px solid rgba(255,255,255,0.10)',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-          }}>
-            {/* Dashboard title bar */}
-            <div style={{
-              padding: '12px 1.5rem',
-              borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: '#0a0a08',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#00E59B', boxShadow: '0 0 6px rgba(0,229,155,0.6)' }}></div>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#8C8B84' }}>corvinth / shield · TestDating</span>
+      {/* ── WHAT IF YOU DO NOTHING ───────────────────────────────────────────── */}
+      <section className="donothing-section">
+        <div className="inner">
+          <p className="section-tag">if you do nothing</p>
+          <h2 className="section-title">The FTC process is public, slow, and expensive.</h2>
+          <p className="section-sub">It won&apos;t happen to you — until it does. Here is what the actual enforcement timeline looks like once a complaint is filed.</p>
+          <div className="donothing-grid">
+            {[
+              { step:'Day 1',      title:'A victim submits a removal request', body:'Your 48-hour TIDA clock starts. If your platform has no detection or intake flow, this request may go to a generic support inbox and be missed entirely.' },
+              { step:'Day 3+',     title:'The 48-hour deadline passes',        body:'The victim files an FTC complaint. This is a formal legal record. The FTC has jurisdiction under TIDA and open investigations become public record when actioned.' },
+              { step:'Weeks later',title:'FTC issues a Civil Investigative Demand', body:'Your platform must produce records: what was uploaded, when it was removed, what your moderation process was. If you have no audit log, you have no defense.' },
+              { step:'Settlement', title:'$53,088 per violation — per image, per re-upload', body:'Fines are calculated per violation. A single viral NCII case re-uploaded 20 times before removal is $1M+ in exposure. Settlement terms are public. Press coverage follows.' },
+            ].map((item, i) => (
+              <div key={i} className="donothing-card">
+                <div className="donothing-bar"/>
+                <div className="donothing-step">{item.step}</div>
+                <h4>{item.title}</h4>
+                <p>{item.body}</p>
               </div>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.08em' }}>live</span>
-            </div>
-            <div className="dashboard-grid">
-              {/* Recent decisions panel */}
-              <div style={{ padding: '1.5rem', borderRight: '0.5px solid rgba(255,255,255,0.06)' }}>
-                <div style={{
-                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
-                  textTransform: 'uppercase', letterSpacing: '0.12em',
-                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
-                }}>Recent decisions</div>
-                {[
-                  { id: 'CASE-3829', label: 'EXACT',     status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',   dist: '0',  time: '2s ago' },
-                  { id: 'CASE-3830', label: 'FUZZY',     status: 'Review',  color: '#FFB224', bg: 'rgba(255,178,36,0.07)', dist: '6',  time: '14s ago' },
-                  { id: 'CASE-3831', label: 'EXACT',     status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',   dist: '0',  time: '41s ago' },
-                  { id: 'CASE-3832', label: 'NEAR_MISS', status: 'Review',  color: '#FFB224', bg: 'rgba(255,178,36,0.07)', dist: '14', time: '1m ago' },
-                  { id: 'CASE-3833', label: 'FUZZY',     status: 'Blocked', color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)',   dist: '3',  time: '2m ago' },
-                  { id: 'CASE-3834', label: 'CLEAN',     status: 'Allowed', color: '#00E59B', bg: 'rgba(0,229,155,0.07)',  dist: '—',  time: '3m ago' },
-                ].map((c) => (
-                  <div key={c.id} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '9px 12px', borderRadius: '8px', marginBottom: '4px',
-                    background: c.bg, border: `0.5px solid ${c.color}1A`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#8C8B84' }}>{c.id}</span>
-                      <span style={{
-                        fontSize: '10px', fontWeight: 500, color: c.color,
-                        fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
-                      }}>{c.label}</span>
-                      <span style={{ fontSize: '11px', color: '#4A4A45' }}>dist: {c.dist}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace" }}>{c.time}</span>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 500, color: c.color,
-                        background: c.bg, padding: '3px 10px',
-                        borderRadius: '999px', border: `0.5px solid ${c.color}33`,
-                        fontFamily: "'JetBrains Mono', monospace",
-                        letterSpacing: '0.04em',
-                      }}>{c.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Stats panel */}
-              <div style={{ padding: '1.5rem' }}>
-                <div style={{
-                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
-                  textTransform: 'uppercase', letterSpacing: '0.12em',
-                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1.25rem',
-                }}>Today</div>
-                {[
-                  { label: 'Uploads scanned', value: '1,248,991', color: '#F0EFE8' },
-                  { label: 'Matches found',   value: '317',        color: '#FF4D4D' },
-                  { label: 'Sent to review',  value: '84',         color: '#FFB224' },
-                  { label: 'Avg response',    value: '72ms',       color: '#00E59B' },
-                  { label: 'Active cases',    value: '12',         color: '#F0EFE8' },
-                ].map((m) => (
-                  <div key={m.label} style={{ marginBottom: '1.25rem' }}>
-                    <div style={{ fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace", marginBottom: '3px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{m.label}</div>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: m.color, letterSpacing: '-0.5px', lineHeight: 1 }}>{m.value}</div>
-                  </div>
-                ))}
-                <div style={{
-                  marginTop: '1.5rem', padding: '10px 14px',
-                  background: 'rgba(0,229,155,0.07)',
-                  border: '0.5px solid rgba(0,229,155,0.18)',
-                  borderRadius: '8px',
-                }}>
-                  <div style={{ fontSize: '10px', color: '#00E59B', fontFamily: "'JetBrains Mono', monospace", marginBottom: '4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>48h compliance</div>
-                  <div style={{ fontSize: '13px', color: '#8C8B84' }}>All cases within deadline</div>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
+          <div style={{ marginTop:'2rem', textAlign:'center' }}>
+            <a className="btn-primary lg" href="#contact">don&apos;t wait for a complaint →</a>
           </div>
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
-      {/* ── PULSE DASHBOARD MOCKUP ────────────────────────────────────────────── */}
-      <section id="pulse">
-        <div className="inner" style={{ maxWidth: '980px' }}>
-          <p className="section-tag" style={{ background: 'rgba(77,158,255,0.08)', borderColor: 'rgba(77,158,255,0.25)', color: '#4D9EFF' }}>pulse — semantic detection</p>
-          <h2 className="section-title">Catch what hashes miss.</h2>
-          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity.</p>
-          <div style={{
-            background: '#060605',
-            border: '0.5px solid rgba(77,158,255,0.15)',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-          }}>
-            {/* Dashboard title bar */}
-            <div style={{
-              padding: '12px 1.5rem',
-              borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: '#0a0a08',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4D9EFF', boxShadow: '0 0 6px rgba(77,158,255,0.6)' }}></div>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#8C8B84' }}>corvinth / pulse · TestDating</span>
-              </div>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.08em' }}>live</span>
-            </div>
-            <div className="dashboard-grid">
-              {/* Complaint registry + semantic matches */}
-              <div style={{ padding: '1.5rem', borderRight: '0.5px solid rgba(255,255,255,0.06)' }}>
-                <div style={{
-                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
-                  textTransform: 'uppercase', letterSpacing: '0.12em',
-                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
-                }}>Complaint registry</div>
-                {[
-                  { id: 'CPL-0041', caseId: 'cse_9f2a',  score: '0.97', status: 'Active',   color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)' },
-                  { id: 'CPL-0040', caseId: 'cse_3b1e',  score: '0.91', status: 'Active',   color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)' },
-                  { id: 'CPL-0039', caseId: 'cse_7c4d',  score: '0.88', status: 'Resolved', color: '#00E59B', bg: 'rgba(0,229,155,0.07)' },
-                  { id: 'CPL-0038', caseId: 'cse_2a9f',  score: '0.94', status: 'Active',   color: '#FF4D4D', bg: 'rgba(255,77,77,0.07)' },
-                ].map((c) => (
-                  <div key={c.id} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '9px 12px', borderRadius: '8px', marginBottom: '4px',
-                    background: c.bg, border: `0.5px solid ${c.color}1A`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#8C8B84' }}>{c.id}</span>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#4A4A45' }}>{c.caseId}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#4D9EFF' }}>sim: {c.score}</span>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 500, color: c.color,
-                        background: c.bg, padding: '3px 10px',
-                        borderRadius: '999px', border: `0.5px solid ${c.color}33`,
-                        fontFamily: "'JetBrains Mono', monospace",
-                        letterSpacing: '0.04em',
-                      }}>{c.status}</span>
-                    </div>
-                  </div>
-                ))}
-                <div style={{ marginTop: '1rem', fontSize: '10px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Recent semantic matches</div>
-                {[
-                  { upload: 'UPL-8821', matchId: 'CPL-0041', cosine: '0.96', action: 'Blocked' },
-                  { upload: 'UPL-8815', matchId: 'CPL-0040', cosine: '0.89', action: 'Review'  },
-                ].map((m) => (
-                  <div key={m.upload} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '8px 12px', borderRadius: '8px', marginBottom: '4px',
-                    background: 'rgba(77,158,255,0.05)', border: '0.5px solid rgba(77,158,255,0.15)',
-                  }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#8C8B84' }}>{m.upload}</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#4D9EFF' }}>→ {m.matchId}</span>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#4A4A45' }}>cos: {m.cosine}</span>
-                    <span style={{
-                      fontSize: '11px', fontWeight: 500,
-                      color: m.action === 'Blocked' ? '#FF4D4D' : '#FFB224',
-                      fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
-                    }}>{m.action}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Pulse stats panel */}
-              <div style={{ padding: '1.5rem' }}>
-                <div style={{
-                  fontSize: '10px', fontWeight: 500, color: '#4A4A45',
-                  textTransform: 'uppercase', letterSpacing: '0.12em',
-                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '1.25rem',
-                }}>Today</div>
-                {[
-                  { label: 'Complaints registered', value: '41',    color: '#4D9EFF' },
-                  { label: 'Semantic matches',       value: '19',    color: '#FF4D4D' },
-                  { label: 'Avg similarity score',   value: '0.93',  color: '#00E59B' },
-                  { label: 'Resolved complaints',    value: '7',     color: '#F0EFE8' },
-                ].map((m) => (
-                  <div key={m.label} style={{ marginBottom: '1.25rem' }}>
-                    <div className="pulse-stat-label">{m.label}</div>
-                    <div className="pulse-stat-value" style={{ color: m.color }}>{m.value}</div>
-                  </div>
-                ))}
-                <div style={{
-                  marginTop: '1.5rem', padding: '10px 14px',
-                  background: 'rgba(0,229,155,0.07)',
-                  border: '0.5px solid rgba(0,229,155,0.18)',
-                  borderRadius: '8px',
-                }}>
-                  <div style={{ fontSize: '10px', color: '#00E59B', fontFamily: "'JetBrains Mono', monospace", marginBottom: '4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>48h compliance</div>
-                  <div style={{ fontSize: '13px', color: '#8C8B84' }}>All complaints processed</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── LIVE API DEMO ─────────────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 2.5rem', background: '#060605' }}>
-        <div className="inner-sm" style={{ textAlign: 'center' }}>
-          <p className="section-tag">live api demo</p>
-          <h2 className="section-title" style={{ fontSize: 'clamp(26px, 3vw, 36px)' }}>Test the Engine</h2>
-          <p style={{ fontSize: '15px', color: '#8C8B84', marginBottom: '2rem', fontWeight: 300 }}>
-            Submit a PDQ hash and see a real API response from the match engine.
+      {/* ── LIABILITY CALCULATOR — now comes after product understanding ──────── */}
+      <section id="calculator" style={{ background:'#060605', padding:'6rem 2.5rem' }}>
+        <div className="inner-sm" style={{ textAlign:'center' }}>
+          <p className="section-tag">exposure calculator</p>
+          <h2 className="section-title">What&apos;s your platform&apos;s risk?</h2>
+          <p style={{ fontSize:'15px', color:'#8C8B84', marginBottom:'2.5rem', fontWeight:300, lineHeight:1.75 }}>
+            Slide to your monthly upload volume. See your worst-case FTC exposure under TIDA.
           </p>
-          <ApiDemo />
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── WHY PLATFORMS DEPLOY CORVINTH ────────────────────────────────────── */}
-      <section>
-        <div className="inner">
-          <p className="section-tag">why platforms deploy corvinth</p>
-          <h2 className="section-title">Built around outcomes, not features.</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1px', background: 'rgba(255,255,255,0.055)', border: '0.5px solid rgba(255,255,255,0.055)', borderRadius: '16px', overflow: 'hidden', marginTop: '2.5rem' }}>
-            {[
-              { icon: '', title: 'Prevent known NCII re-uploads', body: 'Stop repeat uploads before publication. Images already reported to StopNCII are caught at the hash level — before any user ever sees them.', tag: 'shield' },
-              { icon: '', title: 'Catch edited variants and crops', body: 'Heavy crops, arbitrary rotations, and extreme edits defeat PDQ. Pulse uses DINOv2 semantic vectors to catch them anyway.', tag: 'pulse' },
-              { icon: '', title: 'Handle direct victim complaints', body: "Victims don't always go through StopNCII. Pulse gives platforms a direct complaint intake that feeds into the detection engine.", tag: 'pulse' },
-              { icon: '', title: 'Reduce manual moderation load', body: 'Send only uncertain matches to review. Exact matches are blocked automatically. Your team focuses on edge cases, not obvious violations.', tag: 'both' },
-              { icon: '', title: 'Build compliance evidence', body: 'Every decision receives a case UUID and a cryptographically chained audit log. Exportable for FTC or legal review at any time.', tag: 'both' },
-              { icon: '', title: 'Keep pixels off third-party servers', body: 'Only hashes and vectors leave your infrastructure. The original image never crosses the network boundary. Privacy is the architecture, not a feature.', tag: 'both' },
-            ].map((item) => (
-              <div key={item.title} style={{
-                background: '#0e0e0c',
-                padding: '1.75rem',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#141412'}
-              onMouseLeave={e => e.currentTarget.style.background = '#0e0e0c'}
-              >
-                {item.icon && <div style={{ fontSize: '22px', marginBottom: '1rem', filter: 'grayscale(0.2)' }}>{item.icon}</div>}
-                <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#F0EFE8', marginBottom: '0.6rem', letterSpacing: '-0.2px' }}>{item.title}</h4>
-                <p style={{ fontSize: '13px', color: '#8C8B84', lineHeight: 1.7 }}>{item.body}</p>
-                <span className={`pipeline-tag ${item.tag}`}>{item.tag === 'both' ? 'Shield + Pulse' : item.tag}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── COMPARISON TABLE ──────────────────────────────────────────────────── */}
-      <section className="compare-section">
-        <div className="inner" style={{ maxWidth: '900px' }}>
-          <p className="section-tag">why not build it yourself?</p>
-          <h2 className="section-title">Corvinth vs. the alternatives.</h2>
-          <p className="section-sub">Every engineering team asks: &ldquo;Why not use AWS Rekognition, Google Vision, or just build this ourselves?&rdquo; Here&apos;s the honest answer.</p>
-          <div className="compare-table">
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: '30%' }}>Capability</th>
-                  <th className="corvinth-col">Corvinth</th>
-                  <th>AWS Rekognition</th>
-                  <th>Google Vision</th>
-                  <th>Build it yourself</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { feature: 'Matches reported NCII hashes', corvinth: '✓ yes', aws: '✗ no (generic nudity)', google: '✗ no (generic nudity)', diy: '✗ no hash database', corvinthClass: 'check-yes', awsClass: 'check-no', googleClass: 'check-no', diyClass: 'check-no' },
-                  { feature: 'Semantic variant detection (Pulse)', corvinth: '✓ DINOv2', aws: '✗ no', google: '✗ no', diy: '~ months to build', corvinthClass: 'check-yes', awsClass: 'check-no', googleClass: 'check-no', diyClass: 'check-partial' },
-                  { feature: 'TIDA-ready audit log', corvinth: '✓ built in', aws: '~ manual setup', google: '~ manual setup', diy: '~ weeks of work', corvinthClass: 'check-yes', awsClass: 'check-partial', googleClass: 'check-partial', diyClass: 'check-partial' },
-                  { feature: 'Zero image transmission', corvinth: '✓ hashes only', aws: '✗ full image upload', google: '✗ full image upload', diy: '✓ possible', corvinthClass: 'check-yes', awsClass: 'check-no', googleClass: 'check-no', diyClass: 'check-yes' },
-                  { feature: 'Rotation / re-encode tolerance', corvinth: '✓ all 8 orientations', aws: '~ partial', google: '~ partial', diy: '~ months to tune', corvinthClass: 'check-yes', awsClass: 'check-partial', googleClass: 'check-partial', diyClass: 'check-partial' },
-                  { feature: 'Price at 500K scans/mo', corvinth: '$799/mo flat', aws: '~$2,000–4,000', google: '~$1,500–3,000', diy: 'Eng cost + infra', corvinthClass: '', awsClass: '', googleClass: '', diyClass: '' },
-                  { feature: 'Integrate in < 1 day', corvinth: '✓ one endpoint', aws: '~ 1–2 weeks', google: '~ 1–2 weeks', diy: '✗ months', corvinthClass: 'check-yes', awsClass: 'check-partial', googleClass: 'check-partial', diyClass: 'check-no' },
-                ].map((row) => (
-                  <tr key={row.feature}>
-                    <td className="feature-name">{row.feature}</td>
-                    <td className={`corvinth-col ${row.corvinthClass}`}>{row.corvinth}</td>
-                    <td className={row.awsClass}>{row.aws}</td>
-                    <td className={row.googleClass}>{row.google}</td>
-                    <td className={row.diyClass}>{row.diy}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── DETECTION COVERAGE TABLE ─────────────────────────────────────────── */}
-      <section className="coverage-section">
-        <div className="inner" style={{ maxWidth: '900px' }}>
-          <p className="section-tag">detection coverage</p>
-          <h2 className="section-title">What each pipeline catches.</h2>
-          <p className="section-sub">Shield and Pulse cover different attack vectors. Together, they close the gaps neither can cover alone.</p>
-          <div className="coverage-table">
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: '35%' }}>Attack type</th>
-                  <th className="shield-col">Shield</th>
-                  <th className="pulse-col">Pulse</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { attack: 'Exact re-upload',                  shield: '✓ EXACT',                     pulse: '✓' },
-                  { attack: 'Filter / colour grade',            shield: '✓ FUZZY (dist 2–8)',           pulse: '✓' },
-                  { attack: 'Watermark overlay',                shield: '✓ FUZZY (dist 8–20)',          pulse: '✓' },
-                  { attack: 'Mirror flip',                      shield: '✓ dihedral variant',           pulse: '✓' },
-                  { attack: '90°/180°/270° rotation',           shield: '✓ dihedral variant',           pulse: '✓' },
-                  { attack: 'JPEG re-compression',              shield: '✓ FUZZY',                     pulse: '✓' },
-                  { attack: 'Video re-upload (MD5)',             shield: '✓ exact MD5 match',           pulse: '—' },
-                  { attack: 'Heavy crop (>30%)',                 shield: '✗ PDQ limitation',            pulse: '✓ cosine similarity' },
-                  { attack: 'Arbitrary rotation (15°, 35°)',    shield: '✗ PDQ limitation',            pulse: '✓ cosine similarity' },
-                  { attack: 'Direct victim complaint (no StopNCII)', shield: '✗ no hash exists',      pulse: '✓ complaint registry' },
-                ].map((row, i) => {
-                  const shieldOk  = row.shield.startsWith('✓');
-                  const shieldBad = row.shield.startsWith('✗');
-                  const pulseOk   = row.pulse.startsWith('✓');
-                  const pulseDash = row.pulse === '—';
-                  return (
-                    <tr key={i}>
-                      <td className="attack-name">{row.attack}</td>
-                      <td className={`shield-col ${shieldOk ? 'cov-yes' : shieldBad ? 'cov-no' : ''}`}>{row.shield}</td>
-                      <td className={`pulse-col  ${pulseOk ? 'cov-yes' : pulseDash ? 'cov-no' : ''}`}>{row.pulse}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── WHO USES CORVINTH ─────────────────────────────────────────────────── */}
-      <section className="bg-section">
-        <div className="inner">
-          <p className="section-tag">who uses corvinth</p>
-          <h2 className="section-title">Built for platforms that handle user content.</h2>
-          <p className="section-sub">Any platform where users can upload images needs a detection layer. Corvinth is that layer.</p>
-          <div className="usecases">
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg></div>
-              <h4>Dating apps</h4>
-              <p>Scan profile photos and DM attachments before delivery. Protect users from receiving unsolicited NCII.</p>
+          <div className="calc-box">
+            <div className="calc-top">
+              <div className="calc-label">Monthly uploads</div>
+              <div className="calc-value">{uploadsPerMonth.toLocaleString()}</div>
             </div>
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg></div>
-              <h4>Messaging apps</h4>
-              <p>Hash-check image attachments in transit. No content stored, no privacy compromise — just a match signal.</p>
-            </div>
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></div>
-              <h4>Social platforms</h4>
-              <p>Pre-screen every image upload at ingestion time. Stop NCII before it reaches a feed or profile.</p>
-            </div>
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></div>
-              <h4>Creator platforms</h4>
-              <p>Detect re-uploaded stolen content before it surfaces or monetises on your platform.</p>
-            </div>
-            <div className="usecase">
-              <div className="usecase-icon"><svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div>
-              <h4>Content moderation tools</h4>
-              <p>Add NCII detection as a signal layer in your existing pipeline alongside current classifiers.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── API REFERENCE ─────────────────────────────────────────────────────── */}
-      <section>
-        <div className="inner">
-          <div className="api-grid">
-            <div>
-              <p className="section-tag">api reference</p>
-              <h2 className="section-title" style={{ fontSize: 'clamp(24px, 3vw, 34px)' }}>Two pipelines. One integration.</h2>
-              <p className="section-sub" style={{ marginBottom: '2rem' }}>No SDK required. If you can make an HTTP POST, you can integrate Corvinth. Most platforms are live within a day.</p>
-
-              {/* Shield endpoints */}
-              <div style={{ fontSize: '10px', fontFamily: "'JetBrains Mono', monospace", color: '#00E59B', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '8px' }}>Shield</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '1.5rem' }}>
-                {[
-                  { method: 'POST', endpoint: '/hash/check',         color: '#00E59B', bg: 'rgba(0,229,155,0.08)'  },
-                  { method: 'POST', endpoint: '/hash/add',           color: '#00E59B', bg: 'rgba(0,229,155,0.08)'  },
-                  { method: 'GET',  endpoint: '/cases/{uuid}',       color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)' },
-                  { method: 'GET',  endpoint: '/cases/{uuid}/audit', color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)' },
-                  { method: 'POST', endpoint: '/appeals',            color: '#00E59B', bg: 'rgba(0,229,155,0.08)'  },
-                ].map((ep) => (
-                  <div key={ep.endpoint} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '9px 14px',
-                    background: '#060605',
-                    border: '0.5px solid rgba(255,255,255,0.07)',
-                    borderRadius: '8px',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '12px',
-                  }}>
-                    <span style={{ fontSize: '10px', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: ep.bg, color: ep.color, flexShrink: 0, letterSpacing: '0.06em' }}>{ep.method}</span>
-                    <span style={{ color: '#8C8B84' }}>{ep.endpoint}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pulse endpoints */}
-              <div style={{ fontSize: '10px', fontFamily: "'JetBrains Mono', monospace", color: '#4D9EFF', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '8px' }}>Pulse</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '1.5rem' }}>
-                {[
-                  { method: 'POST',   endpoint: '/platform/complaints',      color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)' },
-                  { method: 'DELETE', endpoint: '/platform/complaints/{id}', color: '#FF4D4D', bg: 'rgba(255,77,77,0.08)'  },
-                  { method: 'GET',    endpoint: '/platform/complaints',      color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)' },
-                ].map((ep) => (
-                  <div key={ep.endpoint + ep.method} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '9px 14px',
-                    background: '#060605',
-                    border: '0.5px solid rgba(77,158,255,0.12)',
-                    borderRadius: '8px',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '12px',
-                  }}>
-                    <span style={{ fontSize: '10px', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: ep.bg, color: ep.color, flexShrink: 0, letterSpacing: '0.06em' }}>{ep.method}</span>
-                    <span style={{ color: '#8C8B84' }}>{ep.endpoint}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Admin */}
-              <div style={{ fontSize: '10px', fontFamily: "'JetBrains Mono', monospace", color: '#4A4A45', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '8px' }}>Admin</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {[
-                  { method: 'GET', endpoint: '/hashes/count', color: '#4D9EFF', bg: 'rgba(77,158,255,0.08)' },
-                ].map((ep) => (
-                  <div key={ep.endpoint} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '9px 14px',
-                    background: '#060605',
-                    border: '0.5px solid rgba(255,255,255,0.07)',
-                    borderRadius: '8px',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '12px',
-                  }}>
-                    <span style={{ fontSize: '10px', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: ep.bg, color: ep.color, flexShrink: 0, letterSpacing: '0.06em' }}>{ep.method}</span>
-                    <span style={{ color: '#8C8B84' }}>{ep.endpoint}</span>
-                  </div>
-                ))}
+            <input type="range" min="10000" max="5000000" step="10000" value={uploadsPerMonth}
+              onChange={e => setUploadsPerMonth(Number(e.target.value))} className="calc-slider" />
+            <div className="calc-ticks"><span>10K</span><span>500K</span><span>1M</span><span>5M</span></div>
+            <div className="calc-result">
+              <div className="calc-result-label">Estimated max FTC exposure</div>
+              <div className="calc-result-num">{formatExposure(estimatedExposure)}</div>
+              <div className="calc-result-sub">
+                Based on {violationRateLabel} violation rate · {hypotheticalViolations.toLocaleString()} hypothetical violations · $53,088 each
               </div>
             </div>
-
-            {/* JSON response with tab toggle */}
-            <div>
-              <div className="tab-bar">
-                <button className={`tab-btn${apiTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setApiTab('shield')}>Shield response</button>
-                <button className={`tab-btn${apiTab === 'pulse' ? ' active-pulse' : ''}`} onClick={() => setApiTab('pulse')}>Pulse response</button>
-              </div>
-              <div style={{
-                background: '#060605',
-                border: `0.5px solid ${apiTab === 'shield' ? 'rgba(255,255,255,0.07)' : 'rgba(77,158,255,0.15)'}`,
-                borderRadius: '12px', padding: '1.5rem',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '12px', lineHeight: 1.9,
-              }}>
-                {apiTab === 'shield' ? (
-                  <>
-                    <div style={{ color: '#4A4A45', marginBottom: '10px', fontSize: '11px', letterSpacing: '0.04em' }}># POST /hash/check response</div>
-                    <div style={{ color: '#F0EFE8' }}>{'{'}</div>
-                    <div style={{ paddingLeft: '18px' }}>
-                      <div><span style={{ color: '#00E59B' }}>&quot;case_uuid&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;cse_83f1a2b3...&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;match_found&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>true</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;classification&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;EXACT&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;action&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;content_removed&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;hamming_distance&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>2</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;pipeline_2_queued&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#4D9EFF' }}>false</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#00E59B' }}>&quot;timestamp&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;2026-05-31T...&quot;</span></div>
-                    </div>
-                    <div style={{ color: '#F0EFE8' }}>{'}'}</div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ color: '#4A4A45', marginBottom: '10px', fontSize: '11px', letterSpacing: '0.04em' }}># POST /platform/complaints match response</div>
-                    <div style={{ color: '#F0EFE8' }}>{'{'}</div>
-                    <div style={{ paddingLeft: '18px' }}>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;case_uuid&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;cse_7c4d2e1f...&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;pulse_similarity&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>0.97</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;pulse_classification&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;SEMANTIC_MATCH&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;pulse_matched_complaint_id&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;CPL-0041&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;action&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FF4D4D' }}>&quot;content_removed&quot;</span><span style={{ color: '#5E5E57' }}>,</span></div>
-                      <div><span style={{ color: '#4D9EFF' }}>&quot;timestamp&quot;</span><span style={{ color: '#5E5E57' }}>: </span><span style={{ color: '#FFB224' }}>&quot;2026-05-31T...&quot;</span></div>
-                    </div>
-                    <div style={{ color: '#F0EFE8' }}>{'}'}</div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── ONBOARDING TIMELINE ───────────────────────────────────────────────── */}
-      <section id="how">
-        <div className="inner">
-          <p className="section-tag">integration story</p>
-          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
-          <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
-          <div className="onboard-grid">
-            {[
-              {
-                day: 'Day 0',
-                title: 'Get your credentials',
-                body: 'Request access and receive API credentials within 24 hours. We send you a key, a sandbox environment, and integration guides for Node.js, Python, and Go.',
-                tasks: ['API key issued', 'Sandbox environment live', 'Integration guide sent'],
-              },
-              {
-                day: 'Day 1',
-                title: 'One endpoint in your pipeline',
-                body: 'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.',
-                tasks: ['POST /hash/check integrated', 'Block / review / allow logic wired', 'First real scan running'],
-              },
-              {
-                day: 'Day 2',
-                title: 'Audit log running',
-                body: 'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.',
-                tasks: ['Audit log exporting', 'Webhooks configured', 'Legal team can pull reports'],
-              },
-            ].map((step, i) => (
-              <div key={i} className="onboard-step">
-                <div className="onboard-day">{step.day}</div>
-                <h4>{step.title}</h4>
-                <p>{step.body}</p>
-                <div className="onboard-tasks">
-                  {step.tasks.map(task => (
-                    <div key={task} className="onboard-task">{task}</div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── HOW IT WORKS — TWO FLOWS ──────────────────────────────────────────── */}
-      <section className="bg-section">
-        <div className="inner">
-          <p className="section-tag">how it works</p>
-          <h2 className="section-title">Two pipelines, one decision.</h2>
-          <p className="section-sub">Designed as infrastructure, not a moderation dashboard your team has to babysit.</p>
-
-          <div className="tab-bar" style={{ marginBottom: '2rem' }}>
-            <button className={`tab-btn${howTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setHowTab('shield')}>Flow A — Shield</button>
-            <button className={`tab-btn${howTab === 'pulse' ? ' active-pulse' : ''}`} onClick={() => setHowTab('pulse')}>Flow B — Pulse</button>
-          </div>
-
-          {howTab === 'shield' ? (
-            <div className="timeline">
-              {[
-                { n: '01', title: 'Normalize the upload on your server', body: 'Your platform handles EXIF orientation, resizing, and compression using the Corvinth SDK — running entirely on your infrastructure. The SDK computes a perceptual hash from the image bytes. No pixels are sent to Corvinth.', last: false },
-                { n: '02', title: 'Generate a PDQ fingerprint (8 orientations)', body: 'The SDK uses open-source perceptual hashing — Meta PDQ — and generates fingerprints for all 8 orientations simultaneously. Rotation, filters, and re-encoding are tolerated by design.', last: false },
-                { n: '03', title: 'Match against NCII hash database', body: "The hash is sent to Corvinth's API and compared against a database of reported non-consensual intimate imagery using VP-Tree Hamming-distance lookup across all 8 orientations.", last: false },
-                { n: '04', title: 'Return a decision — you enforce your policy', body: 'Your platform receives a structured response: allow, block, or send to review with a confidence tier and case UUID. Corvinth is the detection layer. You stay in control of what happens next.', last: true },
-              ].map((step) => (
-                <div key={step.n} className="tl-item">
-                  {!step.last && <div className="tl-line"></div>}
-                  <div className="tl-dot">{step.n}</div>
-                  <div className="tl-content">
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
-                  </div>
-                </div>
+            {/* Violation rate toggle */}
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', justifyContent:'center', marginBottom:'1rem' }}>
+              <span style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace" }}>Violation rate:</span>
+              {[{label:'0.01%',value:0.0001},{label:'0.1%',value:0.001},{label:'1%',value:0.01}].map(opt => (
+                <button key={opt.label} onClick={() => setViolationRate(opt.value)} style={{ fontSize:'11px', padding:'4px 12px', borderRadius:'999px', border:`0.5px solid ${violationRate === opt.value ? 'rgba(0,229,155,0.4)' : 'rgba(255,255,255,0.10)'}`, background: violationRate === opt.value ? 'rgba(0,229,155,0.10)' : 'transparent', color: violationRate === opt.value ? '#00E59B' : '#8C8B84', cursor:'pointer', fontFamily:"'JetBrains Mono',monospace", transition:'all 0.15s' }}>{opt.label}</button>
               ))}
             </div>
-          ) : (
-            <div className="timeline">
-              {[
-                { n: '01', title: 'Victim files a direct complaint with platform', body: 'The victim provides an image directly to the platform through the Corvinth-integrated complaint flow. No external database or StopNCII submission required — this is a platform-native intake.', last: false },
-                { n: '02', title: 'SDK computes DINOv2 vector locally', body: 'The Corvinth SDK runs on your infrastructure. It generates a 384-dimensional DINOv2 semantic vector from the image. The original pixels never leave your server.', last: false },
-                { n: '03', title: 'Vector submitted to Corvinth complaint registry', body: "Only the vector and complaint metadata are sent to Corvinth's API. The complaint is stored in the registry and becomes active for future upload matching.", last: false },
-                { n: '04', title: 'Future uploads matched semantically', body: 'Every subsequent upload is compared via cosine similarity against registered complaint vectors. Heavy crops, arbitrary rotations, and semantic variants that defeat PDQ are caught here.', last: true },
-              ].map((step) => (
-                <div key={step.n} className="tl-item">
-                  {!step.last && <div className="tl-line"></div>}
-                  <div className="tl-dot" style={{ borderColor: 'rgba(77,158,255,0.4)', color: '#4D9EFF' }}>{step.n}</div>
-                  <div className="tl-content">
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
-                  </div>
-                </div>
-              ))}
+            <p style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", textAlign:'center', marginBottom:'1.25rem', letterSpacing:'0.02em' }}>
+              Planning tool only — enter your own upload volume to estimate exposure under TIDA
+            </p>
+            <div className="calc-cta-row">
+              <span className="calc-corvinth-cost">Corvinth costs from <b>$99/mo</b> to cover this.</span>
+              <a className="btn-primary" href="#contact">get protected →</a>
             </div>
-          )}
-        </div>
-      </section>
-
-      <hr />
-
-      {/* ── SECURITY & DATA HANDLING ──────────────────────────────────────────── */}
-      <section id="security">
-        <div className="inner">
-          <p className="section-tag">security &amp; data handling</p>
-          <h2 className="section-title">Where does the data go?</h2>
-          <p className="section-sub">The first question your legal team will ask. Here is the complete answer.</p>
-          <div className="security-grid">
-            {[
-              {
-                title: 'Zero image storage',
-                body: 'Images are never sent to or stored on Corvinth servers. The SDK runs entirely on your infrastructure. Only a 256-bit hash or a 384-dim vector crosses the network boundary — this is the architecture, not a configuration option.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
-              },
-              {
-                title: 'Encryption in transit',
-                body: 'All API traffic uses TLS 1.3. Hash values and vectors in transit are non-reversible and cannot reconstruct the original image. Even if intercepted, a 256-bit hash or 384-dim vector reveals nothing about image content.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
-              },
-              {
-                title: 'Hash retention policy',
-                body: 'We store only the fingerprint, vector, and decision metadata — never original content. Hash data is retained for audit log purposes and can be configured per contract for enterprise customers.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg>,
-              },
-            ].map((card, i) => (
-              <div key={i} className="security-card">
-                <div className="security-icon">{card.icon}</div>
-                <h4>{card.title}</h4>
-                <p>{card.body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="dpa-offer">
-            <svg className="icon" viewBox="0 0 24 24" style={{ flexShrink: 0, color: '#00E59B', width: '20px', height: '20px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
-            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:support@corvinth.com" style={{ color: 'var(--green)' }}>support@corvinth.com</a> with your legal team&apos;s requirements.</p>
-            <a href="mailto:support@corvinth.com?subject=DPA Request" className="btn-ghost" style={{ flexShrink: 0 }}>request DPA →</a>
           </div>
         </div>
       </section>
 
-      <hr />
-
-      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
-      <section>
-        <div className="inner">
-          <p className="section-tag">trust and compliance</p>
-          <h2 className="section-title">Built honestly on available technology.</h2>
-          <p className="section-sub">Corvinth does not claim access to restricted systems like Microsoft PhotoDNA unless officially approved. Built around open-source perceptual hashing and platform-side compliance workflows.</p>
-          <div className="trust-grid">
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></div>
-              <h4>Zero image storage</h4>
-              <p>Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash or vector crosses the network boundary.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg></div>
-              <h4>Rotation tolerant</h4>
-              <p>All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught by Shield. Arbitrary rotations caught by Pulse.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg></div>
-              <h4>PDQ + DINOv2</h4>
-              <p>Uses Meta PDQ for perceptual hashing and DINOv2 for semantic vectors. Both run locally via the SDK — no pixels sent to Corvinth.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></div>
-              <h4>Your policy, our detection</h4>
-              <p>We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg></div>
-              <h4>FTC-ready audit log</h4>
-              <p>Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.</p>
-            </div>
-            <div className="trust-card">
-              <div className="ticon"><svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg></div>
-              <h4>TIDA compliance ready</h4>
-              <p>Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.</p>
-            </div>
-          </div>
-          <div className="pills">
-            <span className="pill">Meta PDQ</span>
-            <span className="pill">DINOv2</span>
-            <span className="pill">Qdrant cosine</span>
-            <span className="pill">Open-source hashing</span>
-            <span className="pill">Near-duplicate detection</span>
-            <span className="pill">Compliance logs</span>
-            <span className="pill">Review queue</span>
-            <span className="pill">Case management</span>
-          </div>
-          <div className="disclaimer-box">
-            <p>Corvinth syncs against the StopNCII hash feed. We do not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
-          </div>
-        </div>
-      </section>
-
-      <hr />
+      <hr/>
 
       {/* ── PRICING ───────────────────────────────────────────────────────────── */}
       <section id="pricing">
-        <div className="inner" style={{ maxWidth: '900px' }}>
+        <div className="inner" style={{ maxWidth:'900px' }}>
           <p className="section-tag">pricing</p>
           <h2 className="section-title">Transparent, usage-based pricing.</h2>
-          <p className="section-sub">Starter is Shield-only. Growth unlocks Pulse — semantic detection, video lane, and the complaint registry.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            {/* Founding tier — first card, amber accent */}
-            <div style={{
-              background: 'rgba(255,178,36,0.04)',
-              border: '0.5px solid rgba(255,178,36,0.35)',
-              borderRadius: '16px', padding: '1.75rem',
-              display: 'flex', flexDirection: 'column',
-              position: 'relative',
-              boxShadow: '0 0 40px rgba(255,178,36,0.06)',
-            }}>
-              {/* Amber top line */}
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0,
-                height: '2px',
-                background: 'linear-gradient(90deg, transparent, #FFB224, transparent)',
-                borderRadius: '16px 16px 0 0',
-              }} />
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                fontSize: '11px', fontWeight: 500, color: '#FFB224',
-                textTransform: 'uppercase', letterSpacing: '0.10em',
-                fontFamily: "'JetBrains Mono', monospace", marginBottom: '0.75rem',
-              }}>
+          <p className="section-sub">Starter is Shield-only. Growth unlocks Pulse — semantic detection and the complaint registry.</p>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px,1fr))', gap:'1rem' }}>
+            {/* Founding tier */}
+            <div style={{ background:'rgba(255,178,36,0.04)', border:'0.5px solid rgba(255,178,36,0.35)', borderRadius:'16px', padding:'1.75rem', display:'flex', flexDirection:'column', position:'relative', boxShadow:'0 0 40px rgba(255,178,36,0.06)' }}>
+              <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:'linear-gradient(90deg, transparent, #FFB224, transparent)', borderRadius:'16px 16px 0 0' }}/>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', fontWeight:500, color:'#FFB224', textTransform:'uppercase', letterSpacing:'0.10em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'0.75rem' }}>
                 Founding Access
-                <span style={{
-                  color: '#FFB224', fontSize: '9px', padding: '2px 8px',
-                  background: 'rgba(255,178,36,0.10)',
-                  border: '0.5px solid rgba(255,178,36,0.30)',
-                  borderRadius: '999px', letterSpacing: '0.08em',
-                }}>3 platforms only</span>
+                <span style={{ color:'#FFB224', fontSize:'9px', padding:'2px 8px', background:'rgba(255,178,36,0.10)', border:'0.5px solid rgba(255,178,36,0.30)', borderRadius:'999px' }}>3 platforms only</span>
               </div>
-              <div style={{
-                fontSize: '36px', fontWeight: 800,
-                color: '#F0EFE8', letterSpacing: '-1.5px',
-                marginBottom: '0.15rem', lineHeight: 1,
-              }}>
-                $99
-                <span style={{ fontSize: '14px', fontWeight: 400, color: '#8C8B84', letterSpacing: '0px' }}>/month</span>
-              </div>
-              <div style={{
-                fontSize: '11px', color: '#FFB224',
-                fontFamily: "'JetBrains Mono', monospace",
-                marginBottom: '0.5rem', letterSpacing: '0.04em',
-              }}>full Shield + Pulse access · 3 platforms only</div>
-              <div style={{ marginBottom: '1rem' }}>
-                <span style={{
-                  fontSize: '10px', fontFamily: "'JetBrains Mono', monospace",
-                  padding: '2px 8px', borderRadius: '4px',
-                  background: 'rgba(77,158,255,0.10)',
-                  color: '#4D9EFF',
-                  border: '0.5px solid rgba(77,158,255,0.25)',
-                }}>
-                  ✓ Pulse included
-                </span>
-              </div>
-              <div style={{ fontSize: '13px', color: '#8C8B84', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                Full Shield + Pulse access. For our first three platforms.
-              </div>
-              <ul style={{
-                listStyle: 'none', display: 'flex', flexDirection: 'column',
-                gap: '8px', marginBottom: '1.75rem', flex: 1,
-              }}>
-                {[
-                  'Full Shield API — hash matching',
-                  'Full Pulse API — semantic detection',
-                  'Complaint registry',
-                  'Audit log export',
-                  'Direct line to founder',
-                  'Weekly feedback calls',
-                ].map((f) => (
-                  <li key={f} style={{ fontSize: '13px', color: '#8C8B84', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{
-                      width: '5px', height: '5px', borderRadius: '50%',
-                      background: '#FFB224', flexShrink: 0, display: 'inline-block',
-                      boxShadow: '0 0 4px rgba(255,178,36,0.5)',
-                    }}></span>
+              <div style={{ fontSize:'36px', fontWeight:800, color:'#F0EFE8', letterSpacing:'-1.5px', marginBottom:'0.15rem', lineHeight:1 }}>$99<span style={{ fontSize:'14px', fontWeight:400, color:'#8C8B84' }}>/month</span></div>
+              <div style={{ fontSize:'11px', color:'#FFB224', fontFamily:"'JetBrains Mono',monospace", marginBottom:'0.5rem' }}>full Shield + Pulse access · 3 platforms only</div>
+              <div style={{ marginBottom:'1rem' }}><span style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", padding:'2px 8px', borderRadius:'4px', background:'rgba(77,158,255,0.10)', color:'#4D9EFF', border:'0.5px solid rgba(77,158,255,0.25)' }}>✓ Pulse included</span></div>
+              <div style={{ fontSize:'13px', color:'#8C8B84', marginBottom:'1.5rem', lineHeight:1.6 }}>Full Shield + Pulse access. For our first three platforms.</div>
+              <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:'8px', marginBottom:'1.75rem', flex:1 }}>
+                {['Full Shield API — hash matching','Full Pulse API — semantic detection','Complaint registry','Audit log export','Direct line to founder','Weekly feedback calls'].map(f => (
+                  <li key={f} style={{ fontSize:'13px', color:'#8C8B84', display:'flex', alignItems:'center', gap:'10px' }}>
+                    <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#FFB224', flexShrink:0, display:'inline-block', boxShadow:'0 0 4px rgba(255,178,36,0.5)' }}/>
                     {f}
                   </li>
                 ))}
               </ul>
-              <div style={{
-                fontSize: '11px', color: '#4A4A45', fontFamily: "'JetBrains Mono', monospace",
-                marginBottom: '1rem', lineHeight: 1.6,
-              }}>
-                This tier closes once 3 platforms have joined. In exchange we ask for honest feedback and a case study.
-              </div>
-              <a href="mailto:support@corvinth.com" style={{
-                display: 'block', textAlign: 'center', padding: '11px',
-                borderRadius: '10px', fontSize: '14px', fontWeight: 500,
-                background: 'transparent',
-                color: '#FFB224',
-                border: '0.5px solid rgba(255,178,36,0.35)',
-                textDecoration: 'none', transition: 'all 0.15s',
-                letterSpacing: '0.01em',
-              }}>Email support@corvinth.com →</a>
+              <a href="#contact" style={{ display:'block', textAlign:'center', padding:'11px', borderRadius:'10px', fontSize:'14px', fontWeight:500, background:'rgba(255,178,36,0.12)', color:'#FFB224', border:'0.5px solid rgba(255,178,36,0.35)', textDecoration:'none' }}>apply for founding access</a>
             </div>
 
+            {/* Starter / Growth / Enterprise */}
             {[
-              {
-                name: 'Starter', price: '$299', period: '/month', perScan: 'Shield scans: 50k / mo',
-                desc: 'Hash matching only. For platforms getting compliant fast.',
-                features: ['50,000 Shield scans / month', 'Full Shield API access', 'Case management', 'Audit log export', 'Email support'],
-                pulseIncluded: false,
-                cta: 'request access', featured: false,
-              },
-              {
-                name: 'Growth', price: '$799', period: '/month', perScan: 'Shield + Pulse: 500k / mo',
-                desc: 'Full dual-pipeline coverage for live platforms.',
-                features: ['500,000 Shield scans / month', 'Pulse included', 'Video lane included', 'Complaint registry', 'Webhook notifications', 'Audit log + 99.5% SLA'],
-                pulseIncluded: true,
-                cta: 'request access', featured: true,
-              },
-              {
-                name: 'Enterprise', price: 'Custom', period: '', perScan: 'Unlimited · volume pricing',
-                desc: 'For high-volume platforms and custom needs.',
-                features: ['Unlimited scans', 'Pulse + Shield', 'Dedicated infrastructure', 'On-premise option', 'SLA 99.9% uptime', 'Legal & compliance support'],
-                pulseIncluded: true,
-                cta: 'contact us', featured: false,
-              },
-            ].map((plan) => (
-              <div key={plan.name} style={{
-                background: plan.featured ? 'rgba(0,229,155,0.05)' : '#0e0e0c',
-                border: `0.5px solid ${plan.featured ? 'rgba(0,229,155,0.35)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: '16px', padding: '1.75rem',
-                display: 'flex', flexDirection: 'column',
-                position: 'relative',
-                boxShadow: plan.featured ? '0 0 40px rgba(0,229,155,0.08)' : 'none',
-              }}>
-                {plan.featured && (
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0,
-                    height: '2px',
-                    background: 'linear-gradient(90deg, transparent, #00E59B, transparent)',
-                    borderRadius: '16px 16px 0 0',
-                  }} />
-                )}
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  fontSize: '11px', fontWeight: 500, color: '#4A4A45',
-                  textTransform: 'uppercase', letterSpacing: '0.10em',
-                  fontFamily: "'JetBrains Mono', monospace", marginBottom: '0.75rem',
-                }}>
+              { name:'Starter', price:'$299', period:'/month', perScan:'~$0.0003/scan · 1M scans included', desc:'For platforms under 1M monthly uploads that need Shield compliance without operational overhead.', features:['Shield API — hash matching','Up to 1M scans/month','Audit log export','Webhook notifications','FTC compliance reports'], pulseIncluded:false, featured:false, cta:'request access' },
+              { name:'Growth',  price:'$799', period:'/month', perScan:'~$0.0002/scan · 5M scans included', desc:'For high-growth platforms that need Pulse for victim complaints, semantic detection, and video.',  features:['Everything in Starter','Full Pulse API — semantic detection','Complaint registry','Video lane — MD5/SHA-256 matching','5M scans/month'], pulseIncluded:true, featured:true, cta:'request access' },
+              { name:'Enterprise', price:'Custom', period:'', perScan:'Unlimited scans · dedicated infra', desc:'For high-volume platforms and custom needs.', features:['Unlimited scans','Pulse + Shield','Dedicated infrastructure','On-premise option','SLA 99.9% uptime','Legal & compliance support'], pulseIncluded:true, featured:false, cta:'contact us' },
+            ].map(plan => (
+              <div key={plan.name} style={{ background: plan.featured ? 'rgba(0,229,155,0.05)' : '#0e0e0c', border:`0.5px solid ${plan.featured ? 'rgba(0,229,155,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'16px', padding:'1.75rem', display:'flex', flexDirection:'column', position:'relative', boxShadow: plan.featured ? '0 0 40px rgba(0,229,155,0.08)' : 'none' }}>
+                {plan.featured && <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:'linear-gradient(90deg, transparent, #00E59B, transparent)', borderRadius:'16px 16px 0 0' }}/>}
+                <div style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'0.75rem' }}>
                   {plan.name}
-                  {plan.featured && (
-                    <span style={{
-                      color: '#00E59B', fontSize: '9px', padding: '2px 8px',
-                      background: 'rgba(0,229,155,0.12)',
-                      border: '0.5px solid rgba(0,229,155,0.25)',
-                      borderRadius: '999px', letterSpacing: '0.08em',
-                    }}>popular</span>
-                  )}
+                  {plan.featured && <span style={{ color:'#00E59B', fontSize:'9px', padding:'2px 8px', background:'rgba(0,229,155,0.12)', border:'0.5px solid rgba(0,229,155,0.25)', borderRadius:'999px' }}>popular</span>}
                 </div>
-                <div style={{
-                  fontSize: '36px', fontWeight: 800,
-                  color: '#F0EFE8', letterSpacing: '-1.5px',
-                  marginBottom: '0.15rem', lineHeight: 1,
-                }}>
-                  {plan.price}
-                  <span style={{ fontSize: '14px', fontWeight: 400, color: '#8C8B84', letterSpacing: '0px' }}>{plan.period}</span>
-                </div>
-                <div style={{
-                  fontSize: '11px', color: '#4A4A45',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  marginBottom: '0.5rem', letterSpacing: '0.04em',
-                }}>{plan.perScan}</div>
-                {/* Pulse indicator */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <span style={{
-                    fontSize: '10px', fontFamily: "'JetBrains Mono', monospace",
-                    padding: '2px 8px', borderRadius: '4px',
-                    background: plan.pulseIncluded ? 'rgba(77,158,255,0.10)' : 'rgba(255,255,255,0.03)',
-                    color: plan.pulseIncluded ? '#4D9EFF' : '#4A4A45',
-                    border: `0.5px solid ${plan.pulseIncluded ? 'rgba(77,158,255,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                  }}>
-                    {plan.pulseIncluded ? '✓ Pulse included' : '✗ Pulse not included'}
-                  </span>
-                </div>
-                <div style={{ fontSize: '13px', color: '#8C8B84', marginBottom: '1.5rem', lineHeight: 1.6 }}>{plan.desc}</div>
-                <ul style={{
-                  listStyle: 'none', display: 'flex', flexDirection: 'column',
-                  gap: '8px', marginBottom: '1.75rem', flex: 1,
-                }}>
-                  {plan.features.map((f) => (
-                    <li key={f} style={{ fontSize: '13px', color: '#8C8B84', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        width: '5px', height: '5px', borderRadius: '50%',
-                        background: '#00E59B', flexShrink: 0, display: 'inline-block',
-                        boxShadow: '0 0 4px rgba(0,229,155,0.5)',
-                      }}></span>
+                <div style={{ fontSize:'36px', fontWeight:800, color:'#F0EFE8', letterSpacing:'-1.5px', marginBottom:'0.15rem', lineHeight:1 }}>{plan.price}<span style={{ fontSize:'14px', fontWeight:400, color:'#8C8B84' }}>{plan.period}</span></div>
+                <div style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'0.5rem' }}>{plan.perScan}</div>
+                <div style={{ marginBottom:'1rem' }}><span style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", padding:'2px 8px', borderRadius:'4px', background: plan.pulseIncluded ? 'rgba(77,158,255,0.10)' : 'rgba(255,255,255,0.03)', color: plan.pulseIncluded ? '#4D9EFF' : '#4A4A45', border:`0.5px solid ${plan.pulseIncluded ? 'rgba(77,158,255,0.25)' : 'rgba(255,255,255,0.06)'}` }}>{plan.pulseIncluded ? '✓ Pulse included' : '✗ Pulse not included'}</span></div>
+                <div style={{ fontSize:'13px', color:'#8C8B84', marginBottom:'1.5rem', lineHeight:1.6 }}>{plan.desc}</div>
+                <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:'8px', marginBottom:'1.75rem', flex:1 }}>
+                  {plan.features.map(f => (
+                    <li key={f} style={{ fontSize:'13px', color:'#8C8B84', display:'flex', alignItems:'center', gap:'10px' }}>
+                      <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#00E59B', flexShrink:0, display:'inline-block', boxShadow:'0 0 4px rgba(0,229,155,0.5)' }}/>
                       {f}
                     </li>
                   ))}
                 </ul>
-                <a href="#contact" style={{
-                  display: 'block', textAlign: 'center', padding: '11px',
-                  borderRadius: '10px', fontSize: '14px', fontWeight: 500,
-                  background: plan.featured ? '#00E59B' : 'transparent',
-                  color: plan.featured ? '#060605' : '#8C8B84',
-                  border: plan.featured ? 'none' : '0.5px solid rgba(255,255,255,0.10)',
-                  textDecoration: 'none', transition: 'all 0.15s',
-                  letterSpacing: '0.01em',
-                }}>{plan.cta}</a>
+                <a href="#contact" style={{ display:'block', textAlign:'center', padding:'11px', borderRadius:'10px', fontSize:'14px', fontWeight:500, background: plan.featured ? '#00E59B' : 'transparent', color: plan.featured ? '#060605' : '#8C8B84', border: plan.featured ? 'none' : '0.5px solid rgba(255,255,255,0.10)', textDecoration:'none', transition:'all 0.15s' }}>{plan.cta}</a>
               </div>
             ))}
           </div>
 
-          {/* Founding tier callout line */}
-          <p style={{
-            textAlign: 'center', marginTop: '1.5rem',
-            fontSize: '12px', color: '#4A4A45',
-            fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.03em',
-            lineHeight: 1.7,
-          }}>
+          <p style={{ textAlign:'center', marginTop:'1.5rem', fontSize:'12px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.03em', lineHeight:1.7 }}>
             Founding tier available — 3 platforms only, full Shield + Pulse access from $99/mo.{' '}
-            <a href="mailto:support@corvinth.com" style={{ color: '#FFB224', textDecoration: 'underline' }}>Email support@corvinth.com</a> to apply.
+            <a href="mailto:support@corvinth.com" style={{ color:'#FFB224', textDecoration:'underline' }}>Email support@corvinth.com</a> to apply.
           </p>
 
-          {/* ── PRICING FAQ ── */}
-          <div style={{ marginTop: '3rem' }}>
-            <div style={{
-              fontSize: '10px', fontWeight: 500, color: 'var(--text-faint)',
-              textTransform: 'uppercase', letterSpacing: '0.12em',
-              fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
-            }}>billing questions</div>
+          {/* Pricing FAQ */}
+          <div style={{ marginTop:'3rem' }}>
+            <div style={{ fontSize:'10px', fontWeight:500, color:'var(--text-faint)', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:'var(--font-mono)', marginBottom:'1rem' }}>billing questions</div>
             <div className="faq-list">
               {[
-                {
-                  q: "Does a re-upload of the same image count as a new scan?",
-                  a: "Yes. Every call to /hash/check counts as one scan, regardless of whether the hash has been seen before. This keeps billing predictable and reflects the actual compute cost of the lookup.",
-                },
-                {
-                  q: "What counts as a failed upload — does it consume a scan?",
-                  a: "No. If your platform rejects an upload before calling Corvinth (e.g. wrong file type, too large), that does not consume a scan. A scan is counted only when a hash is sent to /hash/check. If the Corvinth API returns an error on our side, that call is not counted.",
-                },
-                {
-                  q: "What happens if I go over my monthly scan limit?",
-                  a: "We don't hard-cap at the limit. Your platform keeps scanning and we bill overage at the rate shown on your plan. We email you at 80% and 100% of your allowance so there are no surprises.",
-                },
-                {
-                  q: "Is there a free trial or sandbox?",
-                  a: "Yes. Every account gets sandbox credentials at signup. The sandbox accepts real API calls and returns realistic responses — no real NCII hashes are stored in the sandbox environment. Test freely before going live.",
-                },
-              ].map((item, i) => (
-                <FaqItem key={i} q={item.q} a={item.a} />
-              ))}
+                { q:'Does a re-upload of the same image count as a new scan?', a:"Yes. Every call to /hash/check counts as one scan, regardless of whether the hash has been seen before. This keeps billing predictable and reflects the actual compute cost of the lookup." },
+                { q:'What counts as a failed upload — does it consume a scan?', a:"No. If your platform rejects an upload before calling Corvinth (e.g. wrong file type, too large), that does not consume a scan. A scan is counted only when a hash is sent to /hash/check. If the Corvinth API returns an error on our side, that call is not counted." },
+                { q:'What happens if I go over my monthly scan limit?', a:"We don't hard-cap at the limit. Your platform keeps scanning and we bill overage at the rate shown on your plan. We email you at 80% and 100% of your allowance so there are no surprises." },
+                { q:'Is there a free trial or sandbox?', a:"Yes. Every account gets sandbox credentials at signup. The sandbox accepts real API calls and returns realistic responses — no real NCII hashes are stored in the sandbox environment. Test freely before going live." },
+              ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
             </div>
           </div>
         </div>
       </section>
 
-      <hr />
-
-      {/* ── FOR VICTIMS ───────────────────────────────────────────────────────── */}
-      <section className="victims-section">
-        <div className="victims-inner" style={{ padding: '5rem 2rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <span style={{
-              display: 'inline-block',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '10px', color: '#00E59B',
-              textTransform: 'uppercase', letterSpacing: '0.14em',
-              padding: '3px 10px',
-              background: 'rgba(0,229,155,0.06)',
-              border: '0.5px solid rgba(0,229,155,0.18)',
-              borderRadius: '999px',
-            }}>for victims</span>
-          </div>
-          <h2>If your images are being shared without your consent</h2>
-          <p>
-            Platforms using Corvinth can receive your complaint directly.
-          </p>
-          <p>
-            Your images are <em>never stored</em> — only a mathematical fingerprint,
-            computed on your own device, is used for detection.
-          </p>
-        </div>
-      </section>
-
-      <hr />
+      <hr/>
 
       {/* ── FAQ ───────────────────────────────────────────────────────────────── */}
       <section id="faq" className="bg-section">
-        <div className="inner" style={{ maxWidth: '700px' }}>
+        <div className="inner" style={{ maxWidth:'700px' }}>
           <p className="section-tag">faq</p>
           <h2 className="section-title">Questions platforms actually ask.</h2>
           <div className="faq-list">
             {[
-              {
-                q: "What happens if there's a false positive and a legitimate image gets blocked?",
-                a: 'Every decision from Corvinth returns a confidence tier and a case UUID. For anything below the "exact match" threshold, the API returns a "review" action rather than an automatic block — your platform decides what to do. You can also use the /appeals endpoint to flag a case and we maintain a permanent audit log of every decision so there\'s always a paper trail for disputes.',
-              },
-              {
-                q: "Are you actually integrated with StopNCII's database, or just PDQ-compatible?",
-                a: "Corvinth syncs against the StopNCII hash feed. When a victim reports an image to StopNCII, that hash enters the shared database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network, not just complaints filed directly with you. We are an independent company and do not represent StopNCII.",
-              },
-              {
-                q: 'Does Corvinth ever see or store the actual images?',
-                a: "No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values.",
-              },
-              {
-                q: 'How small is "too small" to need this?',
-                a: "TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team.",
-              },
-              {
-                q: "What's the integration effort for an engineering team?",
-                a: "One API endpoint and no required SDK — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. We've written integration guides for Node.js, Python, and Go. Most platforms are live within a working day.",
-              },
-              {
-                q: "What is Pulse and when do I need it?",
-                a: "Pulse is the semantic detection pipeline. It uses DINOv2 vectors and cosine similarity to catch images that PDQ hashing misses: heavy crops, arbitrary rotations, and direct victim complaints where no hash exists yet. Pulse is included in the Growth plan and above.",
-              },
-            ].map((item, i) => (
-              <FaqItem key={i} q={item.q} a={item.a} />
-            ))}
+              { q:"What happens if there's a false positive and a legitimate image gets blocked?", a:"Every decision from Corvinth returns a confidence tier and a case UUID. For anything below the 'exact match' threshold, the API returns a 'review' action rather than an automatic block — your platform decides what to do. You can also use the /appeals endpoint to flag a case and we maintain a permanent audit log of every decision so there's always a paper trail for disputes." },
+              { q:"Are you actually integrated with StopNCII's database, or just PDQ-compatible?", a:"Corvinth syncs against the StopNCII hash feed. When a victim reports an image to StopNCII, that hash enters the shared database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network, not just complaints filed directly with you. We are an independent company and do not represent StopNCII." },
+              { q:'Does Corvinth ever see or store the actual images?', a:"No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values." },
+              { q:'How small is "too small" to need this?', a:"TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team." },
+              { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no required SDK — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. We've written integration guides for Node.js, Python, and Go. Most platforms are live within a working day." },
+              { q:"What is Pulse and when do I need it?", a:"Pulse is the semantic detection pipeline. It uses DINOv2 vectors and cosine similarity to catch images that PDQ hashing misses: heavy crops, arbitrary rotations, and direct victim complaints where no hash exists yet. Pulse is included in the Growth plan and above." },
+            ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
           </div>
         </div>
       </section>
 
-      <hr />
+      <hr/>
+
+      {/* ── FOR VICTIMS ───────────────────────────────────────────────────────── */}
+      <section className="victims-section">
+        <div className="victims-inner" style={{ padding:'5rem 2rem' }}>
+          <div style={{ marginBottom:'1.5rem' }}>
+            <span style={{ display:'inline-block', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#00E59B', textTransform:'uppercase', letterSpacing:'0.14em', padding:'3px 10px', background:'rgba(0,229,155,0.06)', border:'0.5px solid rgba(0,229,155,0.18)', borderRadius:'999px' }}>for victims</span>
+          </div>
+          <h2>If your images are being shared without your consent</h2>
+          <p>Platforms using Corvinth can receive your complaint directly.</p>
+          <p>Your images are <em>never stored</em> — only a mathematical fingerprint, computed on your own device, is used for detection.</p>
+        </div>
+      </section>
+
+      <hr/>
 
       {/* ── REGULATORY UPDATES ───────────────────────────────────────────────── */}
       <section className="blog-teaser-section">
-        <div className="inner" style={{ maxWidth: '640px', textAlign: 'center' }}>
+        <div className="inner" style={{ maxWidth:'640px', textAlign:'center' }}>
           <p className="section-tag">regulatory updates</p>
           <h2 className="section-title">TIDA just passed. There will be more.</h2>
-          <p className="section-sub" style={{ margin: '0 auto 2rem' }}>
+          <p className="section-sub" style={{ margin:'0 auto 2rem' }}>
             We publish plain-English regulatory updates for platform engineers — not lawyers. NCII law is moving fast. Stay ahead of it.
           </p>
-          <a
-            href="mailto:support@corvinth.com?subject=Subscribe me to regulatory updates"
-            style={{
-              fontSize: '14px', textDecoration: 'underline',
-              color: '#4A4A45',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = '#8C8B84'}
-            onMouseLeave={e => e.currentTarget.style.color = '#4A4A45'}
-          >
+          <a href="mailto:support@corvinth.com?subject=Subscribe me to regulatory updates"
+            style={{ fontSize:'14px', textDecoration:'underline', color:'#4A4A45', transition:'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color='#8C8B84'}
+            onMouseLeave={e => e.currentTarget.style.color='#4A4A45'}>
             Email us to subscribe →
           </a>
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
-      {/* ── FOUNDER SECTION ───────────────────────────────────────────────────── */}
+      {/* ── FOUNDER ───────────────────────────────────────────────────────────── */}
       <section id="founder">
-        <div className="inner" style={{ maxWidth: '700px' }}>
+        <div className="inner" style={{ maxWidth:'700px' }}>
           <p className="section-tag">a note from the team</p>
           <h2 className="section-title">There&apos;s a human accountable for this.</h2>
           <div className="founder-card">
             <div className="founder-avatar">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '52px', height: '52px' }}>
-                <circle cx="24" cy="24" r="24" fill="rgba(0,229,155,0.10)" />
-                <circle cx="24" cy="19" r="7" stroke="#00E59B" strokeWidth="1.5" fill="none" />
-                <path d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#00E59B" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:'52px', height:'52px' }}>
+                <circle cx="24" cy="24" r="24" fill="rgba(0,229,155,0.10)"/>
+                <circle cx="24" cy="19" r="7" stroke="#00E59B" strokeWidth="1.5" fill="none"/>
+                <path d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#00E59B" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               </svg>
             </div>
             <div className="founder-body">
@@ -1669,66 +1104,50 @@ if (match.action === 'block') {
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
       {/* ── CONTACT / WAITLIST FORM ───────────────────────────────────────────── */}
       <section id="contact" className="contact-section">
         <div className="inner-sm">
-          <div style={{
-            background: '#0e0e0c',
-            border: '0.5px solid rgba(255,255,255,0.08)',
-            borderRadius: '20px', padding: '3rem 2.5rem',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* Top accent line */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(0,229,155,0.5), transparent)',
-            }} />
-            <p style={{
-              textAlign: 'center', fontSize: '10px', fontWeight: 500,
-              color: '#00E59B', textTransform: 'uppercase', letterSpacing: '0.14em',
-              fontFamily: "'JetBrains Mono', monospace", marginBottom: '1rem',
-            }}>get started</p>
-            <h2 style={{
-              textAlign: 'center',
-              fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 800,
-              color: '#F0EFE8', letterSpacing: '-1px',
-              marginBottom: '0.75rem', lineHeight: 1.1,
-            }}>Ready to integrate?</h2>
-            <p style={{
-              textAlign: 'center', fontSize: '15px', color: '#8C8B84',
-              marginBottom: '2rem', lineHeight: 1.75, fontWeight: 300,
-            }}>
+          <div style={{ background:'#0e0e0c', border:'0.5px solid rgba(255,255,255,0.08)', borderRadius:'20px', padding:'3rem 2.5rem', position:'relative', overflow:'hidden' }}>
+            <div style={{ position:'absolute', top:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg, transparent, rgba(0,229,155,0.5), transparent)' }}/>
+            <p style={{ textAlign:'center', fontSize:'10px', fontWeight:500, color:'#00E59B', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>get started</p>
+            <h2 style={{ textAlign:'center', fontSize:'clamp(26px,3vw,36px)', fontWeight:800, color:'#F0EFE8', letterSpacing:'-1px', marginBottom:'0.75rem', lineHeight:1.1 }}>Ready to integrate?</h2>
+            <p style={{ textAlign:'center', fontSize:'15px', color:'#8C8B84', marginBottom:'2rem', lineHeight:1.75, fontWeight:300 }}>
               Tell us about your platform and we&apos;ll get you API credentials within 24 hours.
             </p>
+
             {formStatus === 'success' ? (
-              <div className="form-success">
-                <p>✓ Request received.</p>
-                <span>We&apos;ll be in touch within 24 hours with your API credentials.</span>
+              <div style={{ textAlign:'center', padding:'2rem 0' }}>
+                <div style={{ fontSize:'28px', marginBottom:'1rem' }}>✓</div>
+                <p style={{ fontSize:'17px', fontWeight:600, color:'#F0EFE8', marginBottom:'0.5rem' }}>You&apos;re on the list.</p>
+                <p style={{ fontSize:'14px', color:'#8C8B84', lineHeight:1.75 }}>
+                  Expect credentials within 24 hours — check your inbox at{' '}
+                  <span style={{ color:'#00E59B', fontFamily:"'JetBrains Mono',monospace" }}>{form.work_email}</span>.
+                </p>
               </div>
             ) : (
               <>
                 <div className="form-grid">
                   <div className="form-field">
                     <label>Contact name <span>*</span></label>
-                    <input name="contact_name" placeholder="Jane Smith" value={form.contact_name} onChange={handleFormChange} className="form-input" />
+                    <input name="contact_name" placeholder="Jane Smith" value={form.contact_name} onChange={handleFormChange} className="form-input" disabled={formStatus === 'submitting'}/>
                   </div>
                   <div className="form-field">
                     <label>Work email <span>*</span></label>
-                    <input name="work_email" type="email" placeholder="jane@company.com" value={form.work_email} onChange={handleFormChange} className="form-input" />
+                    <input name="work_email" type="email" placeholder="jane@company.com" value={form.work_email} onChange={handleFormChange} className="form-input" disabled={formStatus === 'submitting'}/>
                   </div>
                   <div className="form-field">
                     <label>Company / Platform <span>*</span></label>
-                    <input name="company_name" placeholder="Acme Dating Inc." value={form.company_name} onChange={handleFormChange} className="form-input" />
+                    <input name="company_name" placeholder="Acme Dating Inc." value={form.company_name} onChange={handleFormChange} className="form-input" disabled={formStatus === 'submitting'}/>
                   </div>
                   <div className="form-field">
                     <label>Platform URL <span>*</span></label>
-                    <input name="platform_url" placeholder="https://yourapp.com" value={form.platform_url} onChange={handleFormChange} className="form-input" />
+                    <input name="platform_url" placeholder="https://yourapp.com" value={form.platform_url} onChange={handleFormChange} className="form-input" disabled={formStatus === 'submitting'}/>
                   </div>
                   <div className="form-field">
                     <label>Platform type <span>*</span></label>
-                    <select name="platform_type" value={form.platform_type} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.platform_type ? '#F0EFE8' : '#4A4A45' }}>
+                    <select name="platform_type" value={form.platform_type} onChange={handleFormChange} className="form-input" style={{ cursor:'pointer', color: form.platform_type ? '#F0EFE8' : '#4A4A45' }} disabled={formStatus === 'submitting'}>
                       <option value="">Select type…</option>
                       <option value="dating">Dating app</option>
                       <option value="social">Social platform</option>
@@ -1741,7 +1160,7 @@ if (match.action === 'block') {
                   </div>
                   <div className="form-field">
                     <label>Monthly uploads <span>*</span></label>
-                    <select name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.monthly_upload_volume ? '#F0EFE8' : '#4A4A45' }}>
+                    <select name="monthly_upload_volume" value={form.monthly_upload_volume} onChange={handleFormChange} className="form-input" style={{ cursor:'pointer', color: form.monthly_upload_volume ? '#F0EFE8' : '#4A4A45' }} disabled={formStatus === 'submitting'}>
                       <option value="">Select volume…</option>
                       <option value="under_10k">Under 10,000 / month</option>
                       <option value="10k_100k">10,000 – 100,000 / month</option>
@@ -1751,7 +1170,7 @@ if (match.action === 'block') {
                   </div>
                   <div className="form-field full">
                     <label>Do you need Pulse?</label>
-                    <select name="pipeline_choice" value={form.pipeline_choice} onChange={handleFormChange} className="form-input" style={{ cursor: 'pointer', color: form.pipeline_choice ? '#F0EFE8' : '#4A4A45' }}>
+                    <select name="pipeline_choice" value={form.pipeline_choice} onChange={handleFormChange} className="form-input" style={{ cursor:'pointer', color: form.pipeline_choice ? '#F0EFE8' : '#4A4A45' }} disabled={formStatus === 'submitting'}>
                       <option value="">Select…</option>
                       <option value="shield_only">Shield only — hash matching</option>
                       <option value="shield_and_pulse">Pulse + Shield — semantic detection + complaint registry</option>
@@ -1760,23 +1179,26 @@ if (match.action === 'block') {
                   </div>
                   <div className="form-field full">
                     <label>How did you hear about us?</label>
-                    <input name="referral_source" placeholder="Twitter, a colleague, YC forum…" value={form.referral_source} onChange={handleFormChange} className="form-input" />
+                    <input name="referral_source" placeholder="Twitter, a colleague, YC forum…" value={form.referral_source} onChange={handleFormChange} className="form-input" disabled={formStatus === 'submitting'}/>
                   </div>
                   <div className="form-field full">
                     <label>Use case / message</label>
-                    <textarea name="use_case" rows={3} placeholder="Tell us briefly what you're building and how Corvinth fits in…" value={form.use_case} onChange={handleFormChange} className="form-input" style={{ resize: 'vertical', lineHeight: 1.65 }} />
+                    <textarea name="use_case" rows={3} placeholder="Tell us briefly what you're building and how Corvinth fits in…" value={form.use_case} onChange={handleFormChange} className="form-input" style={{ resize:'vertical', lineHeight:1.65 }} disabled={formStatus === 'submitting'}/>
                   </div>
                 </div>
-                {formError && <p className="form-error">{formError}</p>}
-                <button onClick={handleFormSubmit} disabled={formStatus === 'submitting'} className="form-submit">
-                  {formStatus === 'submitting' ? 'Sending…' : 'request API access →'}
+                {formError && (
+                  <p style={{ fontSize:'13px', color:'#FF4D4D', marginTop:'1rem', fontFamily:"'JetBrains Mono',monospace", lineHeight:1.6 }}>
+                    Something went wrong — email us directly at{' '}
+                    <a href="mailto:support@corvinth.com" style={{ color:'#FF4D4D', textDecoration:'underline' }}>support@corvinth.com</a>
+                  </p>
+                )}
+                <button onClick={handleFormSubmit} disabled={formStatus === 'submitting'} className="form-submit" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', opacity: formStatus === 'submitting' ? 0.7 : 1 }}>
+                  {formStatus === 'submitting' ? (
+                    <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:'spin 0.8s linear infinite', flexShrink:0 }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Sending…</>
+                  ) : 'request API access →'}
                 </button>
-                <p style={{
-                  textAlign: 'center', marginTop: '1rem',
-                  fontSize: '11px', color: '#4A4A45',
-                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em',
-                }}>
-                  Early access from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$99/mo</b> · Standard plans from <b style={{ color: '#8C8B84', fontWeight: 500 }}>$299/mo</b>
+                <p style={{ textAlign:'center', marginTop:'1rem', fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.04em' }}>
+                  Early access from <b style={{ color:'#8C8B84', fontWeight:500 }}>$99/mo</b> · Standard plans from <b style={{ color:'#8C8B84', fontWeight:500 }}>$299/mo</b>
                 </p>
               </>
             )}
@@ -1784,12 +1206,13 @@ if (match.action === 'block') {
         </div>
       </section>
 
-      <hr />
+      <hr/>
 
       {/* ── FOOTER ────────────────────────────────────────────────────────────── */}
       <footer>
         <p>CORVINTH · Trust &amp; safety infrastructure · 2026</p>
         <div className="footer-links">
+          <a href="#how">how it works</a>
           <a href="#shield">shield</a>
           <a href="#pulse">pulse</a>
           <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
@@ -1797,21 +1220,5 @@ if (match.action === 'block') {
         </div>
       </footer>
     </>
-  );
-}
-
-// ── FAQ accordion sub-component ──────────────────────────────────────────────
-function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className={`faq-item${open ? ' faq-open' : ''}`}>
-      <button className="faq-q" onClick={() => setOpen(!open)}>
-        <span>{q}</span>
-        <svg className="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      {open && <div className="faq-a"><p>{a}</p></div>}
-    </div>
   );
 }
