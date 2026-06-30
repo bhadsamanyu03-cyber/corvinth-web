@@ -251,16 +251,18 @@ export default function Home() {
             <span className="snippet-dot"/><span className="snippet-dot"/><span className="snippet-dot"/>
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
-          <pre className="snippet-body">{`const { match } = await corvinth.check({
-  pdq_hash:             hash,       // 64-char hex, computed by SDK
-  pdq_dihedral_hashes: variants,   // all 8 orientations
-  source: 'profile_photo'
+          <pre className="snippet-body">{`const result = await corvinth.check({
+  pdq_hash,             // 64-char hex, computed by SDK
+  pdq_dihedral_hashes,  // all 8 orientations
+  content_type: 'image',
 });
 
-if (match.action === 'content_removed') {
+if (result.action === 'content_removed') {
   return res.status(403).json({ blocked: true });
 }
-// → { case_uuid, action, classification, hamming_distance }`}</pre>
+// → { case_uuid, classification, action,
+//     hamming_distance, matched_case_id, review_queue,
+//     pipeline_1_result, pipeline_2_queued, timestamp }`}</pre>
         </div>
 
         <div className="hero-cta">
@@ -386,7 +388,7 @@ if (match.action === 'content_removed') {
           {/* 5-step flow */}
           <div style={{ display:'flex', flexDirection:'column', gap:'0', marginBottom:'3rem' }}>
             {[
-              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js, Python, Go, Ruby, PHP available.' },
+              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js/TypeScript and Python in active development. No SDK required either; one HTTP call works today.' },
               { n:'02', label:'Compute PDQ locally', body:'The SDK hashes the image on your server. All 8 orientations in one call. No pixels leave your infrastructure.' },
               { n:'03', label:'POST the hash',       body:'Send the 64-char hex hash to POST /hash/check with your API key. Under 100ms round-trip.' },
               { n:'04', label:'Receive decision',    body:'allow · review · block — with a case UUID and optional Hamming distance for audit.' },
@@ -483,9 +485,9 @@ if (match.action === 'content_removed') {
 
       {/* ── SDK STRIP ─────────────────────────────────────────────────────────── */}
       <div className="social-strip">
-        <div className="social-strip-label">SDK available for</div>
+        <div className="social-strip-label">SDK in active development for</div>
         <div className="social-logos">
-          {['Node.js','Python','Go','Ruby','PHP','AWS Lambda'].map(tech => (
+          {['Node.js / TypeScript','Python'].map(tech => (
             <div key={tech} className="social-logo-item">{tech}</div>
           ))}
         </div>
@@ -584,7 +586,7 @@ if (match.action === 'content_removed') {
         <div className="inner" style={{ maxWidth:'980px' }}>
           <p className="section-tag" style={{ background:'rgba(77,158,255,0.08)', borderColor:'rgba(77,158,255,0.25)', color:'#4D9EFF' }}>pulse — semantic detection</p>
           <h2 className="section-title">Catch what hashes miss.</h2>
-          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity.</p>
+          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity. Submit a complaint via a presigned URL (we compute the embedding server-side, under SSRF-hardened constraints) or, on Enterprise, send a pre-computed vector directly — your image bytes never have to leave your infrastructure either way.</p>
           <div style={{ background:'#060605', border:'0.5px solid rgba(77,158,255,0.15)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
             <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
@@ -647,6 +649,31 @@ if (match.action === 'content_removed') {
           <p className="section-sub">Two pipelines. One decision. Every endpoint returns a structured response your upload handler can act on immediately.</p>
           <div className="api-grid">
             <div>
+              {/* Meta */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Meta</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
+                {[
+                  { method:'GET', endpoint:'/health', color:'#8C8B84', bg:'rgba(255,255,255,0.04)' },
+                ].map(ep => (
+                  <div key={ep.endpoint+ep.method} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Platform */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Platform</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
+                {[
+                  { method:'POST', endpoint:'/platform/register', color:'#00E59B', bg:'rgba(0,229,155,0.08)' },
+                  { method:'GET',  endpoint:'/platform/verify',    color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                ].map(ep => (
+                  <div key={ep.endpoint+ep.method} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+              </div>
               {/* Shield endpoints */}
               <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Shield</div>
               <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
@@ -656,6 +683,7 @@ if (match.action === 'content_removed') {
                   { method:'GET',  endpoint:'/cases/{case_uuid}',   color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
                   { method:'POST', endpoint:'/cases/{case_uuid}/confirm', color:'#00E59B', bg:'rgba(0,229,155,0.08)' },
                   { method:'GET',  endpoint:'/cases/{case_uuid}/audit',   color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
+                  { method:'GET',  endpoint:'/cases/{case_uuid}/challenge', color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
                 ].map(ep => (
                   <div key={ep.endpoint+ep.method} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
                     <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
@@ -677,9 +705,9 @@ if (match.action === 'content_removed') {
                   </div>
                 ))}
               </div>
-              {/* Appeals + Admin */}
-              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Appeals &amp; Admin</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+              {/* Appeals + Hashes */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Appeals &amp; Hashes</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'1.5rem' }}>
                 {[
                   { method:'POST', endpoint:'/appeals',      color:'#00E59B', bg:'rgba(0,229,155,0.08)'  },
                   { method:'GET',  endpoint:'/hashes/count', color:'#4D9EFF', bg:'rgba(77,158,255,0.08)' },
@@ -689,6 +717,19 @@ if (match.action === 'content_removed') {
                     <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
                   </div>
                 ))}
+              </div>
+              {/* Demo */}
+              <div style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', marginBottom:'8px' }}>Demo</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+                {[
+                  { method:'POST', endpoint:'/demo/check', color:'#FFB224', bg:'rgba(255,178,36,0.08)' },
+                ].map(ep => (
+                  <div key={ep.endpoint} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'#060605', border:'0.5px solid rgba(255,178,36,0.12)', borderRadius:'8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px' }}>
+                    <span style={{ fontSize:'10px', fontWeight:500, padding:'2px 8px', borderRadius:'4px', background:ep.bg, color:ep.color, flexShrink:0, letterSpacing:'0.06em' }}>{ep.method}</span>
+                    <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
+                  </div>
+                ))}
+                <p style={{ fontSize:'11px', color:'#4A4A45', marginTop:'4px', lineHeight:1.6 }}>No API key required — powers the live demo below.</p>
               </div>
             </div>
 
@@ -760,7 +801,7 @@ if (match.action === 'content_removed') {
           <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
           <div className="onboard-grid">
             {[
-              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials within 24 hours. We send you a key, a sandbox environment, and integration guides for Node.js, Python, and Go.', tasks:['API key issued','Sandbox environment live','Integration guide sent'] },
+              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials — typically within 24 hours. We send you an API key and integration notes for Node.js/TypeScript and Python (SDKs in active development; raw HTTP works today).', tasks:['API key issued','Integration notes sent','Live demo available with no API key'] },
               { day:'Day 1', title:'One endpoint in your pipeline', body:'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.', tasks:['POST /hash/check integrated','Block / review / allow logic wired','First real scan running'] },
               { day:'Day 2', title:'Audit log running', body:'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.', tasks:['Audit log exporting','Webhooks configured','Legal team can pull reports'] },
             ].map((step, i) => (
@@ -817,7 +858,7 @@ if (match.action === 'content_removed') {
           <div className="trust-grid">
             {[
               { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash or vector crosses the network boundary.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>, title:'Rotation tolerant', body:'All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught by Shield. Arbitrary rotations caught by Pulse.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>, title:'Rotation tolerant', body:'All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught by Shield. An optional second, normalized hash lane catches brightness/contrast evasion attempts that the standard lane alone would miss. Arbitrary rotations caught by Pulse.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>, title:'PDQ + DINOv2', body:'Uses Meta PDQ for perceptual hashing and DINOv2 for semantic vectors. Both run locally via the SDK — no pixels sent to Corvinth.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, title:'Your policy, our detection', body:'We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, title:'FTC-ready audit log', body:'Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
@@ -1014,8 +1055,8 @@ if (match.action === 'content_removed') {
               {[
                 { q:'Does a re-upload of the same image count as a new scan?', a:"Yes. Every call to /hash/check counts as one scan, regardless of whether the hash has been seen before. This keeps billing predictable and reflects the actual compute cost of the lookup." },
                 { q:'What counts as a failed upload — does it consume a scan?', a:"No. If your platform rejects an upload before calling Corvinth (e.g. wrong file type, too large), that does not consume a scan. A scan is counted only when a hash is sent to /hash/check. If the Corvinth API returns an error on our side, that call is not counted." },
-                { q:'What happens if I go over my monthly scan limit?', a:"We don't hard-cap at the limit. Your platform keeps scanning and we bill overage at the rate shown on your plan. We email you at 80% and 100% of your allowance so there are no surprises." },
-                { q:'Is there a free trial or sandbox?', a:"Yes. Every account gets sandbox credentials at signup. The sandbox accepts real API calls and returns realistic responses — no real NCII hashes are stored in the sandbox environment. Test freely before going live." },
+                { q:'What happens if I go over my monthly scan limit?', a:"We don't hard-cap your platform at the limit — scanning keeps working. If you're consistently running above your plan's included volume, we'll reach out to talk about moving you to the right plan rather than surprise-billing you for overage." },
+                { q:'Is there a free trial or sandbox?', a:"You can try real matching right now with the live demo above — no API key, no signup. We don't yet auto-provision a separate sandbox environment per account at registration; if you want test credentials before going live, just ask when you sign up." },
               ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
             </div>
           </div>
@@ -1031,11 +1072,11 @@ if (match.action === 'content_removed') {
           <h2 className="section-title">Questions platforms actually ask.</h2>
           <div className="faq-list">
             {[
-              { q:"What happens if there's a false positive and a legitimate image gets blocked?", a:"Every decision from Corvinth returns a confidence tier and a case UUID. For anything below the 'exact match' threshold, the API returns a 'review' action rather than an automatic block — your platform decides what to do. You can also use the /appeals endpoint to flag a case and we maintain a permanent audit log of every decision so there's always a paper trail for disputes." },
+              { q:"What happens if there's a false positive and a legitimate image gets blocked?", a:"It depends on your platform's settings. An EXACT match is always removed immediately. A FUZZY match (a close-but-not-perfect hash match) is handled one of three ways: if you've opted into strict mode, it's treated as EXACT and removed; if you're on a plan with our AI tiebreaker and supply a presigned URL, it's held for automatic AI review; otherwise — the default for most platforms — it's shadow-quarantined and the uploader gets an automatic challenge link to dispute it. Every decision gets a case UUID and a permanent, chain-verified audit log entry, and you can file a counter-notice via the /appeals endpoint at any time." },
               { q:"Are you actually integrated with StopNCII's database, or just PDQ-compatible?", a:"Corvinth syncs against the StopNCII hash feed. When a victim reports an image to StopNCII, that hash enters the shared database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network, not just complaints filed directly with you. We are an independent company and do not represent StopNCII." },
               { q:'Does Corvinth ever see or store the actual images?', a:"No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values." },
               { q:'How small is "too small" to need this?', a:"TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team." },
-              { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no required SDK — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. We've written integration guides for Node.js, Python, and Go. Most platforms are live within a working day." },
+              { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no SDK strictly required — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. Node.js/TypeScript and Python SDKs are in active development. Most platforms are live within a working day." },
               { q:"What is Pulse and when do I need it?", a:"Pulse is the semantic detection pipeline. It uses DINOv2 vectors and cosine similarity to catch images that PDQ hashing misses: heavy crops, arbitrary rotations, and direct victim complaints where no hash exists yet. Pulse is included in the Growth plan and above." },
             ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
           </div>
