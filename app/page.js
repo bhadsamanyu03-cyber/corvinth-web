@@ -186,13 +186,11 @@ export default function Home() {
     }
   };
 
-  // Liability calculator
-  const [uploadsPerMonth, setUploadsPerMonth] = useState(500000);
-  const [violationRate,   setViolationRate]   = useState(0.001);
+  // Liability calculator — direct violation count, no synthetic "violation rate"
+  // (there is no published FTC benchmark for this — see disclaimer copy below)
+  const [violationsEstimate, setViolationsEstimate] = useState(5);
   const finePerViolation   = 53088;
-  const hypotheticalViolations = Math.round(uploadsPerMonth * violationRate);
-  const estimatedExposure      = Math.round(hypotheticalViolations * finePerViolation);
-  const violationRateLabel = violationRate === 0.0001 ? '0.01%' : violationRate === 0.001 ? '0.1%' : '1%';
+  const estimatedExposure  = violationsEstimate * finePerViolation;
   const formatExposure = n => {
     if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
     if (n >= 1_000)     return `$${(n/1_000).toFixed(0)}K`;
@@ -233,7 +231,7 @@ export default function Home() {
           <svg className="icon" style={{ width:'10px', height:'10px', fill:'currentColor', stroke:'none' }} viewBox="0 0 24 24">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          TIDA compliant · PDQ perceptual hashing · DINOv2 semantic matching · audit-ready
+          Privacy first · PDQ perceptual hashing · DINOv2 semantic matching · Audit ready · TIDA ready
         </div>
         <h1>
           Protect your platform<br />
@@ -251,10 +249,12 @@ export default function Home() {
             <span className="snippet-dot"/><span className="snippet-dot"/><span className="snippet-dot"/>
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
-          <pre className="snippet-body">{`const result = await corvinth.check({
-  pdq_hash,             // 64-char hex, computed by SDK
-  pdq_dihedral_hashes,  // all 8 orientations
-  content_type: 'image',
+          <pre className="snippet-body">{`import { CorvinthClient } from '@corvinth/sdk';
+const client = new CorvinthClient({ apiKey: process.env.CORVINTH_API_KEY });
+
+const result = await client.checkHash({
+  pdq_hash,             // 64-char hex, computed locally by SDK
+  pdq_dihedral_hashes,  // all 8 orientations — no pixels sent
 });
 
 if (result.action === 'content_removed') {
@@ -862,7 +862,7 @@ if (result.action === 'content_removed') {
               { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>, title:'PDQ + DINOv2', body:'Uses Meta PDQ for perceptual hashing and DINOv2 for semantic vectors. Both run locally via the SDK — no pixels sent to Corvinth.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, title:'Your policy, our detection', body:'We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, title:'FTC-ready audit log', body:'Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title:'TIDA compliance ready', body:'Catches violations at upload — before any removal request is filed. The 48h clock starts with evidence already logged.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title:'Compliance-ready architecture', body:'Catches violations at upload — before any removal request is filed. Evidence is already logged before any regulator asks for it.' },
             ].map((card, i) => (
               <div key={i} className="trust-card">
                 <div className="ticon">{card.icon}</div>
@@ -888,8 +888,8 @@ if (result.action === 'content_removed') {
       <section id="tida" style={{ padding:'6rem 2.5rem', background:'var(--bg-off)' }}>
         <div className="inner">
           <p className="section-tag">the regulation</p>
-          <h2 className="section-title">TIDA is law. Enforcement is active.</h2>
-          <p className="section-sub">The Take It Down Act didn&apos;t sneak up quietly. Here&apos;s the timeline every platform needs to understand.</p>
+          <h2 className="section-title">Why image safety suddenly matters.</h2>
+          <p className="section-sub">Regulatory pressure on platforms is accelerating globally. The U.S. Take It Down Act is the clearest example — but it won&apos;t be the last.</p>
           <div className="tida-timeline">
             {[
               { date:'Feb 2025',    label:'TIDA introduced',                    body:'Bipartisan bill introduced in both House and Senate with broad support. Named partly in response to the Taylor Swift deepfake incident.' },
@@ -917,24 +917,57 @@ if (result.action === 'content_removed') {
       <section className="donothing-section">
         <div className="inner">
           <p className="section-tag">if you do nothing</p>
-          <h2 className="section-title">The FTC process is public, slow, and expensive.</h2>
-          <p className="section-sub">It won&apos;t happen to you — until it does. Here is what the actual enforcement timeline looks like once a complaint is filed.</p>
-          <div className="donothing-grid">
-            {[
-              { step:'Day 1',      title:'A victim submits a removal request', body:'Your 48-hour TIDA clock starts. If your platform has no detection or intake flow, this request may go to a generic support inbox and be missed entirely.' },
-              { step:'Day 3+',     title:'The 48-hour deadline passes',        body:'The victim files an FTC complaint. This is a formal legal record. The FTC has jurisdiction under TIDA and open investigations become public record when actioned.' },
-              { step:'Weeks later',title:'FTC issues a Civil Investigative Demand', body:'Your platform must produce records: what was uploaded, when it was removed, what your moderation process was. If you have no audit log, you have no defense.' },
-              { step:'Settlement', title:'$53,088 per violation — per image, per re-upload', body:'Fines are calculated per violation. A single viral NCII case re-uploaded 20 times before removal is $1M+ in exposure. Settlement terms are public. Press coverage follows.' },
-            ].map((item, i) => (
-              <div key={i} className="donothing-card">
-                <div className="donothing-bar"/>
-                <div className="donothing-step">{item.step}</div>
-                <h4>{item.title}</h4>
-                <p>{item.body}</p>
-              </div>
-            ))}
+          <h2 className="section-title">Two different engineering realities.</h2>
+          <p className="section-sub">
+            The difference between platforms that handle image safety well and platforms that don&apos;t
+            isn&apos;t intent — it&apos;s infrastructure.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '2.5rem', marginBottom: '2.5rem' }}>
+            {/* Without Corvinth */}
+            <div style={{ background: 'rgba(255,77,77,0.04)', border: '0.5px solid rgba(255,77,77,0.18)', borderRadius: '16px', padding: '1.75rem' }}>
+              <div style={{ fontSize: '10px', fontWeight: 500, color: '#FF4D4D', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono',monospace", marginBottom: '1.25rem' }}>Without Corvinth</div>
+              {[
+                'User uploads image',
+                'No detection at ingest',
+                'Victim files abuse report',
+                'Support ticket created',
+                'Manual investigation begins',
+                '48h deadline missed',
+                'FTC complaint filed',
+                'Platform at risk',
+              ].map((step, i, arr) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: '13px', color: i >= 5 ? '#FF4D4D' : '#8C8B84', padding: '7px 0', fontFamily: "'JetBrains Mono',monospace" }}>↓ {step}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* With Corvinth */}
+            <div style={{ background: 'rgba(0,229,155,0.04)', border: '0.5px solid rgba(0,229,155,0.18)', borderRadius: '16px', padding: '1.75rem' }}>
+              <div style={{ fontSize: '10px', fontWeight: 500, color: '#00E59B', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono',monospace", marginBottom: '1.25rem' }}>With Corvinth</div>
+              {[
+                'User uploads image',
+                'SDK hashes locally — no pixels sent',
+                'POST /hash/check → <100ms',
+                'Decision returned: allow · review · block',
+                'Case UUID created',
+                'Audit log entry written',
+                'Webhook fired to your platform',
+                'Evidence ready before any complaint',
+              ].map((step, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: '13px', color: i >= 4 ? '#00E59B' : '#8C8B84', padding: '7px 0', fontFamily: "'JetBrains Mono',monospace" }}>↓ {step}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ marginTop:'2rem', textAlign:'center' }}>
+
+          <div style={{ marginTop: '1rem', padding: '1rem 1.5rem', background: 'rgba(255,178,36,0.05)', border: '0.5px solid rgba(255,178,36,0.2)', borderRadius: '12px', fontSize: '13px', color: '#8C8B84', lineHeight: 1.75 }}>
+            <strong style={{ color: '#FFB224' }}>Note on TIDA:</strong> Under the Take It Down Act (U.S., active May 2026), platforms have 48 hours to remove flagged NCII after a valid request. Failure is $53,088 per violation. Corvinth catches violations at upload — before the clock starts.
+          </div>
+
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
             <a className="btn-primary lg" href="#contact">don&apos;t wait for a complaint →</a>
           </div>
         </div>
@@ -948,32 +981,28 @@ if (result.action === 'content_removed') {
           <p className="section-tag">exposure calculator</p>
           <h2 className="section-title">What&apos;s your platform&apos;s risk?</h2>
           <p style={{ fontSize:'15px', color:'#8C8B84', marginBottom:'2.5rem', fontWeight:300, lineHeight:1.75 }}>
-            Slide to your monthly upload volume. See your worst-case FTC exposure under TIDA.
+            $53,088 is the FTC&apos;s current civil penalty per TIDA violation — that figure is real and confirmed.
+            There is no published benchmark for how many violations a platform like yours might actually have,
+            so estimate a number you believe is realistic and see what it adds up to.
           </p>
           <div className="calc-box">
             <div className="calc-top">
-              <div className="calc-label">Monthly uploads</div>
-              <div className="calc-value">{uploadsPerMonth.toLocaleString()}</div>
+              <div className="calc-label">Estimated unresolved violations</div>
+              <div className="calc-value">{violationsEstimate}</div>
             </div>
-            <input type="range" min="10000" max="5000000" step="10000" value={uploadsPerMonth}
-              onChange={e => setUploadsPerMonth(Number(e.target.value))} className="calc-slider" />
-            <div className="calc-ticks"><span>10K</span><span>500K</span><span>1M</span><span>5M</span></div>
+            <input type="range" min="1" max="100" step="1" value={violationsEstimate}
+              onChange={e => setViolationsEstimate(Number(e.target.value))} className="calc-slider" />
+            <div className="calc-ticks"><span>1</span><span>25</span><span>50</span><span>100</span></div>
             <div className="calc-result">
-              <div className="calc-result-label">Estimated max FTC exposure</div>
+              <div className="calc-result-label">Estimated exposure</div>
               <div className="calc-result-num">{formatExposure(estimatedExposure)}</div>
               <div className="calc-result-sub">
-                Based on {violationRateLabel} violation rate · {hypotheticalViolations.toLocaleString()} hypothetical violations · $53,088 each
+                {violationsEstimate.toLocaleString()} violation{violationsEstimate === 1 ? '' : 's'} × $53,088 each — the FTC&apos;s current TIDA civil penalty
               </div>
             </div>
-            {/* Violation rate toggle */}
-            <div style={{ display:'flex', alignItems:'center', gap:'8px', justifyContent:'center', marginBottom:'1rem' }}>
-              <span style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace" }}>Violation rate:</span>
-              {[{label:'0.01%',value:0.0001},{label:'0.1%',value:0.001},{label:'1%',value:0.01}].map(opt => (
-                <button key={opt.label} onClick={() => setViolationRate(opt.value)} style={{ fontSize:'11px', padding:'4px 12px', borderRadius:'999px', border:`0.5px solid ${violationRate === opt.value ? 'rgba(0,229,155,0.4)' : 'rgba(255,255,255,0.10)'}`, background: violationRate === opt.value ? 'rgba(0,229,155,0.10)' : 'transparent', color: violationRate === opt.value ? '#00E59B' : '#8C8B84', cursor:'pointer', fontFamily:"'JetBrains Mono',monospace", transition:'all 0.15s' }}>{opt.label}</button>
-              ))}
-            </div>
             <p style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", textAlign:'center', marginBottom:'1.25rem', letterSpacing:'0.02em' }}>
-              Planning tool only — enter your own upload volume to estimate exposure under TIDA
+              Hypothetical planning tool — the violation count is a number you choose, not a sourced
+              statistic. The $53,088 figure alone is the real, FTC-confirmed number here.
             </p>
             <div className="calc-cta-row">
               <span className="calc-corvinth-cost">Corvinth costs from <b>$99/mo</b> to cover this.</span>
@@ -1044,8 +1073,8 @@ if (result.action === 'content_removed') {
           </div>
 
           <p style={{ textAlign:'center', marginTop:'1.5rem', fontSize:'12px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.03em', lineHeight:1.7 }}>
-            Founding tier available — 3 platforms only, full Shield + Pulse access from $99/mo.{' '}
-            <a href="mailto:support@corvinth.com" style={{ color:'#FFB224', textDecoration:'underline' }}>Email support@corvinth.com</a> to apply.
+            Founding tier — 3 platforms only, full Shield + Pulse access from $99/mo. Once the founding tier closes, standard pricing applies from $299/mo.{' '}
+            <a href="mailto:support@corvinth.com" style={{ color:'#FFB224', textDecoration:'underline' }}>Email support@corvinth.com</a> to apply before it fills.
           </p>
 
           {/* Pricing FAQ */}
