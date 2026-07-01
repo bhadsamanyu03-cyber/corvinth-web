@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
+  title: "Corvinth — Image Safety Infrastructure | NCII Detection & TIDA Compliance",
   description:
-    "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
+    "Image and video safety infrastructure for user-generated content platforms. Corvinth's two-pipeline detection — Shield (hash matching, under 100ms) and Pulse (semantic matching via DINOv2) — starts with NCII detection and TIDA compliance.",
   openGraph: {
-    title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
+    title: "Corvinth — Image Safety Infrastructure | NCII Detection & TIDA Compliance",
     description:
-      "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
+      "Image and video safety infrastructure for user-generated content platforms. Corvinth's two-pipeline detection — Shield (hash matching, under 100ms) and Pulse (semantic matching via DINOv2) — starts with NCII detection and TIDA compliance.",
     type: "website",
     url: "https://corvinth.com",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Corvinth — Shield & Pulse | NCII Detection Infrastructure",
+    title: "Corvinth — Image Safety Infrastructure | NCII Detection & TIDA Compliance",
     description:
-      "Two-pipeline NCII detection. Shield matches known hashes in under 100ms. Pulse catches semantic variants, crops, and direct complaints using DINOv2. TIDA compliant.",
+      "Image and video safety infrastructure for user-generated content platforms. Corvinth's two-pipeline detection — Shield (hash matching, under 100ms) and Pulse (semantic matching via DINOv2) — starts with NCII detection and TIDA compliance.",
   },
 };
 

@@ -51,7 +51,11 @@ function ApiDemo() {
       const data = await res.json();
       setResponse(JSON.stringify(data, null, 2));
       setLatency(`${ms}ms`);
-      setStatus(data.match_found ? "match" : "ok");
+      setStatus(
+        data.match_found ? "match" :
+        data.classification === "NEAR_MISS" ? "nearmiss" :
+        "ok"
+      );
     } catch (err) {
       const ms = Math.round(performance.now() - t0);
       setResponse(
@@ -62,16 +66,18 @@ function ApiDemo() {
   }
 
   const statusLabel = {
-    idle:    "waiting for input",
-    loading: "querying engine…",
-    ok:      "no match · allow ✓",
-    match:   "match found · blocked 🚫",
-    error:   "request failed",
+    idle:     "waiting for input",
+    loading:  "querying engine…",
+    ok:       "CLEAN · content_allowed ✓",
+    nearmiss: "NEAR_MISS · content_allowed (flagged for pattern review)",
+    match:    "match found · blocked 🚫",
+    error:    "request failed",
   }[status];
 
   const dotColor = {
     idle: "#4A4A45", loading: "#FFB224",
-    ok: "#00E59B",  match: "#FF4D4D", error: "#FF4D4D",
+    ok: "#00E59B",  nearmiss: "#FFB224",
+    match: "#FF4D4D", error: "#FF4D4D",
   }[status];
 
   function syntaxHighlight(str) {
@@ -111,7 +117,7 @@ function ApiDemo() {
           style={{ width:'100%', padding:'10px', borderRadius:'8px', border:'0.5px solid rgba(255,255,255,0.12)', background:'transparent', fontSize:'13px', color:'#F0EFE8', cursor: status === "loading" ? 'not-allowed' : 'pointer', opacity: status === "loading" ? 0.6 : 1, fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
           {status === "loading" ? (
             <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>querying…</>
-          ) : "Run sub-linear lookup →"}
+          ) : "Check for a match →"}
         </button>
         <p style={{ fontSize:'11px', color:'#4A4A45', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace" }}>
           Live sandbox · first request may take ~10s (Render cold start)
@@ -231,7 +237,7 @@ export default function Home() {
           <svg className="icon" style={{ width:'10px', height:'10px', fill:'currentColor', stroke:'none' }} viewBox="0 0 24 24">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          Privacy first · PDQ perceptual hashing · DINOv2 semantic matching · Audit ready · TIDA ready
+          Deploy in an afternoon · Privacy-first architecture · Powered by PDQ + DINOv2
         </div>
         <h1>
           Protect your platform<br />
@@ -239,7 +245,7 @@ export default function Home() {
           <em>before it spreads.</em>
         </h1>
         <p>
-          Privacy-first image safety infrastructure for platforms with user-generated content.
+          Privacy-first image and video safety infrastructure for platforms with user-generated content.
           Deploy in an afternoon. No images ever leave your servers.
         </p>
 
@@ -249,6 +255,9 @@ export default function Home() {
             <span className="snippet-dot"/><span className="snippet-dot"/><span className="snippet-dot"/>
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
+          <pre className="snippet-body">{`# install
+npm install @corvinth/sdk          # v0.2.0
+# pip install corvinth             # v0.2.0 · Python`}</pre>
           <pre className="snippet-body">{`import { CorvinthClient } from '@corvinth/sdk';
 const client = new CorvinthClient({ apiKey: process.env.CORVINTH_API_KEY });
 
@@ -261,6 +270,7 @@ if (result.action === 'content_removed') {
   return res.status(403).json({ blocked: true });
 }
 // → { case_uuid, classification, action,
+//     confidence_score, matched_lane,
 //     hamming_distance, matched_case_id, review_queue,
 //     pipeline_1_result, pipeline_2_queued, timestamp }`}</pre>
         </div>
@@ -276,7 +286,7 @@ if (result.action === 'content_removed') {
         <div className="inner" style={{ textAlign:'center' }}>
           <p style={{ fontSize:'10px', color:'var(--text-faint)', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'var(--font-mono)', marginBottom:'2rem' }}>Built for</p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', justifyContent:'center' }}>
-            {['Dating Apps','Social Platforms','Creator Platforms','AI Communities','Messaging Apps','Adult Content Platforms'].map(type => (
+            {['Social Platforms','Dating Apps','Messaging Apps','Creator Platforms','AI Communities','Adult Content Platforms'].map(type => (
               <div key={type} style={{ padding:'10px 20px', borderRadius:'999px', border:'0.5px solid var(--border-mid)', background:'var(--bg-card)', fontSize:'13px', color:'var(--text-muted)', fontFamily:'var(--font-mono)', letterSpacing:'0.02em' }}>
                 {type}
               </div>
@@ -284,54 +294,6 @@ if (result.action === 'content_removed') {
           </div>
         </div>
       </section>
-
-      {/* ── TRUSTED ARCHITECTURE — zero-knowledge flow ───────────────────────── */}
-      <section style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
-        <div className="inner" style={{ maxWidth:'760px', textAlign:'center' }}>
-          <p className="section-tag">trusted architecture</p>
-          <h2 className="section-title">No images ever leave your infrastructure.</h2>
-          <p className="section-sub" style={{ margin:'0 auto 3rem' }}>
-            The SDK runs entirely on your servers. Only a 256-bit hash crosses the network — never pixels. This is the architecture, not a configuration option.
-          </p>
-          {/* Flow diagram */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flexWrap:'wrap', gap:'0', margin:'0 auto', maxWidth:'680px' }}>
-            {[
-              { label:'Image', sub:'your server', color:'var(--text-muted)' },
-              null,
-              { label:'SDK', sub:'runs locally', color:'var(--green)' },
-              null,
-              { label:'PDQ Hash', sub:'256 bits only', color:'var(--green)' },
-              null,
-              { label:'Corvinth', sub:'match engine', color:'var(--text-muted)' },
-              null,
-              { label:'Decision', sub:'<100ms', color:'var(--green)' },
-            ].map((step, i) =>
-              step === null ? (
-                <span key={i} style={{ color:'var(--text-faint)', fontSize:'18px', padding:'0 6px', userSelect:'none' }}>→</span>
-              ) : (
-                <div key={i} style={{ padding:'14px 18px', borderRadius:'10px', border:`0.5px solid ${step.color === 'var(--green)' ? 'rgba(0,229,155,0.25)' : 'var(--border)'}`, background: step.color === 'var(--green)' ? 'rgba(0,229,155,0.06)' : 'var(--bg-off)', textAlign:'center', minWidth:'90px' }}>
-                  <div style={{ fontSize:'13px', fontWeight:600, color: step.color, fontFamily:'var(--font-mono)', letterSpacing:'0.01em' }}>{step.label}</div>
-                  <div style={{ fontSize:'10px', color:'var(--text-faint)', marginTop:'3px', fontFamily:'var(--font-mono)' }}>{step.sub}</div>
-                </div>
-              )
-            )}
-          </div>
-          <div style={{ marginTop:'2.5rem', display:'flex', alignItems:'center', justifyContent:'center', gap:'2.5rem', flexWrap:'wrap' }}>
-            {[
-              '0 pixels sent to Corvinth',
-              'GDPR & TIDA compliant by design',
-              'No configuration required',
-            ].map(item => (
-              <div key={item} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'var(--text-muted)' }}>
-                <span style={{ color:'var(--green)', fontSize:'15px' }}>✓</span>
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <hr/>
 
       {/* ── WHY CORVINTH — outcomes not features ─────────────────────────────── */}
       <section style={{ padding:'6rem 2.5rem' }}>
@@ -360,7 +322,7 @@ if (result.action === 'content_removed') {
               },
               {
                 outcome: 'Your policy. Our signal.',
-                detail:  'Corvinth returns allow / review / block. You decide what happens next. We are the detection layer, not the decision maker.',
+                detail:  'Corvinth returns allow / review / block / clean. You decide what happens next. We are the detection layer, not the decision maker.',
                 icon: <svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
               },
             ].map((card, i) => (
@@ -368,6 +330,57 @@ if (result.action === 'content_removed') {
                 <div className="usecase-icon">{card.icon}</div>
                 <h4>{card.outcome}</h4>
                 <p>{card.detail}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ marginTop:'2rem', fontSize:'13px', color:'var(--text-faint)', maxWidth:'560px' }}>
+            NCII is where Corvinth starts. The same hashing, matching, and audit infrastructure underneath Shield and Pulse is built to extend to other categories of harmful or unauthorized content over time.
+          </p>
+        </div>
+      </section>
+
+      <hr/>
+
+      {/* ── TRUSTED ARCHITECTURE — zero-knowledge flow ───────────────────────── */}
+      <section style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
+        <div className="inner" style={{ maxWidth:'760px', textAlign:'center' }}>
+          <p className="section-tag">trusted architecture</p>
+          <h2 className="section-title">No images ever leave your infrastructure under Pipeline 1.</h2>
+          <p className="section-sub" style={{ margin:'0 auto 3rem' }}>
+            The SDK runs entirely on your servers. Only a 256-bit hash crosses the network — never pixels. This is Pipeline 1 (Shield). Pipeline 2 deep scans are opt-in, disclosed separately, and disabled by default.
+          </p>
+          {/* Flow diagram */}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flexWrap:'wrap', gap:'0', margin:'0 auto', maxWidth:'680px' }}>
+            {[
+              { label:'Image', sub:'your server', color:'var(--text-muted)' },
+              null,
+              { label:'SDK', sub:'runs locally', color:'var(--green)' },
+              null,
+              { label:'PDQ Hash', sub:'256 bits only', color:'var(--green)' },
+              null,
+              { label:'Corvinth', sub:'match engine', color:'var(--text-muted)' },
+              null,
+              { label:'Decision', sub:'<100ms · p50', color:'var(--green)' },
+            ].map((step, i) =>
+              step === null ? (
+                <span key={i} style={{ color:'var(--text-faint)', fontSize:'18px', padding:'0 6px', userSelect:'none' }}>→</span>
+              ) : (
+                <div key={i} style={{ padding:'14px 18px', borderRadius:'10px', border:`0.5px solid ${step.color === 'var(--green)' ? 'rgba(0,229,155,0.25)' : 'var(--border)'}`, background: step.color === 'var(--green)' ? 'rgba(0,229,155,0.06)' : 'var(--bg-off)', textAlign:'center', minWidth:'90px' }}>
+                  <div style={{ fontSize:'13px', fontWeight:600, color: step.color, fontFamily:'var(--font-mono)', letterSpacing:'0.01em' }}>{step.label}</div>
+                  <div style={{ fontSize:'10px', color:'var(--text-faint)', marginTop:'3px', fontFamily:'var(--font-mono)' }}>{step.sub}</div>
+                </div>
+              )
+            )}
+          </div>
+          <div style={{ marginTop:'2.5rem', display:'flex', alignItems:'center', justifyContent:'center', gap:'2.5rem', flexWrap:'wrap' }}>
+            {[
+              '0 pixels sent to Corvinth · Pipeline 1',
+              'GDPR & TIDA compliant by design',
+              'No configuration required',
+            ].map(item => (
+              <div key={item} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'var(--text-muted)' }}>
+                <span style={{ color:'var(--green)', fontSize:'15px' }}>✓</span>
+                {item}
               </div>
             ))}
           </div>
@@ -417,7 +430,7 @@ if (result.action === 'content_removed') {
                 { n:'01', title:'Normalize on your server',      body:'The SDK handles EXIF orientation, resizing, compression — all locally. No pixels sent anywhere.' },
                 { n:'02', title:'Generate 8 PDQ fingerprints',   body:'Meta PDQ produces fingerprints for all 8 orientations simultaneously. Rotation and re-encoding are tolerated by design.' },
                 { n:'03', title:'Match against NCII database',   body:"Hash sent to Corvinth's API. VP-Tree Hamming-distance lookup across all orientations. Under 100ms." },
-                { n:'04', title:'Decision returned to you',      body:'allow / review / block — plus a case UUID, classification tier, and Hamming distance for your audit log.' },
+                { n:'04', title:'Decision returned to you',      body:'allow · review · block · clean — plus a case UUID, classification, confidence_score, matched_lane, and Hamming distance for your audit log.' },
               ].map((s, i, arr) => (
                 <div key={s.n} className="tl-item">
                   {i < arr.length-1 && <div className="tl-line"/>}
@@ -429,10 +442,10 @@ if (result.action === 'content_removed') {
           ) : (
             <div className="timeline">
               {[
-                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint via the Corvinth-integrated intake flow. No external submission required.' },
-                { n:'02', title:'SDK computes DINOv2 locally',    body:'384-dimensional semantic vector generated on your infrastructure. Original pixels never leave your server.' },
-                { n:'03', title:'Vector stored in registry',      body:"Only the vector and complaint metadata reach Corvinth's API. Becomes active for all future upload matching." },
-                { n:'04', title:'Future uploads matched',         body:'Cosine similarity against registered complaint vectors. Heavy crops, arbitrary rotations, semantic variants — all caught.' },
+                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint and POSTs to /platform/complaints with a presigned CDN URL (Mode A · all tiers) or a pre-computed DINOv2 vector (Mode B · Enterprise).' },
+                { n:'02', title:'Corvinth stores the embedding',  body:'Mode A: Corvinth fetches the URL under SSRF-hardened constraints and computes the 384-dim vector server-side. Mode B: your pre-computed vector is stored directly — image bytes never leave your servers.' },
+                { n:'03', title:'Vector stored in your registry', body:"Only the vector and complaint metadata are stored in Qdrant under your platform's namespace. Strictly scoped — no cross-platform matching." },
+                { n:'04', title:'Future uploads matched semantically', body:'Cosine similarity against your complaint registry on every /hash/check call. Crops, rotations, brightness edits — caught. Results include pulse_similarity score (0.0–1.0).' },
               ].map((s, i, arr) => (
                 <div key={s.n} className="tl-item">
                   {i < arr.length-1 && <div className="tl-line"/>}
@@ -451,11 +464,11 @@ if (result.action === 'content_removed') {
       <div className="proof">
         <div className="proof-item">
           <div className="proof-num">&lt;100ms</div>
-          <div className="proof-label">Shield decision latency</div>
+          <div className="proof-label">Shield decision latency · single worker baseline</div>
         </div>
         <div className="proof-item">
           <div className="proof-num">0 pixels</div>
-          <div className="proof-label">never stored on Corvinth servers</div>
+          <div className="proof-label">Pipeline 1 · never sent to Corvinth</div>
         </div>
         <div className="proof-item">
           <div className="proof-num">crops + rotations</div>
@@ -479,17 +492,20 @@ if (result.action === 'content_removed') {
         <div className="stopncii-body">
           <div className="stopncii-label">Key differentiator</div>
           <h3>We match against real reported NCII hashes — not generic nudity detection.</h3>
-          <p>Corvinth syncs against the StopNCII PDQ hash feed. When a victim reports an image, their fingerprint enters the database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network. A photo on a beach is not a violation. A specific image reported by a victim is.</p>
+          <p>Corvinth is built to be format-compatible with the StopNCII PDQ hash standard — the same fingerprinting scheme used across the industry's largest victim-reporting network. Corvinth is not currently partnered with or integrated into StopNCII's feed; matches run against Corvinth's own database, populated via direct victim complaints (Pulse) and platform-reported hashes. A photo on a beach is not a violation. A specific image reported by a victim is.</p>
         </div>
       </div>
 
       {/* ── SDK STRIP ─────────────────────────────────────────────────────────── */}
       <div className="social-strip">
-        <div className="social-strip-label">SDK in active development for</div>
+        <div className="social-strip-label">SDK in active development · v0.2.0</div>
         <div className="social-logos">
-          {['Node.js / TypeScript','Python'].map(tech => (
+          {['Node.js / TypeScript — npm install @corvinth/sdk','Python — pip install corvinth'].map(tech => (
             <div key={tech} className="social-logo-item">{tech}</div>
           ))}
+        </div>
+        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45', textAlign:'center', marginTop:'0.75rem' }}>
+          checkHash() · checkVideo() · submitComplaint() · addHash()
         </div>
       </div>
 
@@ -513,6 +529,15 @@ if (result.action === 'content_removed') {
             </div>
           ))}
         </div>
+        <div className="pipeline-row">
+          <span className="pipeline-label" style={{ background:'rgba(255,178,36,0.10)', color:'#FFB224', border:'0.5px solid rgba(255,178,36,0.25)' }}>Video</span>
+          {['Every video upload','MD5 + SHA-256 (local SDK)','O(1) set lookup','Exact match · Allow'].map((step,i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(255,178,36,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(255,178,36,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#FFB224' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
+              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
+            </div>
+          ))}
+        </div>
       </div>
 
       <hr/>
@@ -523,13 +548,16 @@ if (result.action === 'content_removed') {
           <p className="section-tag">shield — hash matching</p>
           <h2 className="section-title">What your team sees every day.</h2>
           <p className="section-sub">A real-time view of every scan decision — matches, blocks, and review queue items — with a full audit trail behind every case.</p>
+          <div style={{ display:'flex', justifyContent:'center', marginBottom:'1.25rem' }}>
+            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', padding:'5px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'rgba(255,255,255,0.03)' }}>Illustrative dashboard · sample data, not live production metrics</span>
+          </div>
           <div style={{ background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
             <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                 <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#00E59B', boxShadow:'0 0 6px rgba(0,229,155,0.6)' }}/>
                 <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / shield · TestDating</span>
               </div>
-              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>live</span>
+              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>sample</span>
             </div>
             <div className="dashboard-grid">
               <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
@@ -561,12 +589,15 @@ if (result.action === 'content_removed') {
                   { label:'Uploads scanned', value:'1,248,991', color:'#F0EFE8' },
                   { label:'Matches found',   value:'317',        color:'#FF4D4D' },
                   { label:'Sent to review',  value:'84',         color:'#FFB224' },
-                  { label:'Avg response',    value:'72ms',       color:'#00E59B' },
+                  { label:'Avg response',    value:'60–120ms',   color:'#00E59B' },
                   { label:'Active cases',    value:'12',         color:'#F0EFE8' },
                 ].map(m => (
                   <div key={m.label} style={{ marginBottom:'1.25rem' }}>
                     <div style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'3px', letterSpacing:'0.06em', textTransform:'uppercase' }}>{m.label}</div>
                     <div style={{ fontSize:'24px', fontWeight:700, color:m.color, letterSpacing:'-0.5px', lineHeight:1 }}>{m.value}</div>
+                    {m.label === 'Avg response' && (
+                      <div style={{ fontSize:'9px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginTop:'2px', letterSpacing:'0.06em' }}>p50 · under 50 rps</div>
+                    )}
                   </div>
                 ))}
                 <div style={{ marginTop:'1.5rem', padding:'10px 14px', background:'rgba(0,229,155,0.07)', border:'0.5px solid rgba(0,229,155,0.18)', borderRadius:'8px' }}>
@@ -729,17 +760,19 @@ if (result.action === 'content_removed') {
                     <span style={{ color:'#8C8B84' }}>{ep.endpoint}</span>
                   </div>
                 ))}
-                <p style={{ fontSize:'11px', color:'#4A4A45', marginTop:'4px', lineHeight:1.6 }}>No API key required — powers the live demo below.</p>
+                <p style={{ fontSize:'11px', color:'#4A4A45', marginTop:'4px', lineHeight:1.6 }}>No API key required — powers the live demo below. Rate limited to 10 requests/minute, 50/hour.</p>
               </div>
             </div>
 
             {/* Response tabs */}
             <div>
               <div className="tab-bar">
-                <button className={`tab-btn${apiTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setApiTab('shield')}>Shield response</button>
+                <button className={`tab-btn${apiTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setApiTab('shield')}>Shield — EXACT</button>
+                <button className={`tab-btn${apiTab === 'clean'  ? ' active-shield' : ''}`} onClick={() => setApiTab('clean')}>Shield — CLEAN</button>
+                <button className={`tab-btn${apiTab === 'video'  ? ' active-shield' : ''}`} onClick={() => setApiTab('video')}>Video lane</button>
                 <button className={`tab-btn${apiTab === 'pulse'  ? ' active-pulse'  : ''}`} onClick={() => setApiTab('pulse')}>Pulse response</button>
               </div>
-              <div style={{ background:'#060605', border:`0.5px solid ${apiTab === 'shield' ? 'rgba(255,255,255,0.07)' : 'rgba(77,158,255,0.15)'}`, borderRadius:'12px', padding:'1.5rem', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', lineHeight:1.9 }}>
+              <div style={{ background:'#060605', border:`0.5px solid ${apiTab === 'pulse' ? 'rgba(77,158,255,0.15)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'12px', padding:'1.5rem', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', lineHeight:1.9 }}>
                 {apiTab === 'shield' ? (
                   <>
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check response</div>
@@ -754,7 +787,42 @@ if (result.action === 'content_removed') {
                       <div><span style={{ color:'#00E59B' }}>"review_queue"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4A4A45' }}>null</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"pipeline_1_result"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"EXACT"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"pipeline_2_queued"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"confidence_score"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>0.9922</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_lane"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"shield_standard"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"timestamp"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"2026-06-27T…"</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                ) : apiTab === 'clean' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check — CLEAN (no match)</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"cse_44a9f2c1…"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"match_found"</span>: <span style={{ color:'#4D9EFF' }}>false</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"classification"</span>: <span style={{ color:'#00E59B' }}>"CLEAN"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"action"</span>: <span style={{ color:'#00E59B' }}>"content_allowed"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"hamming_distance"</span>: <span style={{ color:'#4A4A45' }}>null</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"confidence_score"</span>: <span style={{ color:'#4A4A45' }}>null</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_lane"</span>: <span style={{ color:'#4A4A45' }}>null</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"pipeline_2_queued"</span>: <span style={{ color:'#4D9EFF' }}>false</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"timestamp"</span>: <span style={{ color:'#FFB224' }}>"2026-06-27T…"</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                ) : apiTab === 'video' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check — video exact match</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"cse_77d2c1b0…"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"match_found"</span>: <span style={{ color:'#4D9EFF' }}>true</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"classification"</span>: <span style={{ color:'#FF4D4D' }}>"EXACT"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"action"</span>: <span style={{ color:'#FF4D4D' }}>"content_removed"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_lane"</span>: <span style={{ color:'#FFB224' }}>"video_md5"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_case_id"</span>: <span style={{ color:'#FFB224' }}>"case_3b1e…"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"pipeline_2_queued"</span>: <span style={{ color:'#4D9EFF' }}>false</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"timestamp"</span>: <span style={{ color:'#FFB224' }}>"2026-06-27T…"</span></div>
                     </div>
                     <div style={{ color:'#F0EFE8' }}>{'}'}</div>
                   </>
@@ -786,7 +854,7 @@ if (result.action === 'content_removed') {
         <div className="inner">
           <p className="section-tag">live api demo</p>
           <h2 className="section-title">Test the Engine.</h2>
-          <p className="section-sub">Submit a PDQ hash and see a real API response from the match engine. No API key required.</p>
+          <p className="section-sub">Submit a PDQ hash and see a real API response from the match engine. No API key required. Limited to 10 requests/minute.</p>
           <ApiDemo/>
         </div>
       </section>
@@ -828,7 +896,7 @@ if (result.action === 'content_removed') {
           <p className="section-sub">The first question your legal team will ask. Here is the complete answer.</p>
           <div className="security-grid">
             {[
-              { title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs entirely on your infrastructure. Only a 256-bit hash or a 384-dim vector crosses the network boundary — this is the architecture, not a configuration option.', icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+              { title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers under Pipeline 1 (Shield). The SDK runs entirely on your infrastructure. Only a 256-bit hash or a 384-dim vector crosses the network boundary. Pipeline 2 deep scans are opt-in and disclosed separately.', icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
               { title:'Encryption in transit', body:'All API traffic uses TLS 1.3. Hash values and vectors in transit are non-reversible and cannot reconstruct the original image. Even if intercepted, a 256-bit hash reveals nothing about image content.', icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> },
               { title:'Hash retention policy', body:'We store only the fingerprint, vector, and decision metadata — never original content. Hash data is retained for audit log purposes and can be configured per contract for enterprise customers.', icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> },
             ].map((card, i) => (
@@ -854,7 +922,7 @@ if (result.action === 'content_removed') {
         <div className="inner">
           <p className="section-tag">trust and compliance</p>
           <h2 className="section-title">Built honestly on available technology.</h2>
-          <p className="section-sub">Corvinth does not claim access to restricted systems like Microsoft PhotoDNA unless officially approved. Built around open-source perceptual hashing and platform-side compliance workflows.</p>
+          <p className="section-sub">Corvinth is built on open-source perceptual hashing and DINOv2 semantic vectors. The architecture supports optional Microsoft PhotoDNA integration — not currently active in production. When enabled, it operates on a platform opt-in basis with full disclosure in the DPA.</p>
           <div className="trust-grid">
             {[
               { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash or vector crosses the network boundary.' },
@@ -863,6 +931,8 @@ if (result.action === 'content_removed') {
               { icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, title:'Your policy, our detection', body:'We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, title:'FTC-ready audit log', body:'Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
               { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title:'Compliance-ready architecture', body:'Catches violations at upload — before any removal request is filed. Evidence is already logged before any regulator asks for it.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>, title:'Near-miss pattern detection', body:'NEAR_MISS content is allowed through, but every occurrence is logged and analyzed for coordinated evasion patterns — repeated near-variant re-uploads from the same actor get flagged for threat intelligence review, even when no single upload crosses the block threshold.' },
+              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>, title:'Signed webhooks', body:'Every webhook we send is signed with HMAC-SHA256 over the raw request body. Verify the X-Corvinth-Signature header against your webhook secret before trusting a payload.' },
             ].map((card, i) => (
               <div key={i} className="trust-card">
                 <div className="ticon">{card.icon}</div>
@@ -877,7 +947,7 @@ if (result.action === 'content_removed') {
             ))}
           </div>
           <div className="disclaimer-box">
-            <p>Corvinth syncs against the StopNCII hash feed. We do not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
+            <p>Corvinth's hashing format is compatible with the StopNCII PDQ standard. Corvinth is not currently partnered with or integrated into StopNCII's feed, and does not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
           </div>
         </div>
       </section>
@@ -1102,7 +1172,7 @@ if (result.action === 'content_removed') {
           <div className="faq-list">
             {[
               { q:"What happens if there's a false positive and a legitimate image gets blocked?", a:"It depends on your platform's settings. An EXACT match is always removed immediately. A FUZZY match (a close-but-not-perfect hash match) is handled one of three ways: if you've opted into strict mode, it's treated as EXACT and removed; if you're on a plan with our AI tiebreaker and supply a presigned URL, it's held for automatic AI review; otherwise — the default for most platforms — it's shadow-quarantined and the uploader gets an automatic challenge link to dispute it. Every decision gets a case UUID and a permanent, chain-verified audit log entry, and you can file a counter-notice via the /appeals endpoint at any time." },
-              { q:"Are you actually integrated with StopNCII's database, or just PDQ-compatible?", a:"Corvinth syncs against the StopNCII hash feed. When a victim reports an image to StopNCII, that hash enters the shared database — Corvinth pulls from that feed so your platform benefits from every report made anywhere on the network, not just complaints filed directly with you. We are an independent company and do not represent StopNCII." },
+              { q:"Are you actually integrated with StopNCII's database, or just PDQ-compatible?", a:"Just PDQ-compatible, and we'll say that plainly: Corvinth is not currently partnered with or integrated into StopNCII's feed. Our hashing format uses the same open-source Meta PDQ standard, so the architecture is ready to ingest a feed like theirs, but today Corvinth's database is built from direct victim complaints (Pulse) and hashes reported by our own platform customers. We are an independent company and do not represent StopNCII." },
               { q:'Does Corvinth ever see or store the actual images?', a:"No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values." },
               { q:'How small is "too small" to need this?', a:"TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team." },
               { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no SDK strictly required — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. Node.js/TypeScript and Python SDKs are in active development. Most platforms are live within a working day." },
@@ -1219,8 +1289,8 @@ if (result.action === 'content_removed') {
                     <label>Platform type <span>*</span></label>
                     <select name="platform_type" value={form.platform_type} onChange={handleFormChange} className="form-input" style={{ cursor:'pointer', color: form.platform_type ? '#F0EFE8' : '#4A4A45' }} disabled={formStatus === 'submitting'}>
                       <option value="">Select type…</option>
-                      <option value="dating">Dating app</option>
                       <option value="social">Social platform</option>
+                      <option value="dating">Dating app</option>
                       <option value="messaging">Messaging app</option>
                       <option value="creator">Creator platform</option>
                       <option value="marketplace">Marketplace</option>
@@ -1280,7 +1350,7 @@ if (result.action === 'content_removed') {
 
       {/* ── FOOTER ────────────────────────────────────────────────────────────── */}
       <footer>
-        <p>CORVINTH · Trust &amp; safety infrastructure · 2026</p>
+        <p>CORVINTH · Trust &amp; safety infrastructure · API v0.2.0 · 2026</p>
         <div className="footer-links">
           <a href="#how">how it works</a>
           <a href="#shield">shield</a>
