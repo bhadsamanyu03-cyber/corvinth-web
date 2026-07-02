@@ -788,7 +788,7 @@ if (result.action === 'content_removed') {
                       <div><span style={{ color:'#00E59B' }}>"pipeline_1_result"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"EXACT"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"pipeline_2_queued"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"confidence_score"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>0.9922</span><span style={{ color:'#5E5E57' }}>,</span></div>
-                      <div><span style={{ color:'#00E59B' }}>"matched_lane"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"shield_standard"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"matched_lane"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"standard"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"timestamp"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"2026-06-27T…"</span></div>
                     </div>
                     <div style={{ color:'#F0EFE8' }}>{'}'}</div>
