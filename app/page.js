@@ -6,7 +6,7 @@ import { useState } from 'react';
 // ── Samples for the live demo ─────────────────────────────────────────────────
 const SAMPLES = {
   nomatch:  "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345",
-  nearmiss: "f1e2d3c4b5a6978685746352413029180f1e2d3c4b5a697868574635241302918",
+  nearmiss: "f1e2d3c4b5a6978685746352413029180f1e2d3c4b5a69786857463524130291",
 };
 function randomHex64() {
   return Array.from({ length: 64 }, () =>
