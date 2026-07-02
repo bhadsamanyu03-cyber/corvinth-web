@@ -176,11 +176,14 @@ export default function Home() {
       setFormError('Please fill in all required fields.'); return;
     }
     setFormStatus('submitting');
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/waitlist`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+const payload = Object.fromEntries(
+  Object.entries(form).filter(([_, v]) => v !== '')
+);
+try {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/waitlist`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err?.detail?.[0]?.msg || 'Submission failed. Please try again.');
