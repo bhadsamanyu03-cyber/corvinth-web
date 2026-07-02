@@ -22,6 +22,12 @@ function ApiDemo() {
   const [status,   setStatus]   = useState("idle");
   const [latency,  setLatency]  = useState("");
 
+  // Warm the server silently on mount
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`, { method: 'GET' })
+      .catch(() => {});
+  }, []);
+  
   async function runDemo() {
     if (!hash || hash.length !== 64) {
       setStatus("error");
