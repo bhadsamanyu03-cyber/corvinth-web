@@ -912,8 +912,8 @@ if (result.action === 'content_removed') {
           </div>
           <div className="dpa-offer">
             <svg className="icon" viewBox="0 0 24 24" style={{ flexShrink:0, color:'#00E59B', width:'20px', height:'20px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:support@corvinth.com" style={{ color:'var(--green)' }}>support@corvinth.com</a> with your legal team&apos;s requirements.</p>
-            <a href="mailto:support@corvinth.com?subject=DPA%20Request" className="btn-ghost" style={{ flexShrink:0 }}>request DPA →</a>
+            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:founder@corvinth.com" style={{ color:'var(--green)' }}>founder@corvinth.com</a> with your legal team&apos;s requirements.</p>
+            <a href="mailto:founder@corvinth.com?subject=DPA%20Request" className="btn-ghost" style={{ flexShrink:0 }}>request DPA →</a>
           </div>
         </div>
       </section>
@@ -1147,7 +1147,7 @@ if (result.action === 'content_removed') {
 
           <p style={{ textAlign:'center', marginTop:'1.5rem', fontSize:'12px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.03em', lineHeight:1.7 }}>
             Founding tier — 3 platforms only, full Shield + Pulse access from $99/mo. Once the founding tier closes, standard pricing applies from $299/mo.{' '}
-            <a href="mailto:support@corvinth.com" style={{ color:'#FFB224', textDecoration:'underline' }}>Email support@corvinth.com</a> to apply before it fills.
+            <a href="mailto:founder@corvinth.com" style={{ color:'#FFB224', textDecoration:'underline' }}>Email founder@corvinth.com</a> to apply before it fills.
           </p>
 
           {/* Pricing FAQ */}
@@ -1209,7 +1209,7 @@ if (result.action === 'content_removed') {
           <p className="section-sub" style={{ margin:'0 auto 2rem' }}>
             We publish plain-English regulatory updates for platform engineers — not lawyers. NCII law is moving fast. Stay ahead of it.
           </p>
-          <a href="mailto:support@corvinth.com?subject=Subscribe me to regulatory updates"
+          <a href="mailto:founder@corvinth.com?subject=Subscribe me to regulatory updates"
             style={{ fontSize:'14px', textDecoration:'underline', color:'#4A4A45', transition:'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color='#8C8B84'}
             onMouseLeave={e => e.currentTarget.style.color='#4A4A45'}>
@@ -1241,7 +1241,7 @@ if (result.action === 'content_removed') {
               <p className="founder-text">
                 Corvinth is the version of this that fits in a startup&apos;s infrastructure budget, integrates in a day, and gives you the audit trail you need to show the FTC you took this seriously. I&apos;m not anonymous — email me directly with any questions, including hard ones about what Corvinth can and cannot do.
               </p>
-              <a href="mailto:support@corvinth.com" className="founder-email">support@corvinth.com</a>
+              <a href="mailto:founder@corvinth.com" className="founder-email">founder@corvinth.com</a>
             </div>
           </div>
         </div>
@@ -1317,8 +1317,31 @@ if (result.action === 'content_removed') {
                       <option value="">Select…</option>
                       <option value="shield_only">Shield only — hash matching</option>
                       <option value="shield_and_pulse">Pulse + Shield — semantic detection + complaint registry</option>
-                      <option value="unsure">Not sure — tell me more</option>
+                      <option value="unsure">Help me decide</option>
                     </select>
+                    {form.pipeline_choice === 'unsure' && (
+                      <div style={{
+                        padding:'1rem 1.25rem',
+                        background:'rgba(77,158,255,0.05)',
+                        border:'0.5px solid rgba(77,158,255,0.20)',
+                        borderRadius:'10px',
+                        fontSize:'13px',
+                        color:'#8C8B84',
+                        lineHeight:1.75,
+                        marginTop:'0.5rem'
+                      }}>
+                        <div style={{ color:'#4D9EFF', fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'0.10em', textTransform:'uppercase', marginBottom:'0.75rem' }}>quick breakdown</div>
+                        <p style={{ marginBottom:'0.75rem' }}>
+                          <strong style={{ color:'#F0EFE8' }}>Shield only</strong> — PDQ hash matching against known NCII. Catches exact and near-identical uploads at ingest. Best for platforms starting with TIDA compliance under 1M uploads/month.
+                        </p>
+                        <p style={{ marginBottom:'0.75rem' }}>
+                          <strong style={{ color:'#F0EFE8' }}>Pulse + Shield</strong> — adds DINOv2 semantic detection. Catches cropped, rotated, or brightness-edited variants that PDQ misses. Also enables a victim complaint registry. Best for dating apps, creator platforms, and high-volume social.
+                        </p>
+                        <p style={{ fontSize:'11px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace" }}>
+                          Not sure? Submit anyway — we'll recommend the right plan based on your volume and platform type.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="form-field full">
                     <label>How did you hear about us?</label>
@@ -1332,7 +1355,7 @@ if (result.action === 'content_removed') {
                 {formError && (
                   <p style={{ fontSize:'13px', color:'#FF4D4D', marginTop:'1rem', fontFamily:"'JetBrains Mono',monospace", lineHeight:1.6 }}>
                     Something went wrong — email us directly at{' '}
-                    <a href="mailto:support@corvinth.com" style={{ color:'#FF4D4D', textDecoration:'underline' }}>support@corvinth.com</a>
+                    <a href="mailto:founder@corvinth.com" style={{ color:'#FF4D4D', textDecoration:'underline' }}>founder@corvinth.com</a>
                   </p>
                 )}
                 <button onClick={handleFormSubmit} disabled={formStatus === 'submitting'} className="form-submit" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', opacity: formStatus === 'submitting' ? 0.7 : 1 }}>
@@ -1359,7 +1382,7 @@ if (result.action === 'content_removed') {
           <a href="#shield">shield</a>
           <a href="#pulse">pulse</a>
           <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
-          <a href="mailto:support@corvinth.com">support@corvinth.com</a>
+          <a href="mailto:founder@corvinth.com">founder@corvinth.com</a>
         </div>
       </footer>
     </>
