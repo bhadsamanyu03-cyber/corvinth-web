@@ -164,6 +164,7 @@ function FaqItem({ q, a }) {
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [apiTab,  setApiTab]  = useState('shield');
+  const [webhookLang, setWebhookLang] = useState('node');
   const [howTab,  setHowTab]  = useState('shield');
 
   // Waitlist form
@@ -780,6 +781,10 @@ if (result.action === 'content_removed') {
                 <button className={`tab-btn${apiTab === 'clean'  ? ' active-shield' : ''}`} onClick={() => setApiTab('clean')}>Shield — CLEAN</button>
                 <button className={`tab-btn${apiTab === 'video'  ? ' active-shield' : ''}`} onClick={() => setApiTab('video')}>Video lane</button>
                 <button className={`tab-btn${apiTab === 'pulse'  ? ' active-pulse'  : ''}`} onClick={() => setApiTab('pulse')}>Pulse response</button>
+                <button className={`tab-btn${apiTab === 'libupsert'    ? ' active-pulse' : ''}`} onClick={() => setApiTab('libupsert')}>Backfill — upsert (Mode B)</button>
+                <button className={`tab-btn${apiTab === 'libupserturl' ? ' active-pulse' : ''}`} onClick={() => setApiTab('libupserturl')}>Backfill — upsert URL (Mode A)</button>
+                <button className={`tab-btn${apiTab === 'libdelete'    ? ' active-pulse' : ''}`} onClick={() => setApiTab('libdelete')}>Backfill — delete vector</button>
+                <button className={`tab-btn${apiTab === 'libjob'       ? ' active-pulse' : ''}`} onClick={() => setApiTab('libjob')}>Backfill — job status</button>
               </div>
               <div style={{ background:'#060605', border:`0.5px solid ${apiTab === 'pulse' ? 'rgba(77,158,255,0.15)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'12px', padding:'1.5rem', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', lineHeight:1.9 }}>
                 {apiTab === 'shield' ? (
@@ -835,7 +840,7 @@ if (result.action === 'content_removed') {
                     </div>
                     <div style={{ color:'#F0EFE8' }}>{'}'}</div>
                   </>
-                ) : (
+                ) : apiTab === 'pulse' ? (
                   <>
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /platform/complaints response</div>
                     <div style={{ color:'#F0EFE8' }}>{'{'}</div>
@@ -845,12 +850,134 @@ if (result.action === 'content_removed') {
                       <div><span style={{ color:'#4D9EFF' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"vector_stored"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"message"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"Complaint registered. Future uploads matched."</span><span style={{ color:'#5E5E57' }}>,</span></div>
-                      <div><span style={{ color:'#4D9EFF' }}>"used_mock_extraction"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"used_mock_extraction"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"backfill_matches"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#F0EFE8' }}>[]</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                ) : apiTab === 'libupsert' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /pulse/library/batch-upsert — Mode B, no tier gate</div>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}>// platform computes DINOv2 locally, sends only vectors + your own content id</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"upserted_count"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>498</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"rejected"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#F0EFE8' }}>[</span><span style={{ color:'#FFB224' }}>"img_00391.jpg"</span><span style={{ color:'#F0EFE8' }}>, </span><span style={{ color:'#FFB224' }}>"img_00477.jpg"</span><span style={{ color:'#F0EFE8' }}>]</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                    <div style={{ color:'#4A4A45', marginTop:'10px', fontSize:'11px' }}>// bad vectors in a batch land in "rejected" — they don't fail the whole request</div>
+                  </>
+                ) : apiTab === 'libupserturl' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /pulse/library/batch-upsert-url — Mode A, gated feature</div>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}>// Corvinth fetches + computes DINOv2 itself. Runs as an async job.</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"job_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"bfjob_9f13ac0e…"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"status"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"queued"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"total_items"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>25000</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                    <div style={{ color:'#4A4A45', marginTop:'10px', fontSize:'11px' }}>// returns immediately — poll GET /pulse/library/jobs/{'{job_id}'} for progress</div>
+                  </>
+                ) : apiTab === 'libdelete' ? (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># DELETE /pulse/library/{'{platform_content_id}'}</div>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}>// call this whenever you delete the source content, or a stale vector can still match</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"platform_content_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"img_00391.jpg"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"deleted"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span></div>
+                    </div>
+                    <div style={{ color:'#F0EFE8' }}>{'}'}</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># GET /pulse/library/jobs/{'{job_id}'}</div>
+                    <div style={{ color:'#F0EFE8' }}>{'{'}</div>
+                    <div style={{ paddingLeft:'18px' }}>
+                      <div><span style={{ color:'#00E59B' }}>"job_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"bfjob_9f13ac0e…"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"status"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"in_progress"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"total_items"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>25000</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"processed_count"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>18250</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"failed_count"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>12</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"last_processed_index"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>18262</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"created_at"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"2026-07-05T02:10:00Z"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"updated_at"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"2026-07-05T02:47:12Z"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"completed_at"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4A4A45' }}>null</span></div>
                     </div>
                     <div style={{ color:'#F0EFE8' }}>{'}'}</div>
                   </>
                 )}
               </div>
+            </div>
+
+
+
+            {/* Webhook signature verification — day-one reference */}
+            <div style={{ marginTop:'2.5rem' }}>
+              <h3 style={{ fontSize:'15px', color:'#F0EFE8', marginBottom:'6px' }}>Verifying webhook signatures</h3>
+              <p style={{ fontSize:'13px', color:'#8A8A82', lineHeight:1.7, marginBottom:'14px' }}>
+                Every webhook is signed with HMAC-SHA256 over the exact raw request body — hash the bytes as received, not a re-parsed/re-serialized copy, or the signature won't match. Compare using a constant-time function (never <code>===</code> or <code>==</code>) so verification doesn't leak timing information.
+              </p>
+              <p style={{ fontSize:'13px', color:'#8A8A82', lineHeight:1.7, marginBottom:'14px' }}>
+                Webhook delivery retries up to 3 times with exponential backoff if we don't receive a 2xx response — your handler may receive the same <code>case_uuid</code> + event more than once (e.g. if your ack was lost in transit even though you processed it). Dedupe on <code>case_uuid</code> before acting, so a duplicate delivery can't trigger <code>remove_content</code> twice.
+              </p>
+
+              <div className="tab-bar">
+                <button className={`tab-btn${webhookLang === 'node' ? ' active-shield' : ''}`} onClick={() => setWebhookLang('node')}>Node.js</button>
+                <button className={`tab-btn${webhookLang === 'python' ? ' active-shield' : ''}`} onClick={() => setWebhookLang('python')}>Python</button>
+              </div>
+              <pre style={{ background:'#060605', border:'0.5px solid rgba(255,255,255,0.07)', borderRadius:'12px', padding:'1.5rem', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', lineHeight:1.7, overflowX:'auto', color:'#F0EFE8' }}>
+{webhookLang === 'node' ? `const crypto = require('crypto');
+const express = require('express');
+const app = express();
+
+// Use express.raw(), not express.json() — you must hash the exact raw
+// bytes Corvinth sent. Re-parsing and re-stringifying JSON can reorder
+// keys or change spacing, silently breaking signature verification.
+app.post('/webhooks/corvinth', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-corvinth-signature'];
+  const rawBody = req.body; // Buffer, not parsed JSON
+
+  const expected = crypto
+    .createHmac('sha256', process.env.CORVINTH_WEBHOOK_SECRET)
+    .update(rawBody)
+    .digest('hex');
+
+  const sigBuf = Buffer.from(signature, 'hex');
+  const expBuf = Buffer.from(expected, 'hex');
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  const payload = JSON.parse(rawBody);
+  // Dedupe on payload.case_uuid before acting — retries can redeliver.
+  console.log('Verified Corvinth event:', payload.event, payload.case_uuid);
+  res.status(200).send('OK');
+});` : `import hmac, hashlib, os
+from fastapi import FastAPI, Request, HTTPException
+
+app = FastAPI()
+WEBHOOK_SECRET = os.environ["CORVINTH_WEBHOOK_SECRET"]
+
+@app.post("/webhooks/corvinth")
+async def corvinth_webhook(request: Request):
+    raw_body = await request.body()  # exact bytes, before any parsing
+    signature = request.headers.get("x-corvinth-signature", "")
+
+    expected = hmac.new(WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+    payload = await request.json()
+    # Dedupe on payload["case_uuid"] before acting — retries can redeliver.
+    print("Verified Corvinth event:", payload["event"], payload["case_uuid"])
+    return {"status": "ok"}`}
+              </pre>
             </div>
           </div>
         </div>
@@ -1112,7 +1239,7 @@ if (result.action === 'content_removed') {
               <div style={{ marginBottom:'1rem' }}><span style={{ fontSize:'10px', fontFamily:"'JetBrains Mono',monospace", padding:'2px 8px', borderRadius:'4px', background:'rgba(77,158,255,0.10)', color:'#4D9EFF', border:'0.5px solid rgba(77,158,255,0.25)' }}>✓ Pulse included</span></div>
               <div style={{ fontSize:'13px', color:'#8C8B84', marginBottom:'1.5rem', lineHeight:1.6 }}>Full Shield + Pulse access. For our first three platforms.</div>
               <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:'8px', marginBottom:'1.75rem', flex:1 }}>
-                {['Full Shield API — hash matching','Full Pulse API — semantic detection','Complaint registry','Audit log export','Direct line to founder','Weekly feedback calls'].map(f => (
+                {['Full Shield API — hash matching','Full Pulse API — semantic detection','Complaint registry','Library backfill — scan existing uploads (Mode B)','Audit log export','Direct line to founder','Weekly feedback calls'].map(f => (
                   <li key={f} style={{ fontSize:'13px', color:'#8C8B84', display:'flex', alignItems:'center', gap:'10px' }}>
                     <span style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#FFB224', flexShrink:0, display:'inline-block', boxShadow:'0 0 4px rgba(255,178,36,0.5)' }}/>
                     {f}
@@ -1125,8 +1252,8 @@ if (result.action === 'content_removed') {
             {/* Starter / Growth / Enterprise */}
             {[
               { name:'Starter', price:'$299', period:'/month', perScan:'~$0.0003/scan · 1M scans included', desc:'For platforms under 1M monthly uploads that need Shield compliance without operational overhead.', features:['Shield API — hash matching','Up to 1M scans/month','Audit log export','Webhook notifications','FTC compliance reports'], pulseIncluded:false, featured:false, cta:'request access' },
-              { name:'Growth',  price:'$799', period:'/month', perScan:'~$0.0002/scan · 5M scans included', desc:'For high-growth platforms that need Pulse for victim complaints, semantic detection, and video.',  features:['Everything in Starter','Full Pulse API — semantic detection','Complaint registry','Video lane — MD5/SHA-256 matching','5M scans/month'], pulseIncluded:true, featured:true, cta:'request access' },
-              { name:'Enterprise', price:'Custom', period:'', perScan:'Unlimited scans · dedicated infra', desc:'For high-volume platforms and custom needs.', features:['Unlimited scans','Pulse + Shield','Dedicated infrastructure','On-premise option','SLA 99.9% uptime','Legal & compliance support'], pulseIncluded:true, featured:false, cta:'contact us' },
+              { name:'Growth',  price:'$799', period:'/month', perScan:'~$0.0002/scan · 5M scans included', desc:'For high-growth platforms that need Pulse for victim complaints, semantic detection, and video.',  features:['Everything in Starter','Full Pulse API — semantic detection','Complaint registry','Library backfill — scan existing uploads (Mode B)','Video lane — MD5+SHA-256 exact match, StopNCII-compatible, computed locally','5M scans/month'], pulseIncluded:true, featured:true, cta:'request access' },
+              { name:'Enterprise', price:'Custom', period:'', perScan:'Unlimited scans · dedicated infra', desc:'For high-volume platforms and custom needs.', features:['Unlimited scans','Pulse + Shield','Library backfill — Mode A available (metered)','Dedicated infrastructure','On-premise option','SLA available with dedicated infra','Legal & compliance support'], pulseIncluded:true, featured:false, cta:'contact us' },
             ].map(plan => (
               <div key={plan.name} style={{ background: plan.featured ? 'rgba(0,229,155,0.05)' : '#0e0e0c', border:`0.5px solid ${plan.featured ? 'rgba(0,229,155,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'16px', padding:'1.75rem', display:'flex', flexDirection:'column', position:'relative', boxShadow: plan.featured ? '0 0 40px rgba(0,229,155,0.08)' : 'none' }}>
                 {plan.featured && <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:'linear-gradient(90deg, transparent, #00E59B, transparent)', borderRadius:'16px 16px 0 0' }}/>}
