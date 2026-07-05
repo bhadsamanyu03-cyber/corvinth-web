@@ -1,7 +1,7 @@
 // app/page.js
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // ── Samples for the live demo ─────────────────────────────────────────────────
 const SAMPLES = {
