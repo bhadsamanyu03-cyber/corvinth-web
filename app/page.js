@@ -187,7 +187,7 @@ const payload = Object.fromEntries(
   Object.entries(form).filter(([_, v]) => v !== '')
 );
 try {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/waitlist`, {
+  const res = await fetch(`/api/waitlist`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
@@ -266,8 +266,8 @@ try {
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
           <pre className="snippet-body">{`# install
-npm install @corvinth/sdk          # in active development
-# Python SDK — coming soon. Raw HTTP works today.`}</pre>
+npm install @corvinth/sdk          # v0.2.0
+# pip install corvinth             # v0.2.0 · Python`}</pre>
           <pre className="snippet-body">{`import { CorvinthClient } from '@corvinth/sdk';
 const client = new CorvinthClient({ apiKey: process.env.CORVINTH_API_KEY });
 
@@ -411,7 +411,7 @@ if (result.action === 'content_removed') {
           {/* 5-step flow */}
           <div style={{ display:'flex', flexDirection:'column', gap:'0', marginBottom:'3rem' }}>
             {[
-              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js/TypeScript and Python in active development. No SDK required either; one HTTP call works today.' },
+              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js/TypeScript and Python, both at v0.2.0. No SDK required either; one HTTP call works today.' },
               { n:'02', label:'Compute PDQ locally', body:'The SDK hashes the image on your server. All 8 orientations in one call. No pixels leave your infrastructure.' },
               { n:'03', label:'POST the hash',       body:'Send the 64-char hex hash to POST /hash/check with your API key. Under 100ms round-trip.' },
               { n:'04', label:'Receive decision',    body:'allow · review · block — with a case UUID and optional Hamming distance for audit.' },
@@ -508,7 +508,7 @@ if (result.action === 'content_removed') {
 
       {/* ── SDK STRIP ─────────────────────────────────────────────────────────── */}
       <div className="social-strip">
-        <div className="social-strip-label">SDK in active development · v0.2.0</div>
+        <div className="social-strip-label">Node.js/TypeScript and Python SDKs · v0.2.0</div>
         <div className="social-logos">
           {['Node.js / TypeScript — npm install @corvinth/sdk','Python — pip install corvinth'].map(tech => (
             <div key={tech} className="social-logo-item">{tech}</div>
@@ -918,7 +918,7 @@ if (result.action === 'content_removed') {
               </div>
             </div>
 
-
+          </div>
 
             {/* Webhook signature verification — day-one reference */}
             <div style={{ marginTop:'2.5rem' }}>
@@ -982,7 +982,6 @@ async def corvinth_webhook(request: Request):
     return {"status": "ok"}`}
               </pre>
             </div>
-          </div>
         </div>
       </section>
 
@@ -1008,7 +1007,7 @@ async def corvinth_webhook(request: Request):
           <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
           <div className="onboard-grid">
             {[
-              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials — typically within 24 hours. We send you an API key and integration notes for Node.js/TypeScript and Python (SDKs in active development; raw HTTP works today).', tasks:['API key issued','Integration notes sent','Live demo available with no API key'] },
+              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials — typically within 24 hours. We send you an API key and integration notes for Node.js/TypeScript and Python, both v0.2.0.', tasks:['API key issued','Integration notes sent','Live demo available with no API key'] },
               { day:'Day 1', title:'One endpoint in your pipeline', body:'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.', tasks:['POST /hash/check integrated','Block / review / allow logic wired','First real scan running'] },
               { day:'Day 2', title:'Audit log running', body:'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.', tasks:['Audit log exporting','Webhooks configured','Legal team can pull reports'] },
             ].map((step, i) => (
@@ -1314,7 +1313,7 @@ async def corvinth_webhook(request: Request):
               { q:"Are you actually integrated with StopNCII's database, or just PDQ-compatible?", a:"Just PDQ-compatible, and we'll say that plainly: Corvinth is not currently partnered with or integrated into StopNCII's feed. Our hashing format uses the same open-source Meta PDQ standard, so the architecture is ready to ingest a feed like theirs, but today Corvinth's database is built from direct victim complaints (Pulse) and hashes reported by our own platform customers. We are an independent company and do not represent StopNCII." },
               { q:'Does Corvinth ever see or store the actual images?', a:"No. The Corvinth SDK runs entirely on your infrastructure and computes the hash and vector locally. Only the PDQ hash (256 bits) or DINOv2 vector (384 floats) crosses the network boundary — not image bytes. It is architecturally impossible for Corvinth to reconstruct the original image from these values." },
               { q:'How small is "too small" to need this?', a:"TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team." },
-              { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no SDK strictly required — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. Node.js/TypeScript and Python SDKs are in active development. Most platforms are live within a working day." },
+              { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no SDK strictly required — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. Node.js/TypeScript and Python SDKs are both live at v0.2.0. Most platforms are live within a working day." },
               { q:"What is Pulse and when do I need it?", a:"Pulse is the semantic detection pipeline. It uses DINOv2 vectors and cosine similarity to catch images that PDQ hashing misses: heavy crops, arbitrary rotations, and direct victim complaints where no hash exists yet. Pulse is included in the Growth plan and above." },
               { q:"How do I enable strict_mode?", a:"strict_mode treats FUZZY matches as EXACT, removing content immediately without a 24-hour uploader challenge. It defaults to off. To enable it for your account, email support@corvinth.com — it's toggled on your platform record by the Corvinth team." },
             ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
