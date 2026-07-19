@@ -753,6 +753,9 @@ section { padding: 6rem 2.5rem; }
   gap: 3rem;
   align-items: start;
 }
+.api-grid > div {
+  min-width: 0;
+}
 
 /* ── CALCULATOR ──────────────────────────────────────────────────────────── */
 .calc-box {
@@ -1420,7 +1423,9 @@ svg.icon {
 /* ── SECTION TABS (Shield / Pulse toggle for JSON) ───────────────────────── */
 .tab-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
+  row-gap: 8px;
   margin-bottom: 1rem;
 }
 .tab-btn {
