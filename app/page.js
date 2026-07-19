@@ -223,7 +223,7 @@ try {
           <a className="btn-ghost" href="#shield">shield</a>
           <a className="btn-ghost" href="#pulse">pulse</a>
           <a className="btn-ghost" href="#pricing">pricing</a>
-          <a className="btn-ghost" href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
+          <a className="btn-ghost" href={`${process.env.NEXT_PUBLIC_API_URL}/docs`} target="_blank" rel="noopener noreferrer">docs</a>
           <a className="btn-primary" href="#contact">request access</a>
           <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
             <span/><span/><span/>
@@ -237,7 +237,7 @@ try {
         <a href="#shield"  onClick={() => setMobileMenuOpen(false)}>Shield</a>
         <a href="#pulse"   onClick={() => setMobileMenuOpen(false)}>Pulse</a>
         <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-        <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
+        <a href={`${process.env.NEXT_PUBLIC_API_URL}/docs`} target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
         <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access →</a>
       </div>
 
@@ -266,8 +266,8 @@ try {
             <span className="snippet-lang">node.js · integrate in minutes</span>
           </div>
           <pre className="snippet-body">{`# install
-npm install @corvinth/sdk          # v0.2.0
-# pip install corvinth             # v0.2.0 · Python`}</pre>
+npm install @corvinth/sdk          # in active development
+# Python SDK — coming soon. Raw HTTP works today.`}</pre>
           <pre className="snippet-body">{`import { CorvinthClient } from '@corvinth/sdk';
 const client = new CorvinthClient({ apiKey: process.env.CORVINTH_API_KEY });
 
@@ -452,7 +452,7 @@ if (result.action === 'content_removed') {
           ) : (
             <div className="timeline">
               {[
-                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint and POSTs to /platform/complaints with a presigned CDN URL (Mode A · all tiers) or a pre-computed DINOv2 vector (Mode B · Enterprise).' },
+                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint and POSTs to /platform/complaints with a presigned CDN URL (Mode A · default) or a pre-computed DINOv2 vector (Mode B · enabled on request).' },
                 { n:'02', title:'Corvinth stores the embedding',  body:'Mode A: Corvinth fetches the URL under SSRF-hardened constraints and computes the 384-dim vector server-side. Mode B: your pre-computed vector is stored directly — image bytes never leave your servers.' },
                 { n:'03', title:'Vector stored in your registry', body:"Only the vector and complaint metadata are stored in Qdrant under your platform's namespace. Strictly scoped — no cross-platform matching." },
                 { n:'04', title:'Future uploads matched semantically', body:'Cosine similarity against your complaint registry on every /hash/check call. Crops, rotations, brightness edits — caught. Results include pulse_similarity score (0.0–1.0).' },
@@ -627,23 +627,26 @@ if (result.action === 'content_removed') {
         <div className="inner" style={{ maxWidth:'980px' }}>
           <p className="section-tag" style={{ background:'rgba(77,158,255,0.08)', borderColor:'rgba(77,158,255,0.25)', color:'#4D9EFF' }}>pulse — semantic detection</p>
           <h2 className="section-title">Catch what hashes miss.</h2>
-          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity. Submit a complaint via a presigned URL (we compute the embedding server-side, under SSRF-hardened constraints) or, on Enterprise, send a pre-computed vector directly — your image bytes never have to leave your infrastructure either way.</p>
+          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity. Submit a complaint via a presigned URL (we compute the embedding server-side, under SSRF-hardened constraints) or, with Mode B enabled on your account, send a pre-computed vector directly — your image bytes never have to leave your infrastructure either way.</p>
+          <div style={{ display:'flex', justifyContent:'center', marginBottom:'1.25rem' }}>
+            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', padding:'5px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'rgba(255,255,255,0.03)' }}>Illustrative dashboard · sample data, not live production metrics</span>
+          </div>
           <div style={{ background:'#060605', border:'0.5px solid rgba(77,158,255,0.15)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
             <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                 <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#4D9EFF', boxShadow:'0 0 6px rgba(77,158,255,0.6)' }}/>
                 <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / pulse · TestDating</span>
               </div>
-              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>live</span>
+              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>sample</span>
             </div>
             <div className="dashboard-grid">
               <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>Complaint registry</div>
                 {[
-                  { id:'CPL-0041', caseId:'cse_9f2a',  score:'0.97', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
-                  { id:'CPL-0040', caseId:'cse_3b1e',  score:'0.91', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
-                  { id:'CPL-0039', caseId:'cse_7c4d',  score:'0.88', status:'Resolved', color:'#00E59B', bg:'rgba(0,229,155,0.07)' },
-                  { id:'CPL-0038', caseId:'cse_2a9f',  score:'0.94', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                  { id:'a3f2c1d0…', caseId:'4f1b2c3d…', score:'0.97', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                  { id:'b8e4d2f1…', caseId:'9a2e5b8c…', score:'0.91', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
+                  { id:'c9f3a4e2…', caseId:'2d7f1a6e…', score:'0.88', status:'Resolved', color:'#00E59B', bg:'rgba(0,229,155,0.07)' },
+                  { id:'d7b1e5c3…', caseId:'8b3c9f2a…', score:'0.94', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
                 ].map(c => (
                   <div key={c.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:'8px', marginBottom:'4px', background:c.bg, border:`0.5px solid ${c.color}1A` }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
@@ -792,7 +795,7 @@ if (result.action === 'content_removed') {
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check response</div>
                     <div style={{ color:'#F0EFE8' }}>{'{'}</div>
                     <div style={{ paddingLeft:'18px' }}>
-                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"cse_83f1a2b3…"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"4f1b2c3d-8e9a-4b1c-a2d3-f1e2b3c4d5e6"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"match_found"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"classification"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"EXACT"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#00E59B' }}>"action"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FF4D4D' }}>"content_removed"</span><span style={{ color:'#5E5E57' }}>,</span></div>
@@ -812,7 +815,7 @@ if (result.action === 'content_removed') {
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check — CLEAN (no match)</div>
                     <div style={{ color:'#F0EFE8' }}>{'{'}</div>
                     <div style={{ paddingLeft:'18px' }}>
-                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"cse_44a9f2c1…"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"7d2e9f0a-1b3c-4d5e-8f6a-2c3d4e5f6a7b"</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"match_found"</span>: <span style={{ color:'#4D9EFF' }}>false</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"classification"</span>: <span style={{ color:'#00E59B' }}>"CLEAN"</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"action"</span>: <span style={{ color:'#00E59B' }}>"content_allowed"</span>,</div>
@@ -829,7 +832,7 @@ if (result.action === 'content_removed') {
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /hash/check — video exact match</div>
                     <div style={{ color:'#F0EFE8' }}>{'{'}</div>
                     <div style={{ paddingLeft:'18px' }}>
-                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"cse_77d2c1b0…"</span>,</div>
+                      <div><span style={{ color:'#00E59B' }}>"case_uuid"</span>: <span style={{ color:'#FFB224' }}>"6a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d"</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"match_found"</span>: <span style={{ color:'#4D9EFF' }}>true</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"classification"</span>: <span style={{ color:'#FF4D4D' }}>"EXACT"</span>,</div>
                       <div><span style={{ color:'#00E59B' }}>"action"</span>: <span style={{ color:'#FF4D4D' }}>"content_removed"</span>,</div>
@@ -845,11 +848,11 @@ if (result.action === 'content_removed') {
                     <div style={{ color:'#4A4A45', marginBottom:'10px', fontSize:'11px' }}># POST /platform/complaints response</div>
                     <div style={{ color:'#F0EFE8' }}>{'{'}</div>
                     <div style={{ paddingLeft:'18px' }}>
-                      <div><span style={{ color:'#4D9EFF' }}>"complaint_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"CPL-0041"</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"complaint_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"a3f2c1d0-4e5f-6b7c-8d9e-0f1a2b3c4d5e"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"case_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"your-internal-ref"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"platform_id"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"plt_abc123"</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"vector_stored"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>true</span><span style={{ color:'#5E5E57' }}>,</span></div>
-                      <div><span style={{ color:'#4D9EFF' }}>"message"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"Complaint registered. Future uploads matched."</span><span style={{ color:'#5E5E57' }}>,</span></div>
+                      <div><span style={{ color:'#4D9EFF' }}>"message"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#FFB224' }}>"Complaint vector stored. Future uploads will be matched against this embedding."</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"used_mock_extraction"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#4D9EFF' }}>false</span><span style={{ color:'#5E5E57' }}>,</span></div>
                       <div><span style={{ color:'#4D9EFF' }}>"backfill_matches"</span><span style={{ color:'#5E5E57' }}>: </span><span style={{ color:'#F0EFE8' }}>[]</span></div>
                     </div>
@@ -1225,7 +1228,7 @@ async def corvinth_webhook(request: Request):
         <div className="inner" style={{ maxWidth:'900px' }}>
           <p className="section-tag">pricing</p>
           <h2 className="section-title">Transparent, usage-based pricing.</h2>
-          <p className="section-sub">Starter is Shield-only. Growth unlocks Pulse — semantic detection and the complaint registry.</p>
+          <p className="section-sub">Starter is Shield-only. Pulse — semantic detection and the complaint registry — is enabled on Growth plans and above at onboarding.</p>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px,1fr))', gap:'1rem' }}>
             {/* Founding tier */}
             <div style={{ background:'rgba(255,178,36,0.04)', border:'0.5px solid rgba(255,178,36,0.35)', borderRadius:'16px', padding:'1.75rem', display:'flex', flexDirection:'column', position:'relative', boxShadow:'0 0 40px rgba(255,178,36,0.06)' }}>
@@ -1313,6 +1316,7 @@ async def corvinth_webhook(request: Request):
               { q:'How small is "too small" to need this?', a:"TIDA has no size exemption. If your platform receives user-uploaded images, you are in scope. The $53,088 fine is per violation, so even a platform with modest traffic can face significant exposure from a handful of un-removed cases. Corvinth's Starter plan at $299/month is specifically designed for smaller platforms that can't staff a trust-and-safety team." },
               { q:"What's the integration effort for an engineering team?", a:"One API endpoint and no SDK strictly required — though we provide one. A backend engineer can have /hash/check called on every upload in an afternoon. Node.js/TypeScript and Python SDKs are in active development. Most platforms are live within a working day." },
               { q:"What is Pulse and when do I need it?", a:"Pulse is the semantic detection pipeline. It uses DINOv2 vectors and cosine similarity to catch images that PDQ hashing misses: heavy crops, arbitrary rotations, and direct victim complaints where no hash exists yet. Pulse is included in the Growth plan and above." },
+              { q:"How do I enable strict_mode?", a:"strict_mode treats FUZZY matches as EXACT, removing content immediately without a 24-hour uploader challenge. It defaults to off. To enable it for your account, email support@corvinth.com — it's toggled on your platform record by the Corvinth team." },
             ].map((item, i) => <FaqItem key={i} q={item.q} a={item.a}/>)}
           </div>
         </div>
@@ -1514,7 +1518,7 @@ async def corvinth_webhook(request: Request):
           <a href="#how">how it works</a>
           <a href="#shield">shield</a>
           <a href="#pulse">pulse</a>
-          <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
+          <a href={`${process.env.NEXT_PUBLIC_API_URL}/docs`} target="_blank" rel="noopener noreferrer">docs</a>
           <a href="mailto:founder@corvinth.com">founder@corvinth.com</a>
         </div>
       </footer>
