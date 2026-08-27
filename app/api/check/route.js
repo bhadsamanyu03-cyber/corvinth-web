@@ -5,20 +5,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    if (!body.pdq_hash || !body.pdq_dihedral_hashes) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // Validate hash format — backend expects exactly 8 hashes of 64 hex chars each
-    const hexRe = /^[0-9a-fA-F]{64}$/;
-    if (!hexRe.test(body.pdq_hash)) {
-      return NextResponse.json({ error: 'pdq_hash must be 64 hex characters' }, { status: 400 });
-    }
-    if (!Array.isArray(body.pdq_dihedral_hashes) || body.pdq_dihedral_hashes.length !== 8) {
-      return NextResponse.json({ error: 'pdq_dihedral_hashes must be an array of exactly 8 hashes' }, { status: 400 });
-    }
-    if (!body.pdq_dihedral_hashes.every(h => hexRe.test(h))) {
-      return NextResponse.json({ error: 'All dihedral hashes must be 64 hex characters' }, { status: 400 });
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
     }
 
     const API_URL = process.env.CORVINTH_API_URL;
@@ -28,7 +16,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
     }
 
-    const backendResponse = await fetch(`${API_URL}/hash/check`, {
+    const backendResponse = await fetch(`${API_URL.replace(/\/$/, '')}/hash/check-and-archive`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
