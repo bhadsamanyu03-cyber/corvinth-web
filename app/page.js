@@ -217,79 +217,74 @@ try {
     <>
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <nav>
-        <a className="logo" href="#">cor<span className="accent">vinth</span></a>
+        <a className="logo" href="#top" aria-label="Corvinth home">cor<span className="accent">vinth</span></a>
         <div className="nav-right">
-          <a className="btn-ghost" href="#how">how it works</a>
-          <a className="btn-ghost" href="#shield">shield</a>
-          <a className="btn-ghost" href="#pulse">pulse</a>
-          <a className="btn-ghost" href="#pricing">pricing</a>
-          <a className="btn-ghost" href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
-          <a className="btn-primary" href="#contact">request access</a>
-          <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          <a className="btn-ghost" href="#how">How it works</a>
+          <a className="btn-ghost" href="#demo">Live demo</a>
+          <a className="btn-ghost" href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a className="btn-primary" href="#contact">Request access</a>
+          <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation">
             <span/><span/><span/>
           </button>
         </div>
       </nav>
 
       {/* ── MOBILE MENU ──────────────────────────────────────────────────────── */}
-      <div className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
+      <div id="mobile-navigation" className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
         <a href="#how"     onClick={() => setMobileMenuOpen(false)}>How it works</a>
-        <a href="#shield"  onClick={() => setMobileMenuOpen(false)}>Shield</a>
-        <a href="#pulse"   onClick={() => setMobileMenuOpen(false)}>Pulse</a>
-        <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+        <a href="#demo"    onClick={() => setMobileMenuOpen(false)}>Live demo</a>
         <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
-        <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access →</a>
+        <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access</a>
       </div>
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <div className="hero" style={{ paddingTop: '8rem' }}>
-        <div className="badge">
-          <svg className="icon" style={{ width:'10px', height:'10px', fill:'currentColor', stroke:'none' }} viewBox="0 0 24 24">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          Deploy in an afternoon · Privacy-first architecture · Powered by PDQ + DINOv2
-        </div>
-        <h1>
-          Protect your platform<br />
-          from known NCII —<br />
-          <em>before it spreads.</em>
-        </h1>
-        <p>
-          Privacy-first image and video safety infrastructure for platforms with user-generated content.
-          Deploy in an afternoon. No images ever leave your servers.
-        </p>
-
-        {/* Hero code snippet */}
-        <div className="hero-snippet">
-          <div className="snippet-header">
-            <span className="snippet-dot"/><span className="snippet-dot"/><span className="snippet-dot"/>
-            <span className="snippet-lang">node.js · integrate in minutes</span>
+      <section id="top" className="hero" aria-labelledby="hero-title">
+        <div className="hero-inner">
+          <div className="hero-copy">
+            <p className="hero-category">Image safety infrastructure</p>
+            <h1 id="hero-title">
+              <span>Reported content comes back.</span>
+              <span><em>Corvinth</em> helps you find the copies.</span>
+            </h1>
+            <p className="hero-description">
+              Image safety infrastructure for platforms with user-generated content. Corvinth helps your team find copies of content it has chosen to track — across existing platform content and new uploads.
+            </p>
+            <p className="hero-boundary">Corvinth returns the detection result. Your platform decides what happens next.</p>
+            <div className="hero-cta">
+              <a className="btn-primary lg" href="#demo">See it work</a>
+              <a className="btn-ghost lg" href="#contact">Request access</a>
+            </div>
+            <p className="hero-trust">Platform-scoped matching <span aria-hidden="true">·</span> Managed or Customer Compute <span aria-hidden="true">·</span> No durable image-byte storage</p>
           </div>
-          <pre className="snippet-body">{`# install
-npm install @corvinth/sdk          # v0.2.0
-# pip install corvinth             # v0.2.0 · Python`}</pre>
-          <pre className="snippet-body">{`import { CorvinthClient } from '@corvinth/sdk';
-const client = new CorvinthClient({ apiKey: process.env.CORVINTH_API_KEY });
 
-const result = await client.checkHash({
-  pdq_hash,             // 64-char hex, computed locally by SDK
-  pdq_dihedral_hashes,  // all 8 orientations — no pixels sent
-});
-
-if (result.action === 'content_removed') {
-  return res.status(403).json({ blocked: true });
-}
-// → { case_uuid, classification, action,
-//     confidence_score, matched_lane,
-//     hamming_distance, matched_case_id, review_queue,
-//     pipeline_1_result, pipeline_2_queued, timestamp }`}</pre>
+          <div className="hero-proof" aria-label="Illustration of platform-scoped detection">
+            <div className="hero-proof-header">
+              <span className="hero-proof-mark" aria-hidden="true" />
+              <span>Platform-scoped detection</span>
+            </div>
+            <div className="hero-proof-flow">
+              <div className="hero-proof-step">
+                <span className="hero-proof-step-label">Platform-selected image</span>
+                <span className="hero-proof-step-value">Detection reference</span>
+              </div>
+              <div className="hero-proof-connector" aria-hidden="true"><span /></div>
+              <div className="hero-proof-step">
+                <span className="hero-proof-step-label">Platform-scoped matching</span>
+                <span className="hero-proof-step-value">Existing content <span className="hero-proof-separator">·</span> New uploads</span>
+              </div>
+              <div className="hero-proof-connector" aria-hidden="true"><span /></div>
+              <div className="hero-proof-step hero-proof-result">
+                <span className="hero-proof-step-label">Detection result</span>
+                <span className="hero-proof-step-value">Match found</span>
+                <div className="hero-proof-details">
+                  <span>Matched object</span><strong>obj_••92</strong>
+                  <span>Platform scope</span><strong>same platform</strong>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="hero-cta">
-          <a className="btn-primary lg" href="#contact">request early access</a>
-          <a className="btn-ghost lg"   href="#how">see how it works</a>
-        </div>
-      </div>
+      </section>
 
       {/* ── BUILT FOR — self-identification ──────────────────────────────────── */}
       <section style={{ padding:'0 2.5rem 5rem', background:'var(--bg)' }}>

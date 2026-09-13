@@ -1,45 +1,22 @@
 import type { Metadata } from "next";
-import { DM_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--font-instrument-sans",
-  display: "swap",
-});
-
-const dmMono = DM_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-dm-mono",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Corvinth — Image safety infrastructure for upload platforms",
+  title: "Corvinth — Image Safety Infrastructure",
   description:
-    "Corvinth compares privacy-preserving image fingerprints with reported-image records and returns a structured signal. Your platform stays in control.",
+    "Image safety infrastructure for platforms with user-generated content. Corvinth helps your team find copies of content it has chosen to track across existing platform content and new uploads.",
   openGraph: {
-    title: "Corvinth — Image safety infrastructure for upload platforms",
+    title: "Corvinth — Image Safety Infrastructure",
     description:
-      "Corvinth compares privacy-preserving image fingerprints with reported-image records and returns a structured signal. Your platform stays in control.",
+      "Reported content comes back. Corvinth helps you find the copies. Image safety infrastructure for platforms with user-generated content.",
     type: "website",
     url: "https://corvinth.com",
-    images: [
-      {
-        url: "https://corvinth.com/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Corvinth — Catch known harmful images before they spread.",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Corvinth — Image safety infrastructure for upload platforms",
+    title: "Corvinth — Image Safety Infrastructure",
     description:
-      "Corvinth compares privacy-preserving image fingerprints with reported-image records and returns a structured signal. Your platform stays in control.",
-    images: ["https://corvinth.com/og.png"],
+      "Reported content comes back. Corvinth helps you find the copies. Image safety infrastructure for platforms with user-generated content.",
   },
 };
 
@@ -49,7 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} ${dmMono.variable}`}>
+    <html lang="en">
+      <head>
+        {/* Single consolidated font import — Inter + JetBrains Mono */}
+        {/* Inter: body/UI, JetBrains Mono: code/mono */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
