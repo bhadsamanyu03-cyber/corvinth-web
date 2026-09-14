@@ -165,7 +165,6 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [apiTab,  setApiTab]  = useState('shield');
   const [webhookLang, setWebhookLang] = useState('node');
-  const [howTab,  setHowTab]  = useState('shield');
 
   // Waitlist form
   const [form, setForm] = useState({
@@ -215,6 +214,7 @@ try {
 
   return (
     <>
+      <div className="page-frame">
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <nav className="screen01-nav">
         <a className="logo screen01-logo" href="#top" aria-label="Corvinth home">
@@ -229,7 +229,7 @@ try {
           <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">Docs</a>
         </div>
         <div className="nav-right screen01-nav-actions">
-          <a className="screen01-nav-cta" href="#demo">See it work</a>
+          <a className="screen01-nav-cta" href="#contact">Request access</a>
           <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation">
             <span/><span/><span/>
           </button>
@@ -259,12 +259,12 @@ try {
             <p className="hero-description">
               Image safety infrastructure for platforms with user-generated content. Corvinth helps your team find copies of content it has chosen to track — across existing platform content and new uploads.
             </p>
-            <p className="hero-boundary">Corvinth returns the detection result.<br /><strong>Your platform decides what happens next.</strong></p>
+            <p className="hero-boundary">Corvinth returns the detection result.{' '}<br /><strong>Your platform decides what happens next.</strong></p>
             <div className="hero-cta">
               <a className="hero-cta-primary" href="#demo">See it work <span aria-hidden="true">→</span></a>
               <a className="hero-cta-secondary" href="#contact">Request access</a>
             </div>
-            <p className="hero-trust">Platform-scoped matching <span aria-hidden="true">·</span> Managed or Customer Compute <span aria-hidden="true">·</span> No durable image-byte storage</p>
+            <p className="hero-trust">PLATFORM-SCOPED MATCHING <span>·</span> MANAGED OR CUSTOMER COMPUTE <span>·</span> NO DURABLE IMAGE-BYTE STORAGE</p>
           </div>
 
           <div className="hero-proof" aria-label="Illustration of platform-scoped detection">
@@ -300,10 +300,6 @@ try {
                 </div>
               </div>
             </div>
-            <div className="hero-proof-footer">
-              <div><span className="hero-proof-footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><p><strong>Your data. Your environment.</strong><span>Deployed in your infrastructure or ours.</span></p></div>
-              <div><span className="hero-proof-footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V13h4v7M10 20V8h4v12M16 20V4h4v16M2 20h20"/></svg></span><p><strong>Your platform decides.</strong><span>Corvinth returns the detection result.</span></p></div>
-            </div>
           </div>
         </div>
         <div className="hero-feature-row">
@@ -316,10 +312,10 @@ try {
       {/* ── BUILT FOR — self-identification ──────────────────────────────────── */}
       <section style={{ padding:'0 2.5rem 5rem', background:'var(--bg)' }}>
         <div className="inner" style={{ textAlign:'center' }}>
-          <p style={{ fontSize:'10px', color:'var(--text-faint)', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'var(--font-mono)', marginBottom:'2rem' }}>Built for</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', justifyContent:'center' }}>
+          <p style={{ fontSize:'11px', color:'var(--green)', textTransform:'uppercase', letterSpacing:'0.16em', fontFamily:'var(--font-mono)', marginBottom:'1.5rem' }}>Built for</p>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'14px', justifyContent:'center', maxWidth:'1050px', margin:'0 auto' }}>
             {['Social Platforms','Dating Apps','Messaging Apps','Creator Platforms','AI Communities','Adult Content Platforms'].map(type => (
-              <div key={type} style={{ padding:'10px 20px', borderRadius:'999px', border:'0.5px solid var(--border-mid)', background:'var(--bg-card)', fontSize:'13px', color:'var(--text-muted)', fontFamily:'var(--font-mono)', letterSpacing:'0.02em' }}>
+              <div key={type} style={{ padding:'16px 34px', borderRadius:'999px', border:'1px solid rgba(0, 229, 155, 0.2)', background:'linear-gradient(145deg, rgba(0, 229, 155, 0.07), var(--bg-card))', fontSize:'15px', color:'var(--text)', fontFamily:'var(--font-mono)', letterSpacing:'0.02em', boxShadow:'0 8px 24px rgba(0, 0, 0, 0.16)' }}>
                 {type}
               </div>
             ))}
@@ -327,250 +323,147 @@ try {
         </div>
       </section>
 
-      {/* ── WHY CORVINTH — outcomes not features ─────────────────────────────── */}
-      <section style={{ padding:'6rem 2.5rem' }}>
-        <div className="inner">
-          <p className="section-tag">why corvinth</p>
-          <h2 className="section-title">Save six months of engineering.</h2>
-          <p className="section-sub">
-            Building NCII detection from scratch means VP-Trees, perceptual hashing, semantic embeddings, audit logging, and a compliance workflow. That&apos;s a full sprint. Corvinth is the version that ships this afternoon.
-          </p>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:'1px', background:'var(--border)', border:'0.5px solid var(--border)', borderRadius:'var(--radius-xl)', overflow:'hidden', marginTop:'2.5rem' }}>
-            {[
-              {
-                outcome: 'Deploy this afternoon.',
-                detail:  'One API endpoint in your upload pipeline. The SDK computes hashes on your server. No infrastructure changes required.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>,
-              },
-              {
-                outcome: 'Catch edits, crops, rotations.',
-                detail:  'Pulse uses DINOv2 semantic vectors to match heavily edited variants that simple hash matching misses entirely.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-              },
-              {
-                outcome: 'FTC audit log, out of the box.',
-                detail:  'Every decision receives a cryptographically chained audit entry. Exportable for FTC review at any time.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
-              },
-              {
-                outcome: 'Your policy. Our signal.',
-                detail:  'Corvinth returns allow / review / block / clean. You decide what happens next. We are the detection layer, not the decision maker.',
-                icon: <svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-              },
-            ].map((card, i) => (
-              <div key={i} className="usecase">
-                <div className="usecase-icon">{card.icon}</div>
-                <h4>{card.outcome}</h4>
-                <p>{card.detail}</p>
-              </div>
-            ))}
+      {/* ── SCREEN 02 — WHY CORVINTH ─────────────────────────────────────────── */}
+      <section className="screen02" aria-labelledby="screen02-title">
+        <div className="screen02-inner">
+          <div className="screen02-intro">
+            <p className="screen02-eyebrow">Why Corvinth</p>
+            <h2 id="screen02-title">Save months of engineering</h2>
+            <p className="screen02-subtitle">
+              Re-upload detection gets complicated fast. Reference indexing and audit trails have to work together in production. Corvinth gives your team that detection layer without turning it into another infrastructure project.
+            </p>
           </div>
-          <p style={{ marginTop:'2rem', fontSize:'13px', color:'var(--text-faint)', maxWidth:'560px' }}>
-            NCII is where Corvinth starts. The same hashing, matching, and audit infrastructure underneath Shield and Pulse is built to extend to other categories of harmful or unauthorized content over time.
-          </p>
+          <div className="screen02-cards">
+            <article className="screen02-card">
+              <span className="screen02-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="7" height="6" rx="1"/><rect x="14.5" y="13" width="7" height="6" rx="1"/><path d="M9.5 8h4a4 4 0 0 1 4 4v1M14.5 16h-4a4 4 0 0 1-4-4v-1"/></svg></span>
+              <h3>Bounded integration surface.</h3>
+              <p>Connect Corvinth to your existing storage and upload workflow. Use Corvinth-managed compute or keep image processing inside your own infrastructure — without rebuilding your application around a new moderation stack.</p>
+            </article>
+            <article className="screen02-card">
+              <span className="screen02-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l4 4V21.5H6z"/><path d="M14 2.5v4h4M9 11h6M9 15h6M9 19h4"/></svg></span>
+              <h3>Evidence from every case.</h3>
+              <p>Every case and match leaves a structured record your team can use for review, investigation, and internal evidence.</p>
+            </article>
+            <article className="screen02-card">
+              <span className="screen02-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5 20 5.5v5.7c0 5-3.1 8.1-8 10.3-4.9-2.2-8-5.3-8-10.3V5.5z"/><path d="m8.5 12 2.4 2.4 4.8-5"/></svg></span>
+              <h3>Your policy. Our signal.</h3>
+              <p>Corvinth detects the match and returns the signal. Your platform decides what happens next — review it, remove it, or take no action.</p>
+            </article>
+          </div>
+          <p className="screen02-close">Corvinth is category-agnostic. Your platform decides which visual references should be tracked; Corvinth provides the matching and evidence infrastructure underneath it.</p>
+        </div>
+      </section>
+
+      {/* ── SCREEN 03 — TRUSTED ARCHITECTURE ────────────────────────────────── */}
+      <section id="architecture" className="architecture-section" aria-labelledby="architecture-title">
+        <div className="architecture-inner">
+          <header className="architecture-intro">
+            <p className="architecture-eyebrow">Trusted architecture</p>
+            <h2 id="architecture-title">Choose where image compute happens.</h2>
+            <p className="architecture-subtitle">Use Corvinth-managed compute, or keep image processing inside your own infrastructure. Either way, Corvinth does not durably store image bytes.</p>
+          </header>
+
+          <div className="architecture-cards">
+            <article className="architecture-card">
+              <div className="architecture-card-head">
+                <p className="architecture-mode">Mode A — Managed Compute</p>
+                <span className="architecture-badge">Managed compute</span>
+              </div>
+              <h3>Corvinth handles the image compute.</h3>
+              <ol className="architecture-flow" aria-label="Managed Compute flow">
+                <li>Your storage</li>
+                <li>ephemeral fetch access</li>
+                <li>Corvinth compute</li>
+                <li>Corvinth matching</li>
+                <li>match signal</li>
+              </ol>
+              <p className="architecture-card-copy">Corvinth fetches the referenced image when needed, computes the detection signal, and does not retain the image bytes.</p>
+            </article>
+
+            <article className="architecture-card">
+              <div className="architecture-card-head">
+                <p className="architecture-mode">Mode B — Customer Compute</p>
+                <span className="architecture-badge">Customer compute</span>
+              </div>
+              <h3>Image pixels stay with you.</h3>
+              <ol className="architecture-flow" aria-label="Customer Compute flow">
+                <li>Your image</li>
+                <li>your compute</li>
+                <li>fingerprint</li>
+                <li>Corvinth matching</li>
+                <li>match signal</li>
+              </ol>
+              <p className="architecture-card-copy">Image processing stays inside your infrastructure. Corvinth receives the required fingerprint together with the platform-scoped object reference needed to correlate detection results back to content in your system — never the image itself.</p>
+            </article>
+          </div>
+
+          <div className="architecture-shared" aria-label="Shared architecture properties">
+            <span>No durable image-byte storage</span>
+            <span>Choose your compute boundary</span>
+            <span>Same matching infrastructure</span>
+          </div>
+
+          <div className="architecture-trust">
+            <p><span aria-hidden="true">✓</span><strong>Two compute models</strong><span>Choose the trust boundary that fits your platform.</span></p>
+            <p><span aria-hidden="true">✓</span><strong>No durable image-byte storage</strong><span>Corvinth does not build a repository of customer images.</span></p>
+            <p><span aria-hidden="true">✓</span><strong>Your policy stays yours</strong><span>Corvinth returns detection results and relevant context; your platform decides what happens next.</span></p>
+          </div>
         </div>
       </section>
 
       <hr/>
 
-      {/* ── TRUSTED ARCHITECTURE — zero-knowledge flow ───────────────────────── */}
-      <section id="architecture" style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
-        <div className="inner" style={{ maxWidth:'760px', textAlign:'center' }}>
-          <p className="section-tag">trusted architecture</p>
-          <h2 className="section-title">No images ever leave your infrastructure under Pipeline 1.</h2>
-          <p className="section-sub" style={{ margin:'0 auto 3rem' }}>
-            The SDK runs entirely on your servers. Only a 256-bit hash crosses the network — never pixels. This is Pipeline 1 (Shield). Pipeline 2 deep scans are opt-in, disclosed separately, and disabled by default.
-          </p>
-          {/* Flow diagram */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flexWrap:'wrap', gap:'0', margin:'0 auto', maxWidth:'680px' }}>
-            {[
-              { label:'Image', sub:'your server', color:'var(--text-muted)' },
-              null,
-              { label:'SDK', sub:'runs locally', color:'var(--green)' },
-              null,
-              { label:'PDQ Hash', sub:'256 bits only', color:'var(--green)' },
-              null,
-              { label:'Corvinth', sub:'match engine', color:'var(--text-muted)' },
-              null,
-              { label:'Decision', sub:'<100ms · p50', color:'var(--green)' },
-            ].map((step, i) =>
-              step === null ? (
-                <span key={i} style={{ color:'var(--text-faint)', fontSize:'18px', padding:'0 6px', userSelect:'none' }}>→</span>
-              ) : (
-                <div key={i} style={{ padding:'14px 18px', borderRadius:'10px', border:`0.5px solid ${step.color === 'var(--green)' ? 'rgba(0,229,155,0.25)' : 'var(--border)'}`, background: step.color === 'var(--green)' ? 'rgba(0,229,155,0.06)' : 'var(--bg-off)', textAlign:'center', minWidth:'90px' }}>
-                  <div style={{ fontSize:'13px', fontWeight:600, color: step.color, fontFamily:'var(--font-mono)', letterSpacing:'0.01em' }}>{step.label}</div>
-                  <div style={{ fontSize:'10px', color:'var(--text-faint)', marginTop:'3px', fontFamily:'var(--font-mono)' }}>{step.sub}</div>
-                </div>
-              )
-            )}
+      {/* ── SCREEN 04 — HOW CORVINTH WORKS ───────────────────────────────── */}
+      <section id="how" className="screen04" aria-labelledby="screen04-title">
+        <div className="screen04-inner">
+          <header className="screen04-intro">
+            <p className="screen04-eyebrow">How Corvinth works</p>
+            <h2 id="screen04-title">Report it once. Catch it when it comes back.</h2>
+            <p>When your platform chooses reported content to track, Corvinth uses it as a detection reference. Perceptual matching checks that platform&apos;s stored and future fingerprints.</p>
+          </header>
+
+          <div className="screen04-reference">
+            <span className="screen04-step">01 / PLATFORM-SELECTED REFERENCE</span>
+            <h3>Reported content</h3>
+            <p>Your platform tells Corvinth what should be tracked.</p>
           </div>
-          <div style={{ marginTop:'2.5rem', display:'flex', alignItems:'center', justifyContent:'center', gap:'2.5rem', flexWrap:'wrap' }}>
-            {[
-              '0 pixels sent to Corvinth · Pipeline 1',
-              'GDPR & TIDA compliant by design',
-              'No configuration required',
-            ].map(item => (
-              <div key={item} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'var(--text-muted)' }}>
-                <span style={{ color:'var(--green)', fontSize:'15px' }}>✓</span>
-                {item}
+
+          <div className="screen04-connector" aria-hidden="true"><span>↓</span></div>
+
+          <div className="screen04-matching">
+            <div className="screen04-matching-head">
+              <span className="screen04-step">02 / CONTINUOUS MATCHING</span>
+              <h3>Continuous perceptual matching — both directions.</h3>
+              <p>Continuous perceptual matching checks newly reported content against previously stored fingerprints from that platform, then keeps matching against new uploads from that platform as they arrive.</p>
+            </div>
+            <div className="screen04-fingerprint" aria-label="Platform-scoped fingerprint matching in both directions">
+              <div className="screen04-fingerprint-node screen04-fingerprint-existing">
+                <span>Previously stored</span>
+                <strong>That platform&apos;s previously stored fingerprints</strong>
               </div>
-            ))}
+              <div className="screen04-fingerprint-node screen04-fingerprint-reference">
+                <span>Detection reference</span>
+                <strong>reported fingerprint</strong>
+              </div>
+              <div className="screen04-fingerprint-node screen04-fingerprint-future">
+                <span>Future uploads</span>
+                <strong>That platform&apos;s new upload fingerprints</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="screen04-connector" aria-hidden="true"><span>↓</span></div>
+
+          <div className="screen04-result">
+            <span className="screen04-step">03 / MATCH + CASE EVIDENCE</span>
+            <div>
+              <h3>Corvinth returns the match and evidence.</h3>
+              <p>Your platform decides what happens next.</p>
+            </div>
+            <span className="screen04-boundary">Corvinth detects. Platform enforces.</span>
           </div>
         </div>
       </section>
-
-      <hr/>
-
-      {/* ── HOW IT WORKS — 5-step integration ────────────────────────────────── */}
-      <section id="how" style={{ padding:'6rem 2.5rem', background:'var(--bg-off)' }}>
-        <div className="inner" style={{ maxWidth:'680px' }}>
-          <p className="section-tag">integration</p>
-          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
-          <p className="section-sub">
-            This isn&apos;t a multi-sprint project. Most teams are fully integrated in a single working day.
-          </p>
-
-          {/* 5-step flow */}
-          <div style={{ display:'flex', flexDirection:'column', gap:'0', marginBottom:'3rem' }}>
-            {[
-              { n:'01', label:'Install SDK',         body:'npm install @corvinth/sdk — Node.js/TypeScript and Python in active development. No SDK required either; one HTTP call works today.' },
-              { n:'02', label:'Compute PDQ locally', body:'The SDK hashes the image on your server. All 8 orientations in one call. No pixels leave your infrastructure.' },
-              { n:'03', label:'POST the hash',       body:'Send the 64-char hex hash to POST /hash/check with your API key. Under 100ms round-trip.' },
-              { n:'04', label:'Receive decision',    body:'allow · review · block — with a case UUID and optional Hamming distance for audit.' },
-              { n:'05', label:'Enforce your policy', body:'Act on the decision in your upload handler. Corvinth fires your webhook automatically for exact matches.' },
-            ].map((step, i, arr) => (
-              <div key={i} className="tl-item">
-                {i < arr.length - 1 && <div className="tl-line"/>}
-                <div className="tl-dot">{step.n}</div>
-                <div className="tl-content">
-                  <h3>{step.label}</h3>
-                  <p>{step.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* How it works tabs — Shield / Pulse detail */}
-          <div className="tab-bar" style={{ marginBottom:'2rem' }}>
-            <button className={`tab-btn${howTab === 'shield' ? ' active-shield' : ''}`} onClick={() => setHowTab('shield')}>Flow A — Shield</button>
-            <button className={`tab-btn${howTab === 'pulse'  ? ' active-pulse'  : ''}`} onClick={() => setHowTab('pulse')}>Flow B — Pulse</button>
-          </div>
-
-          {howTab === 'shield' ? (
-            <div className="timeline">
-              {[
-                { n:'01', title:'Normalize on your server',      body:'The SDK handles EXIF orientation, resizing, compression — all locally. No pixels sent anywhere.' },
-                { n:'02', title:'Generate 8 PDQ fingerprints',   body:'Meta PDQ produces fingerprints for all 8 orientations simultaneously. Rotation and re-encoding are tolerated by design.' },
-                { n:'03', title:'Match against NCII database',   body:"Hash sent to Corvinth's API. VP-Tree Hamming-distance lookup across all orientations. Under 100ms." },
-                { n:'04', title:'Decision returned to you',      body:'allow · review · block · clean — plus a case UUID, classification, confidence_score, matched_lane, and Hamming distance for your audit log.' },
-              ].map((s, i, arr) => (
-                <div key={s.n} className="tl-item">
-                  {i < arr.length-1 && <div className="tl-line"/>}
-                  <div className="tl-dot">{s.n}</div>
-                  <div className="tl-content"><h3>{s.title}</h3><p>{s.body}</p></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="timeline">
-              {[
-                { n:'01', title:'Victim files a complaint',       body:'Platform receives the complaint and POSTs to /platform/complaints with a presigned CDN URL (Mode A · all tiers) or a pre-computed DINOv2 vector (Mode B · Enterprise).' },
-                { n:'02', title:'Corvinth stores the embedding',  body:'Mode A: Corvinth fetches the URL under SSRF-hardened constraints and computes the 384-dim vector server-side. Mode B: your pre-computed vector is stored directly — image bytes never leave your servers.' },
-                { n:'03', title:'Vector stored in your registry', body:"Only the vector and complaint metadata are stored in Qdrant under your platform's namespace. Strictly scoped — no cross-platform matching." },
-                { n:'04', title:'Future uploads matched semantically', body:'Cosine similarity against your complaint registry on every /hash/check call. Crops, rotations, brightness edits — caught. Results include pulse_similarity score (0.0–1.0).' },
-              ].map((s, i, arr) => (
-                <div key={s.n} className="tl-item">
-                  {i < arr.length-1 && <div className="tl-line"/>}
-                  <div className="tl-dot" style={{ borderColor:'rgba(77,158,255,0.4)', color:'#4D9EFF' }}>{s.n}</div>
-                  <div className="tl-content"><h3>{s.title}</h3><p>{s.body}</p></div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <hr/>
-
-      {/* ── PROOF STRIP ──────────────────────────────────────────────────────── */}
-      <div className="proof">
-        <div className="proof-item">
-          <div className="proof-num">&lt;100ms</div>
-          <div className="proof-label">Shield decision latency · single worker baseline</div>
-        </div>
-        <div className="proof-item">
-          <div className="proof-num">0 pixels</div>
-          <div className="proof-label">Pipeline 1 · never sent to Corvinth</div>
-        </div>
-        <div className="proof-item">
-          <div className="proof-num">crops + rotations</div>
-          <div className="proof-label">caught by Pulse · what PDQ alone cannot reach</div>
-        </div>
-        <div className="proof-item">
-          <div className="proof-num">1 afternoon</div>
-          <div className="proof-label">typical integration time</div>
-        </div>
-      </div>
-
-      <hr/>
-
-      {/* ── STOPNCII DIFFERENTIATOR ───────────────────────────────────────────── */}
-      <div className="stopncii-callout">
-        <div className="stopncii-icon">
-          <svg className="icon" viewBox="0 0 24 24" style={{ width:'20px', height:'20px' }}>
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-          </svg>
-        </div>
-        <div className="stopncii-body">
-          <div className="stopncii-label">Key differentiator</div>
-          <h3>We match against real reported NCII hashes — not generic nudity detection.</h3>
-          <p>Corvinth is built to be format-compatible with the StopNCII PDQ hash standard — the same fingerprinting scheme used across the industry's largest victim-reporting network. Corvinth is not currently partnered with or integrated into StopNCII's feed; matches run against Corvinth's own database, populated via direct victim complaints (Pulse) and platform-reported hashes. A photo on a beach is not a violation. A specific image reported by a victim is.</p>
-        </div>
-      </div>
-
-      {/* ── SDK STRIP ─────────────────────────────────────────────────────────── */}
-      <div className="social-strip">
-        <div className="social-strip-label">SDK in active development · v0.2.0</div>
-        <div className="social-logos">
-          {['Node.js / TypeScript — npm install @corvinth/sdk','Python — pip install corvinth'].map(tech => (
-            <div key={tech} className="social-logo-item">{tech}</div>
-          ))}
-        </div>
-        <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45', textAlign:'center', marginTop:'0.75rem' }}>
-          checkHash() · checkVideo() · submitComplaint() · addHash()
-        </div>
-      </div>
-
-      {/* ── PIPELINE FLOW DIAGRAM ─────────────────────────────────────────────── */}
-      <div className="pipeline-flows">
-        <div className="pipeline-row">
-          <span className="pipeline-label shield">Shield</span>
-          {['Every upload','PDQ hash (local SDK)','VP-Tree match','Allow · Review · Block'].map((step,i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(0,229,155,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(0,229,155,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#00E59B' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
-              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
-            </div>
-          ))}
-        </div>
-        <div className="pipeline-row">
-          <span className="pipeline-label pulse">Pulse</span>
-          {['Direct report','DINOv2 vector (local SDK)','Qdrant cosine','Semantic match'].map((step,i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(77,158,255,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(77,158,255,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#4D9EFF' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
-              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
-            </div>
-          ))}
-        </div>
-        <div className="pipeline-row">
-          <span className="pipeline-label" style={{ background:'rgba(255,178,36,0.10)', color:'#FFB224', border:'0.5px solid rgba(255,178,36,0.25)' }}>Video</span>
-          {['Every video upload','MD5 + SHA-256 (local SDK)','O(1) set lookup','Exact match · Allow'].map((step,i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-              <div style={{ padding:'9px 16px', background: i===3 ? 'rgba(255,178,36,0.08)' : '#0e0e0c', border:`0.5px solid ${i===3 ? 'rgba(255,178,36,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'8px', fontSize:'12px', color: i===3 ? '#FFB224' : '#8C8B84', fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{step}</div>
-              {i < 3 && <span style={{ color:'#2a2a25', fontSize:'14px', userSelect:'none' }}>→</span>}
-            </div>
-          ))}
-        </div>
-      </div>
 
       <hr/>
 
@@ -1017,33 +910,6 @@ async def corvinth_webhook(request: Request):
           <h2 className="section-title">Test the Engine.</h2>
           <p className="section-sub">Submit a PDQ hash and see a real API response from the match engine. No API key required. Limited to 10 requests/minute.</p>
           <ApiDemo/>
-        </div>
-      </section>
-
-      <hr/>
-
-      {/* ── ONBOARDING TIMELINE ───────────────────────────────────────────────── */}
-      <section className="bg-section">
-        <div className="inner">
-          <p className="section-tag">onboarding</p>
-          <h2 className="section-title">Live in a day. Audit-ready by day two.</h2>
-          <p className="section-sub">This isn&apos;t a multi-sprint project. Most engineering teams are fully integrated in a single working day.</p>
-          <div className="onboard-grid">
-            {[
-              { day:'Day 0', title:'Get your credentials', body:'Request access and receive API credentials — typically within 24 hours. We send you an API key and integration notes for Node.js/TypeScript and Python (SDKs in active development; raw HTTP works today).', tasks:['API key issued','Integration notes sent','Live demo available with no API key'] },
-              { day:'Day 1', title:'One endpoint in your pipeline', body:'Add a single POST call to your upload handler. The SDK computes the hash on your server — nothing else changes in your infrastructure.', tasks:['POST /hash/check integrated','Block / review / allow logic wired','First real scan running'] },
-              { day:'Day 2', title:'Audit log running', body:'Enable webhook notifications and connect the audit log export to your compliance tooling. You now have a paper trail for every decision your platform makes.', tasks:['Audit log exporting','Webhooks configured','Legal team can pull reports'] },
-            ].map((step, i) => (
-              <div key={i} className="onboard-step">
-                <div className="onboard-day">{step.day}</div>
-                <h4>{step.title}</h4>
-                <p>{step.body}</p>
-                <div className="onboard-tasks">
-                  {step.tasks.map(task => <div key={task} className="onboard-task">{task}</div>)}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -1543,6 +1409,7 @@ async def corvinth_webhook(request: Request):
           <a href="mailto:founder@corvinth.com">founder@corvinth.com</a>
         </div>
       </footer>
+      </div>
     </>
   );
 }
