@@ -216,13 +216,20 @@ try {
   return (
     <>
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
-      <nav>
-        <a className="logo" href="#top" aria-label="Corvinth home">cor<span className="accent">vinth</span></a>
-        <div className="nav-right">
-          <a className="btn-ghost" href="#how">How it works</a>
-          <a className="btn-ghost" href="#demo">Live demo</a>
-          <a className="btn-ghost" href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">Docs</a>
-          <a className="btn-primary" href="#contact">Request access</a>
+      <nav className="screen01-nav">
+        <a className="logo screen01-logo" href="#top" aria-label="Corvinth home">
+          <svg viewBox="0 0 40 44" aria-hidden="true" focusable="false"><path d="M20 1 38 11v8l-9 4v-7l-9-5-10 6v10l10 6 9-5v-6l9 4v7L20 43 2 33V11L20 1Z"/></svg>
+          <span>Corvinth</span>
+        </a>
+        <div className="screen01-nav-links">
+          <a href="#how">How it works</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#demo">Live demo</a>
+          <a href="#tida">Why now</a>
+          <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+        </div>
+        <div className="nav-right screen01-nav-actions">
+          <a className="screen01-nav-cta" href="#demo">See it work</a>
           <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu" aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation">
             <span/><span/><span/>
           </button>
@@ -232,57 +239,77 @@ try {
       {/* ── MOBILE MENU ──────────────────────────────────────────────────────── */}
       <div id="mobile-navigation" className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
         <a href="#how"     onClick={() => setMobileMenuOpen(false)}>How it works</a>
+        <a href="#architecture" onClick={() => setMobileMenuOpen(false)}>Architecture</a>
         <a href="#demo"    onClick={() => setMobileMenuOpen(false)}>Live demo</a>
+        <a href="#tida" onClick={() => setMobileMenuOpen(false)}>Why now</a>
         <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
         <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request access</a>
       </div>
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section id="top" className="hero" aria-labelledby="hero-title">
+        <div className="hero-backdrop" aria-hidden="true" />
         <div className="hero-inner">
           <div className="hero-copy">
             <p className="hero-category">Image safety infrastructure</p>
             <h1 id="hero-title">
               <span>Reported content comes back.</span>
-              <span><em>Corvinth</em> helps you find the copies.</span>
+              <span>Corvinth helps you find the copies.</span>
             </h1>
             <p className="hero-description">
               Image safety infrastructure for platforms with user-generated content. Corvinth helps your team find copies of content it has chosen to track — across existing platform content and new uploads.
             </p>
-            <p className="hero-boundary">Corvinth returns the detection result. Your platform decides what happens next.</p>
+            <p className="hero-boundary">Corvinth returns the detection result.<br /><strong>Your platform decides what happens next.</strong></p>
             <div className="hero-cta">
-              <a className="btn-primary lg" href="#demo">See it work</a>
-              <a className="btn-ghost lg" href="#contact">Request access</a>
+              <a className="hero-cta-primary" href="#demo">See it work <span aria-hidden="true">→</span></a>
+              <a className="hero-cta-secondary" href="#contact">Request access</a>
             </div>
             <p className="hero-trust">Platform-scoped matching <span aria-hidden="true">·</span> Managed or Customer Compute <span aria-hidden="true">·</span> No durable image-byte storage</p>
           </div>
 
           <div className="hero-proof" aria-label="Illustration of platform-scoped detection">
             <div className="hero-proof-header">
-              <span className="hero-proof-mark" aria-hidden="true" />
-              <span>Platform-scoped detection</span>
+              <div><span className="hero-proof-mark" aria-hidden="true" /><span>Platform-scoped detection</span></div>
+              <span className="hero-proof-scope">Same platform scope</span>
             </div>
             <div className="hero-proof-flow">
-              <div className="hero-proof-step">
-                <span className="hero-proof-step-label">Platform-selected image</span>
-                <span className="hero-proof-step-value">Detection reference</span>
+              <div className="hero-proof-step hero-proof-selected">
+                <h2>Platform-selected<br />image</h2>
+                <div className="hero-proof-photo"><img className="hero-proof-source-image" src="/screen01-reference.webp" alt="Adult woman seated beside a mountain lake at sunset" /></div>
+                <div className="hero-proof-step-caption"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 20 5v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg><span>Selected by your team</span></div>
               </div>
-              <div className="hero-proof-connector" aria-hidden="true"><span /></div>
-              <div className="hero-proof-step">
-                <span className="hero-proof-step-label">Platform-scoped matching</span>
-                <span className="hero-proof-step-value">Existing content <span className="hero-proof-separator">·</span> New uploads</span>
+              <div className="hero-proof-connector hero-proof-reference" aria-label="Detection reference"><span>Detection<br />reference</span><b aria-hidden="true">→</b></div>
+              <div className="hero-proof-step hero-proof-matching">
+                <h2>Platform-scoped<br />matching</h2>
+                <p>existing content · new uploads</p>
+                <div className="hero-proof-stack" aria-hidden="true"><i /><i /><i /><i /></div>
+                <div className="hero-proof-step-caption"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Searching your<br />platform content</span></div>
               </div>
-              <div className="hero-proof-connector" aria-hidden="true"><span /></div>
+              <div className="hero-proof-connector hero-proof-arrow" aria-hidden="true"><b>→</b></div>
               <div className="hero-proof-step hero-proof-result">
-                <span className="hero-proof-step-label">Detection result</span>
-                <span className="hero-proof-step-value">Match found</span>
+                <h2>Match found</h2>
+                <div className="hero-proof-thumbnails" aria-hidden="true">
+                  <img src="/screen01-reference.webp" alt="" />
+                  <img src="/screen01-reference.webp" alt="" />
+                  <img src="/screen01-reference.webp" alt="" />
+                  <img src="/screen01-reference.webp" alt="" />
+                </div>
                 <div className="hero-proof-details">
                   <span>Matched object</span><strong>obj_••92</strong>
                   <span>Platform scope</span><strong>same platform</strong>
                 </div>
               </div>
             </div>
+            <div className="hero-proof-footer">
+              <div><span className="hero-proof-footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><p><strong>Your data. Your environment.</strong><span>Deployed in your infrastructure or ours.</span></p></div>
+              <div><span className="hero-proof-footer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V13h4v7M10 20V8h4v12M16 20V4h4v16M2 20h20"/></svg></span><p><strong>Your platform decides.</strong><span>Corvinth returns the detection result.</span></p></div>
+            </div>
           </div>
+        </div>
+        <div className="hero-feature-row">
+          <div><span className="hero-feature-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10"/><circle cx="16" cy="16" r="3"/><path d="M16 1v7m0 16v7M1 16h7m16 0h7"/></svg></span><p><strong>Platform-scoped matching</strong><span>Find matching content across your platform.</span></p></div>
+          <div><span className="hero-feature-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="6" rx="1"/><rect x="5" y="13" width="22" height="6" rx="1"/><rect x="5" y="21" width="22" height="6" rx="1"/><path d="M22 8h2m-2 8h2m-2 8h2"/></svg></span><p><strong>Managed or Customer Compute</strong><span>Choose where image compute happens.</span></p></div>
+          <div><span className="hero-feature-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m12 20 8-8M11 13l-2 2a6 6 0 0 0 8 8l2-2m2-2 2-2a6 6 0 0 0-8-8l-2 2"/></svg></span><p><strong>Your workflow stays yours</strong><span>Detection results fit into your platform workflow.</span></p></div>
         </div>
       </section>
 
@@ -347,7 +374,7 @@ try {
       <hr/>
 
       {/* ── TRUSTED ARCHITECTURE — zero-knowledge flow ───────────────────────── */}
-      <section style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
+      <section id="architecture" style={{ padding:'5rem 2.5rem', background:'var(--bg-card)' }}>
         <div className="inner" style={{ maxWidth:'760px', textAlign:'center' }}>
           <p className="section-tag">trusted architecture</p>
           <h2 className="section-title">No images ever leave your infrastructure under Pipeline 1.</h2>
