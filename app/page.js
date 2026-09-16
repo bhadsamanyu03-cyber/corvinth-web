@@ -467,134 +467,154 @@ try {
 
       <hr/>
 
-      {/* ── SHIELD DASHBOARD MOCKUP ───────────────────────────────────────────── */}
-      <section id="shield" className="bg-section">
-        <div className="inner" style={{ maxWidth:'980px' }}>
-          <p className="section-tag">shield — hash matching</p>
-          <h2 className="section-title">What your team sees every day.</h2>
-          <p className="section-sub">A real-time view of every scan decision — matches, blocks, and review queue items — with a full audit trail behind every case.</p>
-          <div style={{ display:'flex', justifyContent:'center', marginBottom:'1.25rem' }}>
-            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', padding:'5px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'rgba(255,255,255,0.03)' }}>Illustrative dashboard · sample data, not live production metrics</span>
+      {/* ── SCREEN 06 — EVIDENCE INFRASTRUCTURE ─────────────────────────────── */}
+      <section id="shield" className="screen06" aria-labelledby="screen06-title">
+        <div className="screen06-inner">
+          <header className="screen06-intro">
+            <p className="screen06-eyebrow">Built for real cases</p>
+            <h2 id="screen06-title">Detection is only half the job. The match needs evidence behind it.</h2>
+            <p>Corvinth keeps platform-selected visual references, matches, and timing linked so your team isn&apos;t piecing together detection history from isolated hashes.</p>
+          </header>
+
+          <div className="screen06-chain" aria-label="Evidence chain from visual reference to detection event">
+            {[
+              'Platform-selected visual reference',
+              'Case',
+              'Matched platform object',
+              'Detection event + timing',
+            ].map((step, index) => (
+              <div className="screen06-chain-step" key={step}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{step}</strong>
+              </div>
+            ))}
           </div>
-          <div style={{ background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
-            <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#00E59B', boxShadow:'0 0 6px rgba(0,229,155,0.6)' }}/>
-                <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / shield · TestDating</span>
-              </div>
-              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>sample</span>
-            </div>
-            <div className="dashboard-grid">
-              <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>Recent decisions</div>
-                {[
-                  { id:'CASE-3829', label:'EXACT',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'0',  time:'2s ago' },
-                  { id:'CASE-3830', label:'FUZZY',     status:'Review',  color:'#FFB224', bg:'rgba(255,178,36,0.07)', dist:'6',  time:'14s ago' },
-                  { id:'CASE-3831', label:'EXACT',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'0',  time:'41s ago' },
-                  { id:'CASE-3832', label:'NEAR_MISS', status:'Review',  color:'#FFB224', bg:'rgba(255,178,36,0.07)', dist:'14', time:'1m ago' },
-                  { id:'CASE-3833', label:'FUZZY',     status:'Blocked', color:'#FF4D4D', bg:'rgba(255,77,77,0.07)',   dist:'3',  time:'2m ago' },
-                  { id:'CASE-3834', label:'CLEAN',     status:'Allowed', color:'#00E59B', bg:'rgba(0,229,155,0.07)',  dist:'—',  time:'3m ago' },
-                ].map(c => (
-                  <div key={c.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:'8px', marginBottom:'4px', background:c.bg, border:`0.5px solid ${c.color}1A` }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#8C8B84' }}>{c.id}</span>
-                      <span style={{ fontSize:'10px', fontWeight:500, color:c.color, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.04em' }}>{c.label}</span>
-                      <span style={{ fontSize:'11px', color:'#4A4A45' }}>dist: {c.dist}</span>
-                    </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace" }}>{c.time}</span>
-                      <span style={{ fontSize:'11px', fontWeight:500, color:c.color, background:c.bg, padding:'3px 10px', borderRadius:'999px', border:`0.5px solid ${c.color}33`, fontFamily:"'JetBrains Mono',monospace" }}>{c.status}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ padding:'1.5rem' }}>
-                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1.25rem' }}>Today</div>
-                {[
-                  { label:'Uploads scanned', value:'1,248,991', color:'#F0EFE8' },
-                  { label:'Matches found',   value:'317',        color:'#FF4D4D' },
-                  { label:'Sent to review',  value:'84',         color:'#FFB224' },
-                  { label:'Avg response',    value:'60–120ms',   color:'#00E59B' },
-                  { label:'Active cases',    value:'12',         color:'#F0EFE8' },
-                ].map(m => (
-                  <div key={m.label} style={{ marginBottom:'1.25rem' }}>
-                    <div style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'3px', letterSpacing:'0.06em', textTransform:'uppercase' }}>{m.label}</div>
-                    <div style={{ fontSize:'24px', fontWeight:700, color:m.color, letterSpacing:'-0.5px', lineHeight:1 }}>{m.value}</div>
-                    {m.label === 'Avg response' && (
-                      <div style={{ fontSize:'9px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginTop:'2px', letterSpacing:'0.06em' }}>p50 · under 50 rps</div>
-                    )}
-                  </div>
-                ))}
-                <div style={{ marginTop:'1.5rem', padding:'10px 14px', background:'rgba(0,229,155,0.07)', border:'0.5px solid rgba(0,229,155,0.18)', borderRadius:'8px' }}>
-                  <div style={{ fontSize:'10px', color:'#00E59B', fontFamily:"'JetBrains Mono',monospace", marginBottom:'4px', letterSpacing:'0.08em', textTransform:'uppercase' }}>48h compliance</div>
-                  <div style={{ fontSize:'13px', color:'#8C8B84' }}>All cases within deadline</div>
-                </div>
-              </div>
-            </div>
+
+          <div className="screen06-capabilities">
+            <article>
+              <p className="screen06-capability-index">01 / Case evidence</p>
+              <h3>Every match ties back to its originating case and involved platform content.</h3>
+            </article>
+            <article>
+              <p className="screen06-capability-index">02 / Traceable object identity</p>
+              <h3>Evidence points to the exact platform object being investigated, rather than only an isolated hash or vector.</h3>
+            </article>
+            <article>
+              <p className="screen06-capability-index">03 / Audit history</p>
+              <h3>References, matches, case history, and timing stay connected so your team can trace the detection history of the case.</h3>
+            </article>
+            <article>
+              <p className="screen06-capability-index">04 / Tenant-isolated matching</p>
+              <h3>A platform&apos;s references, matching, and evidence remain scoped to that platform. Another tenant&apos;s case, object, or evidence metadata must not be returned or exposed.</h3>
+            </article>
           </div>
+
+          <div className="screen06-outcome" aria-label="Detection evidence and platform policy boundary">
+            <span>Match</span>
+            <i aria-hidden="true">↓</i>
+            <span>Case + object + timing + evidence</span>
+            <i aria-hidden="true">↓</i>
+            <strong>Your platform&apos;s policy</strong>
+          </div>
+          <p className="screen06-closing">Corvinth records the detection evidence. Your platform decides what happens next.</p>
         </div>
       </section>
 
       <hr/>
 
-      {/* ── PULSE DASHBOARD MOCKUP ────────────────────────────────────────────── */}
-      <section id="pulse">
-        <div className="inner" style={{ maxWidth:'980px' }}>
-          <p className="section-tag" style={{ background:'rgba(77,158,255,0.08)', borderColor:'rgba(77,158,255,0.25)', color:'#4D9EFF' }}>pulse — semantic detection</p>
-          <h2 className="section-title">Catch what hashes miss.</h2>
-          <p className="section-sub">Pulse handles direct victim complaints, heavily cropped variants, and arbitrary rotations that PDQ cannot reach. Powered by DINOv2 384-dim vectors and cosine similarity. Submit a complaint via a presigned URL (we compute the embedding server-side, under SSRF-hardened constraints) or, on Enterprise, send a pre-computed vector directly — your image bytes never have to leave your infrastructure either way.</p>
-          <div style={{ display:'flex', justifyContent:'center', marginBottom:'1.25rem' }}>
-            <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.10em', padding:'5px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'rgba(255,255,255,0.03)' }}>Illustrative dashboard · sample data, not live production metrics</span>
-          </div>
-          <div style={{ background:'#060605', border:'0.5px solid rgba(77,158,255,0.15)', borderRadius:'16px', overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.5)' }}>
-            <div style={{ padding:'12px 1.5rem', borderBottom:'0.5px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#0a0a08' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#4D9EFF', boxShadow:'0 0 6px rgba(77,158,255,0.6)' }}/>
-                <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', color:'#8C8B84' }}>corvinth / pulse · TestDating</span>
+      {/* ── SCREEN 07 — INTEGRATION ──────────────────────────────────────────── */}
+      <section id="integration" className="screen07" aria-labelledby="screen07-title">
+        <div className="screen07-inner">
+          <header className="screen07-intro">
+            <p className="screen07-eyebrow">Integration</p>
+            <h2 id="screen07-title">Add the detection layer. Keep the rest of your stack.</h2>
+            <p>Connect reported references and content to check through the compute path that fits your stack, then route Corvinth&apos;s matches and evidence into the workflow your team already uses.</p>
+          </header>
+
+          <div className="screen07-architecture" aria-label="How Corvinth connects into your existing stack">
+            <section className="screen07-platform-boundary" aria-labelledby="screen07-platform-title">
+              <p id="screen07-platform-title" className="screen07-boundary-label"><span>01</span> Your platform</p>
+              <div className="screen07-platform-source">
+                <span>Start with</span>
+                <strong>Reported reference /<br />content to check</strong>
               </div>
-              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.08em' }}>sample</span>
+              <div className="screen07-platform-paths">
+                <article className="screen07-platform-path screen07-customer-path">
+                  <p>Customer Compute</p>
+                  <span>Derived representation</span>
+                  <small>Direct to Detection / matching</small>
+                </article>
+                <article className="screen07-platform-path screen07-managed-path">
+                  <p>Managed path</p>
+                  <span>Ephemeral fetch access</span>
+                  <small>To Managed Compute</small>
+                </article>
+              </div>
+            </section>
+
+            <div className="screen07-mobile-ingress" aria-hidden="true">
+              <span>Customer Compute <i>↓</i> Detection / matching</span>
+              <span>Managed path <i>↓</i> Managed Compute</span>
             </div>
-            <div className="dashboard-grid">
-              <div style={{ padding:'1.5rem', borderRight:'0.5px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1rem' }}>Complaint registry</div>
-                {[
-                  { id:'CPL-0041', caseId:'cse_9f2a',  score:'0.97', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
-                  { id:'CPL-0040', caseId:'cse_3b1e',  score:'0.91', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
-                  { id:'CPL-0039', caseId:'cse_7c4d',  score:'0.88', status:'Resolved', color:'#00E59B', bg:'rgba(0,229,155,0.07)' },
-                  { id:'CPL-0038', caseId:'cse_2a9f',  score:'0.94', status:'Active',   color:'#FF4D4D', bg:'rgba(255,77,77,0.07)' },
-                ].map(c => (
-                  <div key={c.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:'8px', marginBottom:'4px', background:c.bg, border:`0.5px solid ${c.color}1A` }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#8C8B84' }}>{c.id}</span>
-                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>{c.caseId}</span>
-                    </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>sim: {c.score}</span>
-                      <span style={{ fontSize:'11px', fontWeight:500, color:c.color, background:c.bg, padding:'3px 10px', borderRadius:'999px', border:`0.5px solid ${c.color}33`, fontFamily:"'JetBrains Mono',monospace" }}>{c.status}</span>
-                    </div>
-                  </div>
-                ))}
+
+            <section className="screen07-corvinth-boundary" aria-labelledby="screen07-corvinth-title">
+              <p id="screen07-corvinth-title" className="screen07-boundary-label"><span>02</span> Corvinth</p>
+              <div className="screen07-corvinth-nodes">
+                <article className="screen07-managed-node">
+                  <span>Managed path</span>
+                  <strong>Managed Compute</strong>
+                </article>
+                <i className="screen07-node-arrow" aria-hidden="true">↓</i>
+                <article className="screen07-detection-node">
+                  <span>Both paths connect here</span>
+                  <strong>Detection / matching</strong>
+                </article>
               </div>
-              <div style={{ padding:'1.5rem' }}>
-                <div style={{ fontSize:'10px', fontWeight:500, color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.12em', fontFamily:"'JetBrains Mono',monospace", marginBottom:'1.25rem' }}>Semantic stats</div>
-                {[
-                  { label:'Active complaints', value:'41',   color:'#FF4D4D' },
-                  { label:'Resolved',          value:'189',  color:'#00E59B' },
-                  { label:'Avg similarity',    value:'0.94', color:'#4D9EFF' },
-                  { label:'Variants caught',   value:'1,204',color:'#F0EFE8' },
-                ].map(m => (
-                  <div key={m.label} style={{ marginBottom:'1.25rem' }}>
-                    <div style={{ fontSize:'10px', color:'#4A4A45', fontFamily:"'JetBrains Mono',monospace", marginBottom:'3px', letterSpacing:'0.06em', textTransform:'uppercase' }}>{m.label}</div>
-                    <div style={{ fontSize:'24px', fontWeight:700, color:m.color, letterSpacing:'-0.5px', lineHeight:1 }}>{m.value}</div>
-                  </div>
-                ))}
-                <div style={{ marginTop:'1.5rem', padding:'10px 14px', background:'rgba(77,158,255,0.07)', border:'0.5px solid rgba(77,158,255,0.18)', borderRadius:'8px' }}>
-                  <div style={{ fontSize:'10px', color:'#4D9EFF', fontFamily:"'JetBrains Mono',monospace", marginBottom:'4px', letterSpacing:'0.08em', textTransform:'uppercase' }}>DINOv2 vectors</div>
-                  <div style={{ fontSize:'13px', color:'#8C8B84' }}>384-dim · cosine similarity</div>
-                </div>
-              </div>
+            </section>
+
+            <div className="screen07-result-route" aria-label="Detection result flows into your existing workflow">
+              <span>Match + evidence</span>
+              <i aria-hidden="true">→</i>
+              <strong>Your existing workflow</strong>
             </div>
           </div>
+
+          <ol className="screen07-tasks" aria-label="Three bounded integration tasks">
+            <li>
+              <p>01 / Scope</p>
+              <h3>Establish the platform boundary.</h3>
+              <span>Corvinth operates inside that platform&apos;s isolated scope for references, matching, and evidence.</span>
+            </li>
+            <li>
+              <p>02 / Connect detection</p>
+              <h3>Connect the compute path that fits your stack.</h3>
+              <span className="screen07-task-paths"><b>Managed Compute</b><b>Customer Compute</b></span>
+              <span>Both paths connect into the same Corvinth detection layer.</span>
+            </li>
+            <li>
+              <p>03 / Route results</p>
+              <h3>Send matches and evidence into the workflow you already use.</h3>
+              <span>Corvinth result <i>→</i> internal tooling <i>→</i> review / case handling <i>→</i> platform action</span>
+              <span>Corvinth detects and returns context. The platform decides what happens next.</span>
+            </li>
+          </ol>
+
+          <div className="screen07-ownership-strip" aria-label="Product boundary">
+            <article>
+              <p>Your stack stays yours</p>
+              <ul>
+                {['Storage', 'Moderation decisions', 'Case handling', 'Enforcement'].map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </article>
+            <article>
+              <p>Corvinth adds</p>
+              <ul>
+                {['Detection references', 'Matching', 'Evidence context'].map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </article>
+          </div>
+
+          <p className="screen07-closing">Corvinth adds the detection layer. Your product workflow stays yours.</p>
         </div>
       </section>
 
@@ -915,29 +935,124 @@ async def corvinth_webhook(request: Request):
 
       <hr/>
 
-      {/* ── SECURITY & DATA HANDLING ──────────────────────────────────────────── */}
-      <section id="security">
-        <div className="inner">
-          <p className="section-tag">security &amp; data handling</p>
-          <h2 className="section-title">Where does the data go?</h2>
-          <p className="section-sub">The first question your legal team will ask. Here is the complete answer.</p>
-          <div className="security-grid">
-            {[
-              { title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers under Pipeline 1 (Shield). The SDK runs entirely on your infrastructure. Only a 256-bit hash or a 384-dim vector crosses the network boundary. Pipeline 2 deep scans are opt-in and disclosed separately.', icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
-              { title:'Encryption in transit', body:'All API traffic uses TLS 1.3. Hash values and vectors in transit are non-reversible and cannot reconstruct the original image. Even if intercepted, a 256-bit hash reveals nothing about image content.', icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> },
-              { title:'Hash retention policy', body:'We store only the fingerprint, vector, and decision metadata — never original content. Hash data is retained for audit log purposes and can be configured per contract for enterprise customers.', icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> },
-            ].map((card, i) => (
-              <div key={i} className="security-card">
-                <div className="security-icon">{card.icon}</div>
-                <h4>{card.title}</h4>
-                <p>{card.body}</p>
-              </div>
-            ))}
+      {/* ── SCREEN 08 — DATA BOUNDARY ─────────────────────────────────────────── */}
+      <section id="data-boundary" className="screen08" aria-labelledby="screen08-title">
+        <div className="screen08-inner">
+          <header className="screen08-intro">
+            <p className="screen08-eyebrow">Data boundary</p>
+            <h2 id="screen08-title">What Corvinth receives. What Corvinth keeps.</h2>
+            <p>The data boundary depends on where image compute happens. In either model, Corvinth retains the platform-scoped detection data and context required to operate the product—not a repository of customer image bytes.</p>
+          </header>
+          <section className="screen08-lifecycle" aria-labelledby="screen08-lifecycle-title">
+            <div className="screen08-lifecycle-heading">
+              <p id="screen08-lifecycle-title">Two compute paths <span>→</span> one platform-scoped durable state</p>
+              <span>What crosses · what is temporary · what persists</span>
+            </div>
+
+            <div className="screen08-paths">
+              <article className="screen08-path screen08-path-managed">
+                <header className="screen08-path-header">
+                  <span>01</span>
+                  <p>Managed Compute</p>
+                </header>
+                <h3>Image bytes are temporary.</h3>
+                <p className="screen08-path-copy">Corvinth receives platform/object identity together with ephemeral fetch access, retrieves the image for the required compute, and does not durably retain the image bytes.</p>
+                <div className="screen08-flow" aria-label="Managed Compute data flow">
+                  <div className="screen08-flow-stage screen08-flow-crosses">
+                    <span>Crosses into Corvinth</span>
+                    <strong>Platform / object identity<br />+ ephemeral fetch access</strong>
+                  </div>
+                  <i aria-hidden="true">↓</i>
+                  <div className="screen08-flow-stage screen08-flow-temporary">
+                    <span>Temporary inside Corvinth</span>
+                    <strong>Fetch image bytes for required compute</strong>
+                    <small>Temporary fetch access is not durable product state. Image bytes do not become durable state.</small>
+                  </div>
+                  <i aria-hidden="true">↓</i>
+                  <div className="screen08-flow-stage screen08-flow-output">
+                    <span>Feeds durable detection state</span>
+                    <strong>Derived detection representation</strong>
+                  </div>
+                </div>
+              </article>
+
+              <article className="screen08-path screen08-path-customer">
+                <header className="screen08-path-header">
+                  <span>02</span>
+                  <p>Customer Compute</p>
+                </header>
+                <h3>Image processing stays with the customer.</h3>
+                <p className="screen08-path-copy">The customer performs the image compute inside its own infrastructure. Corvinth receives the derived detection representation required for the operation, together with the platform and object context required for matching and correlation. Case/evidence context is associated where the workflow requires it.</p>
+                <div className="screen08-flow" aria-label="Customer Compute data flow">
+                  <div className="screen08-flow-stage screen08-flow-customer-side">
+                    <span>Customer infrastructure</span>
+                    <strong>Image bytes stay customer-side</strong>
+                  </div>
+                  <i aria-hidden="true">↓</i>
+                  <div className="screen08-flow-stage screen08-flow-customer-compute">
+                    <span>Customer Compute</span>
+                    <strong>Derived detection representation<br />+ platform / object context</strong>
+                  </div>
+                  <i aria-hidden="true">↓</i>
+                  <div className="screen08-flow-stage screen08-flow-output">
+                    <span>Crosses into Corvinth</span>
+                    <strong>Required detection data and context</strong>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div className="screen08-convergence" aria-hidden="true"><span></span><i>↓</i><span></span></div>
+
+            <article className="screen08-durable-state" aria-labelledby="screen08-durable-title">
+              <div className="screen08-durable-label"><span>03</span> Platform-scoped durable Corvinth state</div>
+              <h3 id="screen08-durable-title">Detection state, not an image repository.</h3>
+              <p>Corvinth retains the data needed for detection, matching, and associated evidence context. It does not turn Managed Compute into durable customer-image storage.</p>
+              <ul>
+                <li>Detection references</li>
+                <li>Matching representations retained where required</li>
+                <li>Platform / object context</li>
+                <li>Associated evidence context</li>
+                <li>Operational / audit metadata</li>
+              </ul>
+            </article>
+          </section>
+
+          <section className="screen08-persistence" aria-label="What persists and what does not durably persist">
+            <article>
+              <p>Persists</p>
+              <ul>
+                <li>Detection references</li>
+                <li>Matching representations retained where required</li>
+                <li>Platform / object context</li>
+                <li>Evidence / operational metadata</li>
+              </ul>
+            </article>
+            <article>
+              <p>Does not durably persist</p>
+              <ul>
+                <li>Managed-compute image bytes</li>
+                <li>Ephemeral fetch access</li>
+              </ul>
+            </article>
+          </section>
+
+          <aside className="screen08-isolation" aria-label="Platform isolation boundary">
+            <div>
+              <p>Same platform scope</p>
+              <h3>Durable detection state remains scoped to the platform it belongs to.</h3>
+            </div>
+            <p>Matching and evidence lookup remain within the same platform scope. References, evidence, and metadata from another tenant are neither searched nor exposed.</p>
+          </aside>
+
+          <div className="screen08-proof-strip" aria-label="Data-boundary trust statements">
+            <span>Platform-isolated scope</span>
+            <span>No durable managed-compute image bytes</span>
           </div>
-          <div className="dpa-offer">
-            <svg className="icon" viewBox="0 0 24 24" style={{ flexShrink:0, color:'#00E59B', width:'20px', height:'20px' }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            <p><strong>Data Processing Agreement available.</strong> Enterprise customers can request a signed DPA before integration. Email <a href="mailto:founder@corvinth.com" style={{ color:'var(--green)' }}>founder@corvinth.com</a> with your legal team&apos;s requirements.</p>
-            <a href="mailto:founder@corvinth.com?subject=DPA%20Request" className="btn-ghost" style={{ flexShrink:0 }}>request DPA →</a>
+
+          <div className="screen08-closing">
+            <p>Corvinth may process image bytes depending on the compute mode. It does not become your image repository.</p>
+            <span>What persists is the platform-scoped detection data and context required to operate Corvinth.</span>
           </div>
         </div>
       </section>
@@ -981,92 +1096,87 @@ async def corvinth_webhook(request: Request):
 
       <hr/>
 
-      {/* ── TIDA / REGULATION — comes AFTER the product ──────────────────────── */}
-      <section id="tida" style={{ padding:'6rem 2.5rem', background:'var(--bg-off)' }}>
-        <div className="inner">
-          <p className="section-tag">the regulation</p>
-          <h2 className="section-title">Why image safety suddenly matters.</h2>
-          <p className="section-sub">Regulatory pressure on platforms is accelerating globally. The U.S. Take It Down Act is the clearest example — but it won&apos;t be the last.</p>
-          <div className="tida-timeline">
-            {[
-              { date:'Feb 2025',    label:'TIDA introduced',                    body:'Bipartisan bill introduced in both House and Senate with broad support. Named partly in response to the Taylor Swift deepfake incident.' },
-              { date:'Apr 2025',    label:'Passed Senate 95–1',                 body:'Near-unanimous vote. Senators cited the explosion of AI-generated NCII targeting minors and adults across social and dating platforms.' },
-              { date:'May 19 2026', label:'Signed into law · FTC enforcement begins', body:'Platforms now have 48 hours to remove flagged NCII after a valid request. Failure = $53,088 per violation. The FTC has active jurisdiction.', highlight:true },
-              { date:'Now',         label:'Your platform is covered',           body:'If users can upload images on your platform, you are in scope. Dating apps, social platforms, messaging apps, creator tools — no exceptions for size.', highlight:true },
-            ].map((item, i, arr) => (
-              <div key={i} className={`tl-item${item.highlight ? ' tl-highlight' : ''}`}>
-                {i < arr.length-1 && <div className="tl-line"/>}
-                <div className={`tl-dot${item.highlight ? ' tl-dot-hot' : ''}`}>{item.highlight ? '!' : String(i+1).padStart(2,'0')}</div>
-                <div className="tl-content">
-                  <div className="tl-date">{item.date}</div>
-                  <h3>{item.label}</h3>
-                  <p>{item.body}</p>
-                </div>
-              </div>
-            ))}
+      {/* ── SCREEN 05 — WHY NOW ─────────────────────────────────────────────── */}
+      <section id="tida" className="screen05" aria-labelledby="screen05-title">
+        <div className="screen05-inner">
+          <header className="screen05-intro">
+            <p className="screen05-eyebrow">Why now</p>
+            <h2 id="screen05-title">When the removal clock starts, manual search becomes an infrastructure problem.</h2>
+          </header>
+
+          <div className="screen05-opening" aria-label="Report to removal operating path">
+            <p className="screen05-kicker">The operating reality</p>
+            <ol className="screen05-request-flow">
+              {['report', 'support / admin', 'engineer', 'manual search', 'removal'].map((step) => <li key={step}>{step}</li>)}
+            </ol>
+            <p>Engineering doesn&apos;t start the clock. For a covered platform, the 48-hour period begins when it receives a valid removal request through its TIDA notice-and-removal process.</p>
           </div>
-        </div>
-      </section>
 
-      <hr/>
+          <div className="screen05-pressure" aria-label="Regulatory pressure">
+            <article>
+              <p className="screen05-pressure-label">48 hours</p>
+              <p>Covered platforms must remove qualifying reported content and make reasonable efforts to identify and remove known identical copies within 48 hours after receiving a valid removal request through their TIDA notice-and-removal process.</p>
+            </article>
+            <article>
+              <p className="screen05-pressure-label">Reasonable efforts</p>
+              <p>Platforms must make reasonable efforts to identify and remove known identical copies.</p>
+            </article>
+            <p className="screen05-pressure-line">Big platforms can staff this problem. Small platforms still have to solve it.</p>
+          </div>
 
-      {/* ── WHAT IF YOU DO NOTHING ───────────────────────────────────────────── */}
-      <section className="donothing-section">
-        <div className="inner">
-          <p className="section-tag">if you do nothing</p>
-          <h2 className="section-title">Two different engineering realities.</h2>
-          <p className="section-sub">
-            The difference between platforms that handle image safety well and platforms that don&apos;t
-            isn&apos;t intent — it&apos;s infrastructure.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '2.5rem', marginBottom: '2.5rem' }}>
-            {/* Without Corvinth */}
-            <div style={{ background: 'rgba(255,77,77,0.04)', border: '0.5px solid rgba(255,77,77,0.18)', borderRadius: '16px', padding: '1.75rem' }}>
-              <div style={{ fontSize: '10px', fontWeight: 500, color: '#FF4D4D', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono',monospace", marginBottom: '1.25rem' }}>Without Corvinth</div>
-              {[
-                'User uploads image',
-                'No detection at ingest',
-                'Victim files abuse report',
-                'Support ticket created',
-                'Manual investigation begins',
-                '48h deadline missed',
-                'FTC complaint filed',
-                'Platform at risk',
-              ].map((step, i, arr) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <div style={{ fontSize: '13px', color: i >= 5 ? '#FF4D4D' : '#8C8B84', padding: '7px 0', fontFamily: "'JetBrains Mono',monospace" }}>↓ {step}</div>
-                </div>
-              ))}
+          <div className="screen05-infrastructure" aria-label="Where Corvinth fits in the platform workflow">
+            <div className="screen05-infrastructure-intro">
+              <p className="screen05-kicker">The boundary</p>
+              <h3>TIDA creates urgency. It does not define Corvinth&apos;s data model.</h3>
+              <p>Image safety infrastructure for matching platform-selected visual references.</p>
             </div>
-
-            {/* With Corvinth */}
-            <div style={{ background: 'rgba(0,229,155,0.04)', border: '0.5px solid rgba(0,229,155,0.18)', borderRadius: '16px', padding: '1.75rem' }}>
-              <div style={{ fontSize: '10px', fontWeight: 500, color: '#00E59B', textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: "'JetBrains Mono',monospace", marginBottom: '1.25rem' }}>With Corvinth</div>
-              {[
-                'User uploads image',
-                'SDK hashes locally — no pixels sent',
-                'POST /hash/check → <100ms',
-                'Decision returned: allow · review · block',
-                'Case UUID created',
-                'Audit log entry written',
-                'Webhook fired to your platform',
-                'Evidence ready before any complaint',
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <div style={{ fontSize: '13px', color: i >= 4 ? '#00E59B' : '#8C8B84', padding: '7px 0', fontFamily: "'JetBrains Mono',monospace" }}>↓ {step}</div>
-                </div>
-              ))}
+            <div className="screen05-layers">
+              <article className="screen05-layer">
+                <p>Legal pressure</p>
+                <div><span>valid qualifying request</span><i aria-hidden="true">→</i><span>time-bound platform obligation</span></div>
+              </article>
+              <article className="screen05-layer">
+                <p>Engineering consequence</p>
+                <div><span>reported content</span><i aria-hidden="true">→</i><span>find the reported item</span><i aria-hidden="true">→</i><span>identify known identical copies</span><i aria-hidden="true">→</i><span>platform evaluates and acts</span></div>
+              </article>
+              <article className="screen05-layer screen05-layer-corvinth">
+                <p>Corvinth underneath</p>
+                <div><span>platform-selected visual reference</span><i aria-hidden="true">→</i><span>platform-scoped matching</span><i aria-hidden="true">→</i><span>detection context returned to the platform</span></div>
+              </article>
             </div>
+            <p className="screen05-underneath">The obligation exists above Corvinth. The discovery infrastructure sits underneath it.</p>
           </div>
 
-          <div style={{ marginTop: '1rem', padding: '1rem 1.5rem', background: 'rgba(255,178,36,0.05)', border: '0.5px solid rgba(255,178,36,0.2)', borderRadius: '12px', fontSize: '13px', color: '#8C8B84', lineHeight: 1.75 }}>
-            <strong style={{ color: '#FFB224' }}>Note on TIDA:</strong> Under the Take It Down Act (U.S., active May 2026), platforms have 48 hours to remove flagged NCII after a valid request. Failure is $53,088 per violation. Corvinth catches violations at upload — before the clock starts.
+          <div className="screen05-ownership" aria-label="Platform and Corvinth ownership split">
+            <article>
+              <p className="screen05-kicker">The platform owns</p>
+              <ul><li>notice / request workflow</li><li>legal validity</li><li>policy decision</li><li>removal / enforcement</li></ul>
+            </article>
+            <article>
+              <p className="screen05-kicker">Corvinth provides</p>
+              <ul><li>platform-scoped detection</li><li>matching infrastructure</li><li>detection context returned to the platform</li></ul>
+            </article>
+          </div>
+          <p className="screen05-boundary-copy">Corvinth does not determine whether a legal request is valid, whether content is unlawful, or what enforcement action the platform must take.</p>
+
+          <div className="screen05-compare" aria-label="Classifier versus reference-based matching">
+            <header><p className="screen05-kicker">A different question</p><h3>The product boundary is reference-based detection, not content-category classification.</h3></header>
+            <div className="screen05-compare-grid">
+              <article>
+                <p className="screen05-compare-label">Classifier</p>
+                <h4>“What is this image?”</h4>
+                <p className="screen05-compare-flow">Image <span>→</span> classification <span>→</span> content category</p>
+              </article>
+              <article className="screen05-compare-corvinth">
+                <p className="screen05-compare-label">Corvinth</p>
+                <h4>“Where does this platform-selected visual reference appear?”</h4>
+                <p className="screen05-compare-flow">Platform-selected visual reference <span>→</span> platform-scoped matching <span>→</span> match + evidence</p>
+              </article>
+            </div>
+            <p className="screen05-compare-note">Reported content can become a visual reference when the platform selects it for tracking. Corvinth matches platform-selected visual references using fingerprints and visual signatures — it does not require a content-category label to detect a match.</p>
           </div>
 
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <a className="btn-primary lg" href="#contact">don&apos;t wait for a complaint →</a>
-          </div>
+          <p className="screen05-closing">The platform already has the report. Corvinth gives it the infrastructure to find matching platform content.</p>
         </div>
       </section>
 
@@ -1404,7 +1514,7 @@ async def corvinth_webhook(request: Request):
         <div className="footer-links">
           <a href="#how">how it works</a>
           <a href="#shield">shield</a>
-          <a href="#pulse">pulse</a>
+          <a href="#integration">integration</a>
           <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
           <a href="mailto:founder@corvinth.com">founder@corvinth.com</a>
         </div>

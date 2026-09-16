@@ -1602,8 +1602,8 @@ Reported reference / content to check
                ↓                                            │
           ephemeral fetch access ───────┐                   │
                                         ▼                   │
-                                  [ CORVINTH ]               │
-                                  Managed compute            │
+                                  [ CORVINTH ]              │  
+                                  Managed compute           │
                                         │                   │
                                         └────────┐          │
                                                  ▼          ▼
