@@ -1059,38 +1059,84 @@ async def corvinth_webhook(request: Request):
 
       <hr/>
 
-      {/* ── TRUST & COMPLIANCE ────────────────────────────────────────────────── */}
-      <section>
-        <div className="inner">
-          <p className="section-tag">trust and compliance</p>
-          <h2 className="section-title">Built honestly on available technology.</h2>
-          <p className="section-sub">Corvinth is built on open-source perceptual hashing and DINOv2 semantic vectors. The architecture supports optional Microsoft PhotoDNA integration — not currently active in production. When enabled, it operates on a platform opt-in basis with full disclosure in the DPA.</p>
-          <div className="trust-grid">
-            {[
-              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title:'Zero image storage', body:'Images are never sent to or stored on Corvinth servers. The SDK runs on your infrastructure. Only the hash or vector crosses the network boundary.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>, title:'Rotation tolerant', body:'All 8 orientations stored at index time. Rotated or flipped re-uploads are still caught by Shield. An optional second, normalized hash lane catches brightness/contrast evasion attempts that the standard lane alone would miss. Arbitrary rotations caught by Pulse.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>, title:'PDQ + DINOv2', body:'Uses Meta PDQ for perceptual hashing and DINOv2 for semantic vectors. Both run locally via the SDK — no pixels sent to Corvinth.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, title:'Your policy, our detection', body:'We return a signal. You enforce your policy. Corvinth is the detection layer — not the decision maker.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, title:'FTC-ready audit log', body:'Every decision receives a cryptographically chained audit log. Exportable for FTC or legal review at any time.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, title:'Compliance-ready architecture', body:'Catches violations at upload — before any removal request is filed. Evidence is already logged before any regulator asks for it.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>, title:'Near-miss pattern detection', body:'NEAR_MISS content is allowed through, but every occurrence is logged and analyzed for coordinated evasion patterns — repeated near-variant re-uploads from the same actor get flagged for threat intelligence review, even when no single upload crosses the block threshold.' },
-              { icon:<svg className="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>, title:'Signed webhooks', body:'Every webhook we send is signed with HMAC-SHA256 over the raw request body. Verify the X-Corvinth-Signature header against your webhook secret before trusting a payload.' },
-            ].map((card, i) => (
-              <div key={i} className="trust-card">
-                <div className="ticon">{card.icon}</div>
-                <h4>{card.title}</h4>
-                <p>{card.body}</p>
+      {/* ── SCREEN 09 — TECHNICAL FOUNDATION ─────────────────────────────────── */}
+      <section className="screen09" aria-labelledby="screen09-title">
+        <div className="screen09-inner">
+          <header className="screen09-intro">
+            <p className="screen09-eyebrow">Technical foundation</p>
+            <h2 id="screen09-title">Established detection methods. Corvinth infrastructure around them.</h2>
+            <p>Corvinth uses established perceptual detection techniques underneath the product. The value Corvinth adds is the platform-scoped infrastructure that turns those capabilities into an operational detection system.</p>
+          </header>
+
+          <div className="screen09-composition" aria-label="Detection foundations, Corvinth infrastructure, and clear boundaries">
+            <section className="screen09-foundations" aria-labelledby="screen09-foundations-title">
+              <p id="screen09-foundations-title">Detection foundations</p>
+              <div className="screen09-foundation-detail">
+                <span>Perceptual fingerprinting</span>
+                <strong>PDQ</strong>
+                <small>Used as an underlying primitive for perceptual image matching.</small>
               </div>
-            ))}
+            </section>
+
+            <div className="screen09-connector" aria-hidden="true"><span></span><i>↓</i><span></span></div>
+
+            <section className="screen09-infrastructure" aria-labelledby="screen09-infrastructure-title">
+              <header className="screen09-infrastructure-header">
+                <h3 id="screen09-infrastructure-title">Corvinth infrastructure</h3>
+              </header>
+              <ul>
+                <li>
+                  <h4>Platform-scoped reference lifecycle</h4>
+                  <p>References are created, maintained, and used within the platform scope they belong to.</p>
+                </li>
+                <li>
+                  <h4>Matching orchestration across continuous and explicit-search workflows</h4>
+                  <p>Corvinth coordinates how detection methods are used operationally rather than exposing isolated algorithms.</p>
+                </li>
+                <li>
+                  <h4>Managed / customer compute boundaries</h4>
+                  <p>The platform can choose where image compute happens while using the same Corvinth detection system.</p>
+                </li>
+                <li>
+                  <h4>Object, case, and evidence context where applicable</h4>
+                  <p>Corvinth connects detection results to the operational identity and context required by the workflow.</p>
+                </li>
+                <li>
+                  <h4>Platform-scoped matching and evidence boundaries</h4>
+                  <p>Matching results and evidence remain within the relevant platform scope rather than becoming a global cross-customer pool.</p>
+                </li>
+              </ul>
+            </section>
+
+            <div className="screen09-connector" aria-hidden="true"><span></span><i>↓</i><span></span></div>
+
+            <section className="screen09-boundaries" aria-labelledby="screen09-boundaries-title">
+              <header>
+                <p id="screen09-boundaries-title">Clear boundaries</p>
+              </header>
+              <ul>
+                <li>
+                  <h3>Established foundations</h3>
+                  <p>Corvinth does not present underlying detection methods as proprietary inventions.</p>
+                </li>
+                <li>
+                  <h3>Production status is explicit</h3>
+                  <p>Optional or inactive integrations are identified separately from production capabilities.</p>
+                </li>
+                <li>
+                  <h3>Detection, not enforcement</h3>
+                  <p>Corvinth provides detection and evidence context. Your platform retains moderation and enforcement decisions.</p>
+                </li>
+              </ul>
+            </section>
           </div>
-          <div className="pills">
-            {['Meta PDQ','DINOv2','Qdrant cosine','Open-source hashing','Near-duplicate detection','Compliance logs','Review queue','Case management'].map(p => (
-              <span key={p} className="pill">{p}</span>
-            ))}
-          </div>
-          <div className="disclaimer-box">
-            <p>Corvinth's hashing format is compatible with the StopNCII PDQ standard. Corvinth is not currently partnered with or integrated into StopNCII's feed, and does not represent or speak for StopNCII, Meta, or any listed organization. Corvinth is an independent trust and safety infrastructure company.</p>
-          </div>
+
+          <p className="screen09-closing">The detection primitives are established. Corvinth is the infrastructure that makes them usable as a scoped, operational system for platforms.</p>
+
+          <aside className="screen09-independence" aria-label="Independence clarification">
+            <p>Independence clarification</p>
+            <span>Corvinth is not partnered with or integrated into StopNCII and does not represent StopNCII. Corvinth independently uses perceptual-hashing technology within its own detection infrastructure.</span>
+          </aside>
         </div>
       </section>
 
