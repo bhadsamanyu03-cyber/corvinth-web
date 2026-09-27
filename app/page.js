@@ -785,7 +785,7 @@ export default function Home() {
                 {
                   topic: 'Independence',
                   q: 'Is Corvinth integrated with StopNCII?',
-                  a: <p className="screen12-faq-answer-lead">Corvinth is not partnered with or integrated into StopNCII and does not represent StopNCII. Corvinth independently uses perceptual-hashing technology within its own detection infrastructure.</p>,
+                  a: <p className="screen12-faq-answer-lead">Corvinth is not partnered with or integrated into StopNCII and does not represent StopNCII. Corvinth operates its own image-matching infrastructure, incorporating perceptual hashing and DINOv2-based semantic image matching.</p>,
                 },
                 {
                   topic: 'Image handling',
