@@ -334,7 +334,11 @@ export default function Home() {
               <a className="hero-cta-primary" href="#contact">Request API access <span aria-hidden="true">→</span></a>
               <a className="hero-cta-secondary" href="#demo">View live demo</a>
             </div>
-            <p className="hero-trust">PLATFORM-SCOPED MATCHING <span>·</span> MANAGED OR CUSTOMER COMPUTE <span>·</span> NO DURABLE IMAGE-BYTE STORAGE</p>
+            <p className="hero-trust">
+              <span className="hero-trust-line">PLATFORM-SCOPED MATCHING <span>·</span></span>{' '}
+              <span className="hero-trust-line">MANAGED OR CUSTOMER COMPUTE <span>·</span></span>{' '}
+              <span className="hero-trust-line">NO DURABLE IMAGE-BYTE STORAGE</span>
+            </p>
           </div>
 
           <div className="hero-proof" aria-label="Illustration of platform-scoped detection">
