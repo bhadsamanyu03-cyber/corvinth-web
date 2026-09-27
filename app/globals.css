@@ -2324,10 +2324,10 @@ svg.icon {
 /* ── SCREEN 13 — PLATFORM USERS ──────────────────────────────────────────── */
 .screen13-users {
   position: relative; overflow: hidden;
-  padding: clamp(96px, 10vw, 148px) clamp(24px, 5vw, 88px) clamp(104px, 11vw, 160px);
+  padding: clamp(72px, 6vw, 96px) clamp(24px, 5vw, 88px);
   background:
-    radial-gradient(ellipse 44% 46% at 16% 38%, rgba(0, 229, 155, .035), transparent 76%),
-    linear-gradient(180deg, #0d0f0d 0%, #0a0c0b 62%, #080908 100%);
+    radial-gradient(ellipse 70% 90% at 50% 20%, rgba(0, 229, 155, .035), transparent 80%),
+    #0e1310;
 }
 .screen13-users::before {
   content: '';
@@ -2337,19 +2337,20 @@ svg.icon {
 }
 .screen13-users-shell {
   position: relative; z-index: 1;
-  display: grid; grid-template-columns: minmax(0, 1.14fr) minmax(270px, .54fr);
+  display: grid; grid-template-columns: 200px minmax(0, 1fr);
   grid-template-areas:
-    "tag ."
-    "title boundary"
-    "lead boundary";
-  column-gap: clamp(54px, 10vw, 168px); row-gap: 20px;
-  width: 100%; max-width: 1180px; margin: 0 auto;
+    "tag title"
+    ". lead"
+    ". boundary";
+  column-gap: clamp(40px, 5vw, 80px); row-gap: 24px;
+  width: 100%; max-width: 1040px; margin: 0 auto; padding-top: 32px;
+  border-top: 1px solid rgba(151, 197, 169, .25);
 }
 .screen13-users-tag {
   grid-area: tag; display: inline-flex; align-items: center; gap: 9px;
-  width: fit-content; margin: 0; color: var(--green);
+  align-self: start; width: fit-content; margin: 8px 0 0; color: var(--green);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .13em;
   text-transform: uppercase;
@@ -2362,75 +2363,71 @@ svg.icon {
   box-shadow: 0 0 12px rgba(0, 229, 155, .5);
 }
 .screen13-users h2 {
-  grid-area: title; max-width: 680px; margin: 0; color: #f0f3f1;
+  grid-area: title; max-width: none; margin: 0; color: #f0f3f1;
   font-family: var(--font-display);
-  font-size: clamp(37px, 3.65vw, 54px);
-  font-weight: 700;
-  letter-spacing: -.05em;
-  line-height: 1.05;
-  text-wrap: balance;
+  font-size: clamp(32px, 3vw, 42px);
+  font-weight: 650;
+  letter-spacing: -.04em;
+  line-height: 1.18;
 }
-.screen13-users h2 span { display: block; color: #bec9c2; }
+.screen13-users h2 span { display: block; color: #b9d2c2; }
 .screen13-users-lead {
-  grid-area: lead; max-width: 570px; margin: 0;
-  color: #b1bab5;
-  font-size: clamp(14px, 1.2vw, 17px);
+  grid-area: lead; max-width: 660px; margin: 0;
+  color: #c4cec7;
+  font-size: 18px;
   line-height: 1.75;
 }
 .screen13-users-boundary {
-  grid-area: boundary; align-self: center;
-  max-width: 360px; margin: 0; padding: 26px 0 0;
-  border-top: 1px solid rgba(0, 229, 155, .32); border-left: 0;
+  grid-area: boundary;
+  max-width: 660px; margin: 8px 0 0; padding: 28px 0 0;
+  border-top: 1px solid rgba(151, 197, 169, .2);
 }
 .screen13-users-boundary > p:first-child {
   margin: 0;
-  color: #b1bbb5;
-  font-size: 14px;
+  color: #b7c4bc;
+  font-size: 16px;
   line-height: 1.74;
 }
 .screen13-users-boundary strong {
+  display: block; margin-bottom: 10px;
   color: #e9eeeb;
-  font-weight: 650;
+  font-size: 21px; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.35;
 }
 .screen13-users-boundary .screen13-users-boundary-statement {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  width: fit-content; margin: 22px 0 0;
-  color: #9fc9af;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  width: fit-content; margin: 20px 0 0;
+  color: #a9c7b5;
+  font-size: 13px;
+  line-height: 1.6;
 }
 .screen13-users-boundary-statement::before {
   content: '';
   width: 18px;
+  flex-shrink: 0;
   height: 1px;
   background: currentColor;
 }
 
+@media (max-width: 900px) {
+  .screen13-users-shell { display: block; max-width: 660px; }
+  .screen13-users-tag { margin-top: 0; }
+  .screen13-users h2 { margin-top: 24px; }
+  .screen13-users-lead { margin-top: 24px; }
+  .screen13-users-boundary { margin-top: 32px; }
+}
 @media (max-width: 640px) {
-  .screen13-users {
-    padding: 84px 20px 88px;
-  }
-  .screen13-users-shell { display: block; max-width: 500px; }
+  .screen13-users { padding: 56px 24px 64px; }
+  .screen13-users-shell { padding-top: 24px; }
   .screen13-users h2 {
-    max-width: 380px; margin-top: 22px;
-    font-size: clamp(34px, 10vw, 44px);
+    font-size: clamp(29px, 7.7vw, 36px);
   }
-  .screen13-users-lead { max-width: 360px; margin-top: 22px; }
-  .screen13-users-boundary {
-    max-width: 360px; margin-top: 40px;
-    padding: 24px 0 0;
-    border-top: 1px solid rgba(0, 229, 155, .32); border-left: 0;
-  }
-  .screen13-users-boundary > p:first-child { font-size: 13px; }
-  .screen13-users-boundary .screen13-users-boundary-statement {
-    justify-content: flex-start;
-    line-height: 1.5;
-  }
+  .screen13-users-lead { font-size: 16px; }
+  .screen13-users-boundary { padding-top: 24px; }
+  .screen13-users-boundary > p:first-child { font-size: 15px; }
+  .screen13-users-boundary strong { font-size: 20px; }
 }
 /* ── PULSE DASHBOARD MOCKUP ──────────────────────────────────────────────── */
 .pulse-complaint-row {
