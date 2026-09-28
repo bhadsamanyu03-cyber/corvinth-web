@@ -349,7 +349,7 @@ export default function Home() {
             <div className="hero-proof-flow">
               <div className="hero-proof-step hero-proof-selected">
                 <h2>Platform-selected<br />image</h2>
-                <div className="hero-proof-photo"><img className="hero-proof-source-image" src="/screen01-reference.webp" alt="Adult woman seated beside a mountain lake at sunset" /></div>
+                <div className="hero-proof-photo"><img className="hero-proof-source-image" src="/screen01-personal-original.webp" alt="Fully clothed adult woman taking a mirror selfie at home, with her face covered by her phone" /></div>
                 <div className="hero-proof-step-caption"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 20 5v6c0 5-3.3 8.5-8 11-4.7-2.5-8-6-8-11V5l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg><span>Selected by your team</span></div>
               </div>
               <div className="hero-proof-connector hero-proof-reference" aria-label="Reference"><span>Reference</span><b aria-hidden="true">→</b></div>
@@ -363,10 +363,12 @@ export default function Home() {
               <div className="hero-proof-step hero-proof-result">
                 <h2>Match found</h2>
                 <div className="hero-proof-thumbnails" aria-hidden="true">
-                  <img src="/screen01-reference.webp" alt="" />
-                  <img src="/screen01-reference.webp" alt="" />
-                  <img src="/screen01-reference.webp" alt="" />
-                  <img src="/screen01-reference.webp" alt="" />
+                  <img src="/screen01-personal-mirrored.webp" alt="" />
+                  <img src="/screen01-personal-original.webp" alt="" />
+                  <img src="/screen01-personal-pink.webp" alt="" />
+                  <img className="hero-proof-rotated-image" src="/screen01-personal-rotated.webp" alt="" />
+                  <img src="/screen01-personal-cropped.webp" alt="" />
+                  <img src="/screen01-personal-blurred.webp" alt="" />
                 </div>
                 <div className="hero-proof-details">
                   <span>match_found</span><strong>true</strong>
