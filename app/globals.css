@@ -349,6 +349,7 @@ nav::before {
 .hero-trust-line > span { color: #00E59B; padding: 0 .15em; }
 
 .hero-proof {
+  container-type: inline-size;
   display: flex; flex-direction: column;
   min-width: 0; margin-top: 21px; padding: 18px 26px 0;
   border: 1px solid rgba(0, 229, 155, .3); border-radius: 18px;
@@ -384,6 +385,7 @@ nav::before {
   font-size: 16px; font-weight: 700; line-height: 1.4;
   letter-spacing: -.025em; text-transform: uppercase;
 }
+.hero-proof-selected h2, .hero-proof-matching h2 { white-space: nowrap; }
 .hero-proof-photo {
   width: 100%; height: 174px; margin-top: 10px;
   overflow: hidden; border-radius: 7px;
@@ -448,7 +450,6 @@ nav::before {
   width: 100%; height: 100%; object-fit: cover;
   object-position: center 20%; border-radius: 7px;
 }
-.hero-proof-thumbnails .hero-proof-rotated-image { object-fit: contain; object-position: center; }
 .hero-proof-details {
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   gap: 6px 5px; margin-top: auto; color: #d9e5e8;
@@ -591,6 +592,53 @@ nav::before {
 @media (max-width: 355px) {
   .screen01-nav-cta { display: none; }
   .hero-cta-primary, .hero-cta-secondary { min-width: 100%; }
+}
+
+/* Approved input / process / output proportions, sized to the diagram itself. */
+@media (min-width: 681px) {
+  .hero-proof-flow {
+    grid-template-columns: minmax(0, 342fr) minmax(0, 90fr) minmax(0, 293fr) minmax(0, 45fr) minmax(0, 562fr);
+    gap: 0; align-items: center; padding: 4cqw 0 10cqw;
+  }
+  .hero-proof-step, .hero-proof-result {
+    height: 49.55cqw; min-height: 0; padding: 2.55cqw 2.15cqw 2.35cqw;
+  }
+  .hero-proof-selected { padding-inline: 1.9cqw; }
+  .hero-proof-selected h2 { padding-left: .6cqw; }
+  .hero-proof-step h2 { font-size: 2cqw; }
+  .hero-proof-photo {
+    height: auto; aspect-ratio: 290 / 370; flex-shrink: 0;
+    margin: 1.6cqw 0 0;
+  }
+  .hero-proof-step-caption {
+    gap: 1.2cqw; margin: auto 0 2cqw;
+    font-size: 1.65cqw; white-space: normal;
+  }
+  .hero-proof-step-caption svg { width: 3.35cqw; height: 3.35cqw; }
+  .hero-proof-connector { position: relative; z-index: 1; }
+  .hero-proof-connector b { font-size: 3.8cqw; }
+  .hero-proof-reference { gap: .4cqw; }
+  .hero-proof-reference span {
+    flex-shrink: 0; font-size: 1.15cqw; padding: 1.2cqw .95cqw;
+  }
+  .hero-proof-matching > p { font-size: 1.65cqw; white-space: normal; }
+  .hero-proof-matching .hero-proof-stack {
+    width: 14.6cqw; height: 17.85cqw; flex-shrink: 0; margin: 3cqw auto auto;
+  }
+  .hero-proof-stack span { font-size: 1.15cqw; }
+  .hero-proof-stack i { left: 9.5%; width: 81%; height: 36.6%; }
+  .hero-proof-stack i:nth-of-type(1) { top: 5%; }
+  .hero-proof-stack i:nth-of-type(2) { top: 22%; }
+  .hero-proof-stack i:nth-of-type(3) { top: 39%; }
+  .hero-proof-stack i:nth-of-type(4) { top: 56%; }
+  .hero-proof-result .hero-proof-thumbnails {
+    grid-template-rows: repeat(2, minmax(0, 1fr)); height: 25.5cqw; min-height: 0;
+    flex-shrink: 0; gap: 1.5cqw; margin: 2.4cqw 0 0;
+  }
+  .hero-proof-details { gap: 1cqw .7cqw; font-size: 1.5cqw; }
+  .hero-proof-details strong { font-size: 1.5cqw; }
+  .hero-proof-details span::before { font-size: 1.65cqw; margin-right: 1cqw; }
+  .hero-proof-boundary { margin-top: 1.6cqw; padding-top: 1.6cqw; font-size: 1.4cqw; }
 }
 
 /* ── SCREEN 02 / WHY CORVINTH ───────────────────────────────────────────── */

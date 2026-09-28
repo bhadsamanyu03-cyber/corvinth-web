@@ -363,12 +363,12 @@ export default function Home() {
               <div className="hero-proof-step hero-proof-result">
                 <h2>Match found</h2>
                 <div className="hero-proof-thumbnails" aria-hidden="true">
-                  <img src="/screen01-personal-mirrored.webp" alt="" />
-                  <img src="/screen01-personal-original.webp" alt="" />
-                  <img src="/screen01-personal-pink.webp" alt="" />
-                  <img className="hero-proof-rotated-image" src="/screen01-personal-rotated.webp" alt="" />
-                  <img src="/screen01-personal-cropped.webp" alt="" />
-                  <img src="/screen01-personal-blurred.webp" alt="" />
+                  <img src="/hero-matches/blurred.png" alt="" />
+                  <img src="/hero-matches/original.png" alt="" />
+                  <img src="/hero-matches/filtered.png" alt="" />
+                  <img src="/hero-matches/rotate90.png" alt="" />
+                  <img src="/hero-matches/cropped.png" alt="" />
+                  <img src="/hero-matches/darkened.png" alt="" />
                 </div>
                 <div className="hero-proof-details">
                   <span>match_found</span><strong>true</strong>
