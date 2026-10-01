@@ -1,148 +1,8 @@
 // app/page.js
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-
-// ── Samples for the live demo ─────────────────────────────────────────────────
-const SAMPLES = {
-  nomatch:  "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345",
-  nearmiss: "f1e2d3c4b5a6978685746352413029180f1e2d3c4b5a69786857463524130291",
-};
-function randomHex64() {
-  return Array.from({ length: 64 }, () =>
-    "0123456789abcdef"[Math.floor(Math.random() * 16)]
-  ).join("");
-}
-
-// ── Live API Demo ─────────────────────────────────────────────────────────────
-function ApiDemo() {
-  const [hash,     setHash]     = useState("");
-  const [source,   setSource]   = useState("");
-  const [response, setResponse] = useState("// response will appear here");
-  const [status,   setStatus]   = useState("idle");
-  const [latency,  setLatency]  = useState("");
-
-  // Warm the server silently on mount
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`, { method: 'GET' })
-      .catch(() => {});
-  }, []);
-  
-  async function runDemo() {
-    if (!hash || hash.length !== 64) {
-      setStatus("error");
-      setResponse("// hash must be exactly 64 hex characters");
-      return;
-    }
-    setStatus("loading");
-    setResponse("// querying Corvinth match engine…");
-    setLatency("");
-    const t0 = performance.now();
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/demo/check`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdq_hash: hash.trim().toLowerCase(), source: source || "demo" }),
-      });
-      const ms = Math.round(performance.now() - t0);
-      if (res.status === 429) {
-        setResponse("// Rate limit reached — try again in a minute.");
-        setLatency(`${ms}ms`); setStatus("error"); return;
-      }
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setResponse(`// error ${res.status}: ${err.detail || res.statusText}`);
-        setLatency(`${ms}ms`); setStatus("error"); return;
-      }
-      const data = await res.json();
-      setResponse(JSON.stringify(data, null, 2));
-      setLatency(`${ms}ms`);
-      setStatus(
-        data.match_found ? "match" :
-        data.classification === "NEAR_MISS" ? "nearmiss" :
-        "ok"
-      );
-    } catch (err) {
-      const ms = Math.round(performance.now() - t0);
-      setResponse(
-        `// Network error: ${err.message}\n//\n// The sandbox runs on Render's free tier.\n// First request may take ~10s while the server wakes up. Try again.`
-      );
-      setLatency(`${ms}ms`); setStatus("error");
-    }
-  }
-
-  const statusLabel = {
-    idle:     "waiting for input",
-    loading:  "querying engine…",
-    ok:       "CLEAN · content_allowed ✓",
-    nearmiss: "NEAR_MISS · content_allowed (flagged for pattern review)",
-    match:    "match found · blocked 🚫",
-    error:    "request failed",
-  }[status];
-
-  const dotColor = {
-    idle: "#4A4A45", loading: "#FFB224",
-    ok: "#00E59B",  nearmiss: "#FFB224",
-    match: "#FF4D4D", error: "#FF4D4D",
-  }[status];
-
-  function syntaxHighlight(str) {
-    if (str.startsWith("//")) return `<span style="color:#4A4A45">${str.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
-    return str.replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"([^"]+)":/g, '<span style="color:#00E59B">"$1"</span>:')
-      .replace(/: "(.*?)"/g,  ': <span style="color:#FFB224">"$1"</span>')
-      .replace(/: (true|false)/g, ': <span style="color:#4D9EFF">$1</span>')
-      .replace(/: (null)/g,       ': <span style="color:#4A4A45">$1</span>')
-      .replace(/: (-?\d+\.?\d*)/g,': <span style="color:#4D9EFF">$1</span>');
-  }
-
-  return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px,1fr))', gap:'1rem', width:'100%', textAlign:'left' }}>
-      {/* Input panel */}
-      <div style={{ borderRadius:'12px', border:'0.5px solid rgba(255,255,255,0.08)', background:'#0a0a08', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
-        <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Input — PDQ hash</p>
-        <textarea
-          style={{ width:'100%', fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'8px', padding:'10px 12px', color:'#F0EFE8', resize:'vertical', minHeight:'88px', outline:'none' }}
-          placeholder="Paste a 64-char hex PDQ hash…"
-          value={hash} onChange={e => setHash(e.target.value)} spellCheck={false}
-        />
-        <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
-          {["nomatch","nearmiss","random"].map(s => (
-            <button key={s} onClick={() => setHash(s === "random" ? randomHex64() : SAMPLES[s])}
-              style={{ fontSize:'11px', padding:'4px 12px', borderRadius:'999px', border:'0.5px solid rgba(255,255,255,0.10)', background:'transparent', color:'#8C8B84', cursor:'pointer', fontFamily:'inherit' }}>
-              {s === "nomatch" ? "no match sample" : s === "nearmiss" ? "near-miss sample" : "random"}
-            </button>
-          ))}
-        </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
-          <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Source tag (optional)</p>
-          <input type="text" placeholder="profile_photo" value={source} onChange={e => setSource(e.target.value)}
-            style={{ width:'100%', fontSize:'13px', background:'#060605', border:'0.5px solid rgba(255,255,255,0.10)', borderRadius:'8px', padding:'8px 12px', color:'#F0EFE8', outline:'none', fontFamily:'inherit' }} />
-        </div>
-        <button onClick={runDemo} disabled={status === "loading"}
-          style={{ width:'100%', padding:'10px', borderRadius:'8px', border:'0.5px solid rgba(255,255,255,0.12)', background:'transparent', fontSize:'13px', color:'#F0EFE8', cursor: status === "loading" ? 'not-allowed' : 'pointer', opacity: status === "loading" ? 0.6 : 1, fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
-          {status === "loading" ? (
-            <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation:'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>querying…</>
-          ) : "Check for a match →"}
-        </button>
-        <p style={{ fontSize:'11px', color:'#4A4A45', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace" }}>
-          Live sandbox · first request may take ~10s (Render cold start)
-        </p>
-      </div>
-      {/* Response panel */}
-      <div style={{ borderRadius:'12px', border:'0.5px solid rgba(255,255,255,0.08)', background:'#0a0a08', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'0.75rem' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-          <span style={{ width:'8px', height:'8px', borderRadius:'50%', background:dotColor, flexShrink:0, transition:'background 0.3s' }}/>
-          <span style={{ fontSize:'12px', color:'#8C8B84', fontFamily:"'JetBrains Mono',monospace" }}>{statusLabel}</span>
-          {latency && <span style={{ marginLeft:'auto', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', color:'#4A4A45' }}>{latency}</span>}
-        </div>
-        <p style={{ fontSize:'10px', color:'#4A4A45', textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:"'JetBrains Mono',monospace" }}>Response</p>
-        <pre style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'12px', background:'#060605', borderRadius:'8px', padding:'12px', minHeight:'200px', whiteSpace:'pre-wrap', wordBreak:'break-all', lineHeight:1.7, overflow:'auto', flex:1 }}
-          dangerouslySetInnerHTML={{ __html: syntaxHighlight(response) }} />
-      </div>
-    </div>
-  );
-}
+import { useState, useRef } from 'react';
+import DemoPreview from './components/DemoPreview';
 
 function Screen12FaqItem({ index, topic, q, a, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -701,14 +561,7 @@ export default function Home() {
       <hr/>
 
       {/* ── LIVE API DEMO ─────────────────────────────────────────────────────── */}
-      <section id="demo">
-        <div className="inner">
-          <p className="section-tag">live api demo</p>
-          <h2 className="section-title">Test the Engine.</h2>
-          <p className="section-sub">Submit a PDQ hash and see a real API response from the match engine. No API key required. Limited to 10 requests/minute.</p>
-          <ApiDemo/>
-        </div>
-      </section>
+      <DemoPreview/>
 
       <hr/>
 

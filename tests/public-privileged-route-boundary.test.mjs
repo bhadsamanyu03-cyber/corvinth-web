@@ -46,10 +46,14 @@ test('public frontend code contains no privileged check-and-archive target', () 
   );
 });
 
-test('the public demo remains bound only to the read-only demo endpoint', () => {
-  const demoRoute = readFileSync(join(appRoot, 'api', 'demo', 'route.js'), 'utf8');
+test('the legacy public demo proxy is absent', () => {
+  assert.equal(existsSync(join(appRoot, 'api', 'demo', 'route.js')), false);
+});
 
-  assert.match(demoRoute, /\/demo\/check/);
-  assert.doesNotMatch(demoRoute, /CORVINTH_API_KEY/);
-  assert.doesNotMatch(demoRoute, /\/hash\/check-and-archive/);
+test('frontend runtime code has no stale demo endpoint integration', () => {
+  const violations = sourceFiles(appRoot)
+    .filter((path) => /\/demo\/check|\/api\/demo/.test(readFileSync(path, 'utf8')))
+    .map((path) => relative(root, path));
+
+  assert.deepEqual(violations, [], 'Legacy backend demo must remain disconnected from the frontend');
 });

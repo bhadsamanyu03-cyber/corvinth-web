@@ -1,0 +1,72 @@
+.demo { text-align: left; }
+.intro { max-width: 530px; color: var(--text-muted); font-size: 16px; line-height: 1.75; }
+.availability { margin-top: 28px; padding-left: 16px; border-left: 2px solid var(--green-dark); }
+.status, .eyebrow { font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; }
+.status { color: #b8c5bf; }
+.availability p { margin-top: 5px; color: #a6aaa3; font-size: 13px; line-height: 1.65; }
+.previewButton {
+  display: inline-flex; align-items: center; gap: 22px; margin-top: 24px;
+  padding: 12px 18px; border: 1px solid var(--green-mid); border-radius: 8px;
+  background: var(--green-light); color: var(--green); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.previewButton:hover { border-color: var(--green); }
+.workspace { margin-top: 32px; padding: 28px; border: 1px solid var(--border-hi); border-radius: 14px; background: var(--bg-card); }
+.workspaceHeading, .stageHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.eyebrow { color: #a0b2a8; }
+.textButton { padding: 6px 0; border: 0; background: none; color: #c3cbc6; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.access { margin-top: 18px; border-block: 1px solid var(--border-mid); }
+.access summary, .requestDetails summary { padding: 16px 0; color: #c3cbc6; font-size: 13px; cursor: pointer; }
+.access summary span { margin-left: 12px; font-size: 11px; color: var(--text-muted); }
+.accessBody { padding-bottom: 20px; }
+.accessBody > p, .requestDetails p { max-width: 570px; color: #a6aaa3; font-size: 13px; line-height: 1.7; }
+.accessFields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; border: 0; min-width: 0; }
+.accessFields label { display: grid; gap: 7px; color: #b8c1bb; font-size: 12px; min-width: 0; }
+.accessFields input { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid var(--border-mid); border-radius: 6px; background: var(--bg); color: var(--text-muted); font: inherit; }
+.accessFields input::placeholder { color: var(--text-muted); opacity: 1; }
+.modes { min-width: 0; margin-top: 28px; border: 0; }
+.modes legend { margin-bottom: 14px; color: var(--text); font-size: 15px; font-weight: 600; }
+.modeOptions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mode { display: flex; align-items: flex-start; gap: 12px; padding: 18px; border: 1px solid var(--border-hi); border-radius: 9px; background: var(--bg); cursor: pointer; }
+.mode:hover { border-color: var(--green-dark); }
+.selected { border-color: var(--green); background: var(--green-glow); }
+.mode input { width: 16px; height: 16px; margin-top: 4px; flex-shrink: 0; accent-color: var(--green); }
+.mode strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
+.mode strong + span { display: block; margin-top: 7px; font-size: 13px; line-height: 1.65; color: #a6aaa3; }
+.stageHeading { margin-top: 32px; align-items: baseline; }
+.modeContext { font-size: 11px; color: #a6aaa3; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 12px; border-bottom: 1px solid var(--border-hi); }
+.stages button { display: flex; align-items: center; gap: 10px; padding: 14px 10px; border: 0; border-bottom: 2px solid transparent; background: none; color: #a6aaa3; font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+.stages button[aria-pressed='true'] { border-bottom-color: var(--green); color: var(--text); }
+.stages button[aria-pressed='true'] .stepNumber { color: var(--green); }
+.stepNumber { font-family: var(--font-mono); font-size: 10px; color: #88968d; }
+.stage { padding-top: 26px; }
+.stage h3 { font-size: 21px; font-weight: 600; line-height: 1.35; letter-spacing: -.5px; }
+.description { max-width: 570px; margin-top: 8px; color: #a6aaa3; font-size: 14px; line-height: 1.75; }
+.galleryEmpty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 164px; margin-top: 22px; padding: 24px; border: 1px dashed var(--border-hi); border-radius: 8px; background: var(--bg); text-align: center; }
+.emptyMark { margin-bottom: 8px; color: var(--green-dark); font-size: 20px; }
+.galleryEmpty strong { font-size: 14px; font-weight: 500; color: #c3cbc6; }
+.galleryEmpty p { max-width: 370px; margin-top: 7px; color: #a6aaa3; font-size: 12px; line-height: 1.65; }
+.stageFooter { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 22px; }
+.stageFooter p { max-width: 350px; font-size: 12px; line-height: 1.65; color: #a6aaa3; }
+.action { flex-shrink: 0; padding: 11px 16px; border: 1px solid var(--border-hi); border-radius: 7px; background: var(--bg-raised); color: #a6aaa3; font: inherit; font-size: 13px; }
+.action:disabled, .accessFields input:disabled { cursor: not-allowed; }
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+.imageEmpty { display: grid; place-items: center; min-height: 135px; margin-top: 10px; padding: 16px; border: 1px dashed var(--border-hi); border-radius: 8px; background: var(--bg); color: #a6aaa3; font-size: 12px; text-align: center; }
+.requestDetails { margin-top: 16px; border-bottom: 1px solid var(--border-mid); }
+.requestDetails p { padding-bottom: 16px; }
+.demo button:focus-visible, .demo summary:focus-visible, .mode:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 4px; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 600px) {
+  .workspace { padding: 20px 16px; }
+  .modeOptions, .accessFields { grid-template-columns: 1fr; }
+  .stageHeading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .stages button { flex-direction: column; align-items: flex-start; gap: 5px; padding: 12px 5px; font-size: 11px; line-height: 1.5; }
+  .mode { padding: 15px; }
+  .stageFooter { flex-direction: column; align-items: stretch; gap: 14px; }
+  .stageFooter p { max-width: none; }
+  .comparison { gap: 10px; }
+  .comparison .eyebrow { font-size: 9px; letter-spacing: .03em; }
+  .imageEmpty { min-height: 120px; padding: 10px; }
+  .galleryEmpty { padding: 20px 16px; }
+  .access summary span { display: block; margin-left: 17px; margin-top: 3px; }
+}
