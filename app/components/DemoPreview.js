@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './DemoPreview.module.css';
 
 const stages = [
@@ -9,13 +9,97 @@ const stages = [
   { id: 'result', title: 'See the result' },
 ];
 
-// Presentation only. No session, reference, or result is fabricated here.
-// Enable execution only after the server owns the approved asset mapping
-// and provides bounded sessions with isolated reference state.
+const accessMessages = {
+  demo_token_invalid: 'This token is invalid, expired, revoked, or has reached its session limit.',
+  demo_session_invalid: 'Your demo session has ended or expired. Enter a token to start again.',
+  demo_rate_limited: 'Too many access attempts. Please try again later.',
+  demo_invalid_request: 'Enter the complete demo token supplied by Corvinth.',
+  demo_origin_rejected: 'Demo access is unavailable from this page address.',
+  demo_unavailable: 'Demo access is temporarily unavailable. Please try again later.',
+};
+
+// Access is connected; image selection and computation remain unavailable.
 export default function DemoPreview() {
   const [expanded, setExpanded] = useState(false);
   const [mode, setMode] = useState('');
   const [stage, setStage] = useState('reference');
+  const [session, setSession] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [message, setMessage] = useState('');
+  const tokenInput = useRef(null);
+  const requestBusy = useRef(false);
+  const accessGeneration = useRef(0);
+
+  useEffect(() => {
+    if (!expanded) return;
+    let cancelled = false;
+    async function refresh() {
+      if (requestBusy.current) return;
+      const generation = accessGeneration.current;
+      try {
+        const response = await fetch('/api/live-demo/session', { cache: 'no-store', credentials: 'same-origin' });
+        const data = await response.json();
+        if (cancelled || requestBusy.current || generation !== accessGeneration.current) return;
+        if (response.ok) {
+          setSession(data.status === 'active' ? data : null);
+        } else if (response.status === 401) {
+          setSession(null);
+          setMessage(accessMessages.demo_session_invalid);
+        } else {
+          setSession(null);
+          setMessage(accessMessages[data.error] || accessMessages.demo_unavailable);
+        }
+      } catch {
+        if (!cancelled && generation === accessGeneration.current && !requestBusy.current) {
+          setSession(null); setMessage(accessMessages.demo_unavailable);
+        }
+      } finally {
+        if (!cancelled && generation === accessGeneration.current && !requestBusy.current) setChecking(false);
+      }
+    }
+    refresh();
+    const interval = setInterval(refresh, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [expanded]);
+
+  useEffect(() => {
+    if (!session) return;
+    const timer = setTimeout(() => {
+      setSession(null);
+      setMode('');
+      setStage('reference');
+      setMessage(accessMessages.demo_session_invalid);
+    }, Math.max(0, new Date(session.expires_at).getTime() - Date.now()));
+    return () => clearTimeout(timer);
+  }, [session]);
+
+  async function changeAccess(event, method) {
+    event.preventDefault();
+    if (requestBusy.current) return;
+    requestBusy.current = true;
+    accessGeneration.current += 1;
+    setBusy(true);
+    setMessage('');
+    const token = method === 'POST' ? tokenInput.current.value.trim() : undefined;
+    if (tokenInput.current) tokenInput.current.value = '';
+    try {
+      const response = await fetch('/api/live-demo/session', {
+        method, credentials: 'same-origin', cache: 'no-store',
+        ...(method === 'POST' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) } : {}),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 401) { setSession(null); resetPreview(); }
+        setMessage(accessMessages[data.error] || accessMessages.demo_unavailable);
+        return;
+      }
+      setSession(data.status === 'active' ? data : null);
+      resetPreview();
+      if (method === 'DELETE') setMessage('Your demo session has ended.');
+    } catch { setMessage(accessMessages.demo_unavailable); }
+    finally { requestBusy.current = false; setBusy(false); setChecking(false); }
+  }
 
   function resetPreview() {
     setMode('');
@@ -51,20 +135,29 @@ export default function DemoPreview() {
               <button type="button" id="demo-reset" className={styles.textButton} onClick={resetPreview}>Reset preview</button>
             </div>
 
-            <details id="demo-access" className={styles.access}>
-              <summary>Demo access <span>Pending connection</span></summary>
+            <div id="demo-access" className={styles.access} aria-busy={busy || checking}>
               <div className={styles.accessBody}>
-                <p>The live demo will start with a short-lived session. Access is not connected yet; these fields do not collect or send information.</p>
-                <fieldset disabled className={styles.accessFields}>
-                  <legend className={styles.srOnly}>Demo access preview — unavailable</legend>
-                  <label htmlFor="demo-email">Work email<input id="demo-email" type="email" autoComplete="off" placeholder="you@company.com" /></label>
-                  <label htmlFor="demo-company">Company / platform URL<input id="demo-company" type="url" autoComplete="off" placeholder="https://your-platform.com" /></label>
-                </fieldset>
-                <button type="button" className={styles.action} data-demo-execution disabled>Start demo session</button>
+                <h3 className={styles.accessTitle}>Demo access</h3>
+                {session ? (
+                  <>
+                    <p role="status">Session active until {new Date(session.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. {session.runs_remaining} of {session.max_runs} runs remaining.</p>
+                    <p>Access is ready. Image selection and live checks are still pending.</p>
+                    <button type="button" className={styles.action} disabled={busy} onClick={(event) => changeAccess(event, 'DELETE')}>{busy ? 'Ending session…' : 'End demo session'}</button>
+                  </>
+                ) : (
+                  <form onSubmit={(event) => changeAccess(event, 'POST')}>
+                    <p>Enter the demo token we sent you. To request one, email <a href="mailto:founder@corvinth.com">founder@corvinth.com</a> with your work email and company or platform URL.</p>
+                    <div className={styles.accessFields}>
+                      <label htmlFor="demo-token">Demo token<input ref={tokenInput} id="demo-token" name="demo-token" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" maxLength={100} required disabled={busy || checking} placeholder="Paste your demo token" /></label>
+                    </div>
+                    <button type="submit" className={styles.action} disabled={busy || checking}>{checking ? 'Checking session…' : busy ? 'Starting session…' : 'Start demo session'}</button>
+                  </form>
+                )}
+                {message && <p className={styles.accessMessage} role="status">{message}</p>}
               </div>
-            </details>
+            </div>
 
-            <fieldset className={styles.modes}>
+            <fieldset className={styles.modes} disabled={!session || busy}>
               <legend>Choose how your platform integrates</legend>
               <div className={styles.modeOptions}>
                 <label className={`${styles.mode} ${mode === 'managed' ? styles.selected : ''}`}>
@@ -80,7 +173,7 @@ export default function DemoPreview() {
 
             <div className={styles.stageHeading}>
               <p className={styles.eyebrow}>Explore each step</p>
-              <p className={styles.modeContext} aria-live="polite">{mode ? `${mode === 'managed' ? 'Managed' : 'Customer'} compute selected · preview only` : 'Choose a compute model above'}</p>
+              <p className={styles.modeContext} aria-live="polite">{!session ? 'Enter a demo token to choose a compute model' : mode ? `${mode === 'managed' ? 'Managed' : 'Customer'} compute selected · preview only` : 'Choose a compute model above'}</p>
             </div>
             <div className={styles.stages} role="group" aria-label="Preview a stage of the demo">
               {stages.map((item, index) => (

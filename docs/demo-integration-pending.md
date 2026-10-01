@@ -1,9 +1,10 @@
 # Homepage demo: execution pending
 
-`app/components/DemoPreview.js` currently renders a frontend-only preview at
-`#demo`. The compute-model choice and stage navigation change presentation only.
-Access fields and execution buttons are disabled. No session is issued, no image
-is registered, no matching request is sent, and no classification is fabricated.
+`app/components/DemoPreview.js` renders the demo at `#demo`. Phase 1 connects
+founder-issued token redemption, session status/end, and an HttpOnly cookie through
+`/api/live-demo/session`. Mode selection requires an active session. Stage
+navigation remains a flow preview; image selection and execution are disabled.
+No image is registered, matching request sent, or classification fabricated.
 
 The old hash-entry component and Next.js `app/api/demo/route.js` proxy have been
 removed. The legacy backend endpoint has not been changed.
@@ -13,8 +14,9 @@ removed. The legacy backend endpoint has not been changed.
 - An authoritative server-owned gallery: opaque asset ID and display image must
   refer to the exact approved storage object and verified SDK signal payload.
   Existing hero images are not automatically registered as demo inputs.
-- A bounded, short-lived session and a server-enforced access gate. The preview
-  access fields do not provide authentication, authorization, or rate limiting.
+- The Phase 1 gate must be configured on both services (see `demo-access.md`).
+  Execution must additionally enforce run reservation and shared compute admission;
+  Phase 1 records the run allowance but exposes no compute operation.
 - An isolated backend demo reference lifecycle that cannot read or write customer
   data or another visitor's reference. Reset and expiry must discard that state.
 - Confirmed contracts for reference registration, upload checks, reset, and

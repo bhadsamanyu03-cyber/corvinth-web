@@ -19,7 +19,15 @@
 .access summary span { margin-left: 12px; font-size: 11px; color: var(--text-muted); }
 .accessBody { padding-bottom: 20px; }
 .accessBody > p, .requestDetails p { max-width: 570px; color: #a6aaa3; font-size: 13px; line-height: 1.7; }
-.accessFields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; border: 0; min-width: 0; }
+.accessFields { display: grid; grid-template-columns: minmax(0, 480px); gap: 16px; margin: 18px 0; border: 0; min-width: 0; }
+.accessTitle { margin: 20px 0 10px; font-size: 16px; font-weight: 600; }
+.accessBody form > p { max-width: 570px; color: #a6aaa3; font-size: 13px; line-height: 1.7; }
+.accessBody a { color: var(--green); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.accessBody > .action { margin-top: 14px; }
+.accessMessage { margin-top: 14px; }
+.accessFields input:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.modes:disabled .mode { cursor: default; opacity: .65; }
+.action:not(:disabled) { color: var(--green); border-color: var(--green-mid); cursor: pointer; }
 .accessFields label { display: grid; gap: 7px; color: #b8c1bb; font-size: 12px; min-width: 0; }
 .accessFields input { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid var(--border-mid); border-radius: 6px; background: var(--bg); color: var(--text-muted); font: inherit; }
 .accessFields input::placeholder { color: var(--text-muted); opacity: 1; }
