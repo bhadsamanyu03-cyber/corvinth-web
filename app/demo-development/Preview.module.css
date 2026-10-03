@@ -1,0 +1,5 @@
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 24px; background: #18160d; border-bottom: 1px solid #574929; color: #e1d7bd; font-size: 12px; }
+.controls p { flex-basis: 100%; }
+.controls label { display: grid; gap: 6px; }
+.controls select, .controls button { min-height: 40px; padding: 8px; border: 1px solid #706040; border-radius: 5px; color: #e1d7bd; background: #10100b; font: inherit; }
+.controls a { padding: 8px; text-decoration: underline; }

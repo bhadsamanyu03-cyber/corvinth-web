@@ -2,8 +2,9 @@
 
 `app/components/DemoPreview.js` renders the demo at `#demo`. Phase 1 connects
 founder-issued token redemption, session status/end, and an HttpOnly cookie through
-`/api/live-demo/session`. Mode selection requires an active session. Stage
-navigation remains a flow preview; image selection and execution are disabled.
+`/api/live-demo/session`. Mode selection requires an active session. The progressive
+buyer flow replaces the old stage preview. The production catalogue is explicitly
+unavailable; image selection and execution remain disconnected.
 No image is registered, matching request sent, or classification fabricated.
 
 The old hash-entry component and Next.js `app/api/demo/route.js` proxy have been
@@ -26,6 +27,6 @@ removed. The legacy backend endpoint has not been changed.
   check response may supply the displayed classification. Do not derive results
   from image labels, transformations, or the selected compute model.
 
-The step buttons are explicitly a flow preview, not lifecycle progression.
-Replace that preview navigation with success-gated progression when wiring the
-live flow. Preserve `#demo` so the current navigation and hero links still work.
+Progression now requires validated operation responses. See `demo-frontend-contract.md`
+for the adapter boundary, cycle invariants and development-only visualization.
+Preserve `#demo` so the current navigation and hero links still work.
