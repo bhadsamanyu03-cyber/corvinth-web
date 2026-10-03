@@ -35,6 +35,11 @@ export function createFixture(initialControl) {
     session.runs_used += 1; session.runs_remaining -= 1;
   }
   return Object.freeze({
+    tokenRequests: Object.freeze({ available: true, async submit({ signal }) {
+      await pause(signal);
+      if (control.requestFailure) throw new DemoError(control.requestFailure);
+      return { status: 'accepted', request_id: 'fixture_request_receipt' };
+    } }),
     async getSession({ signal }) { await pause(signal); return session ? active() : null; },
     async startSession({ signal }) {
       await pause(signal);

@@ -4,8 +4,8 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { DemoError, readCatalogue, readReference, readResult, readSession } from '../lib/demo-contract.mjs';
 import { canExecute, demoReducer, initialDemoState } from '../lib/demo-state.mjs';
 
-export default function useDemo(adapter) {
-  const [state, dispatch] = useReducer(demoReducer, initialDemoState);
+export default function useDemo(adapter, { autoOpen = false } = {}) {
+  const [state, dispatch] = useReducer(demoReducer, { ...initialDemoState, stage: autoOpen ? 'checking' : 'entry' });
   const running = useRef(null);
   const sequence = useRef(0);
   const attempt = useRef(null);
@@ -52,13 +52,21 @@ export default function useDemo(adapter) {
       if (running.current?.id === id) {
         if (operationKey) attempt.current = null;
         dispatch({ type: 'DONE', id, data });
+        return true;
       }
     } catch (error) {
       if (running.current?.id === id) dispatch({ type: 'FAIL', id, error: error.code || 'demo_unavailable' });
+      return false;
     } finally { clearTimeout(timeout); if (running.current?.id === id) running.current = null; }
   }, [adapter]);
 
   useEffect(() => () => { running.current?.controller.abort(); running.current = null; }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (autoOpen) queueMicrotask(() => { if (!cancelled) perform('session'); });
+    return () => { cancelled = true; };
+  }, [autoOpen, perform]);
 
   useEffect(() => {
     if (!state.session) return;
@@ -72,12 +80,14 @@ export default function useDemo(adapter) {
     return () => { clearTimeout(timer); clearInterval(interval); };
   }, [state.session, perform]);
 
+  const retrySession = useCallback(() => perform('session'), [perform]);
+
   return { state,
     open: () => { dispatch({ type: 'OPEN' }); perform('session'); },
     close: () => dispatch({ type: 'CLOSE' }),
     start: (token) => perform('start', { token }),
     end: () => perform('end'),
-    retrySession: () => perform('session'),
+    retrySession,
     chooseMode: (mode) => {
       if (state.reference || state.pending) return;
       dispatch({ type: 'MODE', mode }); perform('assets', { mode });

@@ -1,12 +1,46 @@
 # Buyer demo frontend boundary
 
-The homepage uses `DemoExperience` → `useDemo` → `liveDemoClient`. The only connected
-transport is the existing GET/POST/DELETE `/api/live-demo/session` gateway. No new
-execution route or backend integration is introduced in this frontend pass.
+The homepage uses `DemoPreview` → `DemoAccess`: invitation and access only. It does
+not import the gallery, workflow reducer, workspace, or development fixtures.
+Confirmed access navigates to `/demo` without an intermediate confirmation screen.
+That route uses `DemoWorkspace` → `useDemo` → `liveDemoClient`. The only connected
+transport remains GET/POST/DELETE `/api/live-demo/session`. No new execution route
+or backend integration is introduced in this frontend pass.
+
+## Access and navigation
+
+Opening homepage access checks for an existing session first. A valid response
+navigates straight to `/demo`; otherwise the buyer can enter a token or request one.
+`/demo` starts with a checking screen (including on reload), then resumes a valid
+session's allowance. Missing/expired access shows the same Corvinth token-entry
+component on `/demo`, not the workspace. Status failure stays locked with retry.
+Exit demo ends the backend session and clears its cookie through the existing
+gateway, then returns to `/#demo`; failure does not pretend to end access.
+
+This client gate is a presentation boundary, not server authorization. Every future
+execution operation must still validate the backend session. No credentials,
+tokens, selections or results are stored in URLs or browser storage.
+
+## Inline token requests (delivery pending)
+
+`DemoAccess` accepts a separate `requests` adapter with `available` and
+`submit({ work_email, company_url, signal })`. Only those two buyer fields are
+accepted. `readTokenRequest` validates and projects them. A confirmed receipt must
+be `{ status: "accepted", request_id: <opaque ID> }`; only then is the founder-led
+“Request sent. I’ll send your demo token to your work email.” displayed.
+
+Production `liveTokenRequests` is explicitly unavailable. The form states this
+before submission and returns “Nothing was submitted” on submit; it makes no network
+request and retains the input. No invented endpoint, email, logging, or fake receipt.
+The existing `/api/waitlist` requires additional API-access fields and is not reused.
+A later approved delivery path must persist/acknowledge the request and handle spam,
+rate limiting, duplicate submissions and uncertain outcomes before setting
+`available: true`. An accepted receipt means the founder received the request, not
+that a token has already been issued or emailed. This is separate from redemption.
 
 ## Flow and invariants
 
-Entry → token → compute choice → reference selection → confirmed reference →
+Homepage invitation → token → `/demo` → compute choice → reference selection → confirmed reference →
 upload selection → confirmed classification. The progress indicator cannot skip
 steps. Only a successful report response activates a reference. Its compute mode,
 manifest and cycle are fixed until a successful server reset. Changing mode before
@@ -60,18 +94,30 @@ projected fields; production API responses and enforcement actions are not expos
 
 ## Development inspection
 
-Run `npm run dev` and visit `/demo-development`. Enter any nonempty token in this
-fixture page. Its controls exercise all four classifications, delay, failures and
-expiry. Every screen identifies itself as development visualization; result labels
+Run `npm run dev` and visit `/demo-development`. It renders the same dedicated
+workspace shell. Enter any nonempty token in this fixture page. Its controls exercise
+all four classifications, delay, failures, expiry and token-request receipts/errors.
+Every screen identifies itself as development visualization; result labels
 say simulated. Existing hero artwork is reused solely to inspect aspect ratios and
 a 24-item library; none is approved or registered as a real demo input.
 
 The server page calls `notFound()` outside NODE_ENV=development, before importing
 the preview. Fixture creation also rejects non-development environments. The
-homepage imports only the live adapter. There is no query parameter, token, public
+homepage and `/demo` import only live adapters. There is no query parameter, token, public
 environment flag or production fallback that selects fixtures. The production
 adapter returns an unavailable empty catalogue and throws for every execution
 operation. Verify the production preview URL returns HTTP 404 before release.
+
+Verification commands:
+
+- `node --test tests/*.test.mjs`
+- `npm run lint` and `npm run build`
+- `node tests/demo-workspace.browser.mjs` with local dev on 3091, a built production
+  server on 3092 and disposable Chrome debugging on 9333. Optional
+  `DEMO_SCREENSHOTS=<existing temp directory>` captures desktop/390px/320px states.
+  This test intercepts session replies locally; it is not live backend integration
+  evidence. It checks route gating, redirect/resume/exit, token rejection, truthful
+  request failure, fixture receipts, mode locks, budget preservation and all results.
 
 ## Remaining execution work
 
