@@ -1,0 +1,15 @@
+'use client';
+
+import { useConsoleData, date } from './data';
+import { Heading, DataState, Facts, Badge, Empty } from './primitives';
+
+export default function Integration() {
+  const resource = useConsoleData('overview');
+  return <><Heading eyebrow="Connection & access" title="Integration" action={<button className="cc-button cc-secondary" onClick={resource.reload}>Refresh status</button>}>Your platform configuration and the connection information Corvinth can verify.</Heading><DataState resource={resource}>{data => <div className="cc-detail-grid"><div className="cc-stack"><section className="cc-panel"><div className="cc-panel-head"><h2>Platform connection</h2><Badge value={data.platform.status}/></div><div className="cc-panel-body"><Facts entries={[
+    ['Platform', data.platform.platform_name], ['Platform ID', data.platform.platform_id], ['Registered', date(data.platform.registered_at)], ['PDQ reporting', data.permissions.pdq_report ? 'Enabled' : 'Not enabled'], ['Pulse reporting', data.permissions.pulse_report ? 'Enabled' : 'Not enabled'], ['Storage job runtime', data.storage_jobs_enabled ? 'Configured for this platform' : 'Not enabled for this platform'],
+  ]}/></div></section><section className="cc-panel"><div className="cc-panel-head"><h2>Storage integrations</h2></div>{data.integrations.length ? data.integrations.map(item => <div className="cc-panel-body" key={item.id}><Facts entries={[
+    ['Bucket', item.storage_bucket], ['Region', item.bucket_region], ['Status', <Badge key="status" value={item.status}/>], ['Version policy', item.version_policy], ['Integration ID', item.id],
+  ]}/></div>) : <Empty icon="connect" title="No storage integration configured">Contact Corvinth to provision your platform’s storage integration.</Empty>}<div className="cc-panel-body"><p className="cc-help">Configuration state does not establish live storage reachability.</p></div></section><section className="cc-panel cc-panel-body"><h2 style={{ marginBottom: 20 }}>Webhook</h2><Facts entries={[
+    ['Configuration', data.webhook.configured ? 'Configured' : 'Not configured'], ['Endpoint', data.platform.webhook_url || 'Not configured'], ['Delivery health', 'Not verified by this view'],
+  ]}/></section></div><section className="cc-panel cc-panel-body"><p className="cc-eyebrow">Server-side credentials</p><h2 style={{ margin: '14px 0' }}>Your key stays off the screen.</h2><p className="cc-help">Your console session is bound to this platform. API calls use a separately scoped credential held by the console server.</p><div className="cc-facts" style={{ marginTop: 25 }}><div><dt>Credential purpose</dt><dd>Customer dashboard</dd></div><div><dt>Existing key recovery</dt><dd>Not available</dd></div></div><p className="cc-help" style={{ marginTop: 24 }}>Only credential hashes are stored in the backend. Issuance, replacement and revocation are managed by Corvinth. There is no existing raw key to reveal.</p><a className="cc-button cc-secondary" style={{ marginTop: 22 }} href="mailto:support@corvinth.com">Request credential assistance ↗</a></section></div>}</DataState></>;
+}
