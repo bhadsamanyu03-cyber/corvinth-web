@@ -1,20 +1,18 @@
 import { DemoError } from '../lib/demo-contract.mjs';
 
-// Existing hero artwork is reused only to inspect layout. These are NOT registered demo assets.
-const artwork = ['original', 'blurred', 'filtered', 'rotate90', 'cropped', 'darkened'];
-const labels = ['Original', 'Blurred', 'Color filtered', 'Rotated', 'Cropped', 'Darkened'];
-
 export function createFixture(initialControl) {
   if (process.env.NODE_ENV !== 'development') throw new Error('Development fixture is disabled');
   let control = { ...initialControl };
   let session = null;
   let reference = null;
   let revision = 0;
+  // Inert catalogue entries for interaction tests, not approved production assets.
+  // The guarded preview renders neutral slots and never requests these sentinel URLs.
   const assets = Array.from({ length: 24 }, (_, index) => ({
-    id: `fixture_asset_${index}`, preview_url: `/hero-matches/${artwork[index % 6]}.png`,
-    label: `${labels[index % 6]} ${Math.floor(index / 6) + 1}`,
-    alt: 'Development fixture: an existing hero image, with the face covered by a phone.',
-    can_reference: index % 6 === 0, can_upload: true,
+    id: `fixture_asset_${index}`, preview_url: '/demo-development/neutral-slot',
+    label: `Demo asset ${String(index + 1).padStart(2, '0')}`,
+    alt: 'Neutral development asset slot.',
+    can_reference: true, can_upload: true,
   }));
   function active() {
     if (!session || Date.parse(session.expires_at) <= Date.now()) throw new DemoError('demo_session_invalid');

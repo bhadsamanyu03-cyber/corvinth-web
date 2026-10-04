@@ -81,11 +81,46 @@ The future backend must make this key idempotent within the session. It cannot
 charge twice or register another reference for a replay. No automatic retry occurs.
 
 Asset: `{ id, preview_url, label, alt, can_reference, can_upload }`. The gallery supports
-up to 50 approved items; upload selection adds search once there are more than nine.
+up to 50 approved items, six per page; search appears above six eligible images.
 Reference: `{ status: "active", reference_id, asset_id, mode, manifest_version,
 cycle_revision }`. Result: `{ classification, reference_id, upload_asset_id, mode,
 cycle_revision, request_id }`. Unknown properties are discarded before rendering.
 Mismatched asset, mode, manifest or cycle responses are rejected.
+
+## Product workspace and approved image insertion
+
+The charcoal workspace has its own compact header; it does not import the homepage
+navigation. Compute choice comes before the library. Before registration, the buyer
+can change modes; after registration the active-reference strip replaces mode choices.
+The header says **runs remaining** because reporting and checking share the current
+backend allowance. It does not relabel this as a checks-only budget.
+
+`DemoImageWorkspace` is shared by reference and upload selection, and both compute
+modes. Desktop puts the selected preview/action left and paginated library right;
+mobile puts the library before the preview. Display images use `object-fit: contain`
+to retain the approved composition. Managed input is explained as selected image →
+presigned URL → Corvinth; customer input as selected image → Corvinth SDK → derived
+signals → Corvinth. Neither processing URLs nor actual signals appear in this UI.
+
+Until an approved catalogue is connected, production renders six **nonselectable**
+neutral slots. They are presentation elements only: no asset IDs, image requests,
+reference actions, or simulated classifications. Reporting remains disabled.
+
+To populate the real library later:
+
+1. Add the manually approved display files under `public/demo-assets/` (or another
+   approved same-origin display path). No new asset directory/files are created by
+   this slice.
+2. Supply approved `listAssets` entries with the existing fields, for example
+   `{ id: "<approved ID>", preview_url: "/demo-assets/<approved file>",
+   label: "<display label>", alt: "<image description>", can_reference: true,
+   can_upload: true }`. Use actual opaque manifest IDs, not the example placeholders.
+3. Bind each entry to the separately approved immutable backend manifest and its
+   Mode A/Mode B input. Do not add storage URLs, hashes or vectors to display entries.
+
+The gallery, preview, selection and pagination need no layout change to consume these
+entries. Adding display files alone does **not** enable execution: the existing
+session/execution guards remain in force until the real isolated adapter is connected.
 
 Classifier wire values retain the existing backend vocabulary: EXACT, FUZZY,
 NEAR_MISS, CLEAN. The visible label for NEAR_MISS is NEARMISS as requested. No
@@ -97,9 +132,10 @@ projected fields; production API responses and enforcement actions are not expos
 Run `npm run dev` and visit `/demo-development`. It renders the same dedicated
 workspace shell. Enter any nonempty token in this fixture page. Its controls exercise
 all four classifications, delay, failures, expiry and token-request receipts/errors.
-Every screen identifies itself as development visualization; result labels
-say simulated. Existing hero artwork is reused solely to inspect aspect ratios and
-a 24-item library; none is approved or registered as a real demo input.
+The development control bar identifies neutral slots and simulated replies; result
+labels say simulated. Its 24 synthetic entries exercise selection/search/pagination
+without photos. Their preview paths are inert sentinels; the development-only neutral
+renderer never requests them. No website artwork is reused as a demo asset.
 
 The server page calls `notFound()` outside NODE_ENV=development, before importing
 the preview. Fixture creation also rejects non-development environments. The
@@ -117,7 +153,8 @@ Verification commands:
   `DEMO_SCREENSHOTS=<existing temp directory>` captures desktop/390px/320px states.
   This test intercepts session replies locally; it is not live backend integration
   evidence. It checks route gating, redirect/resume/exit, token rejection, truthful
-  request failure, fixture receipts, mode locks, budget preservation and all results.
+  request failure, fixture receipts, pagination/search, neutral slots, mode locks,
+  budget preservation and all results.
 
 ## Remaining execution work
 

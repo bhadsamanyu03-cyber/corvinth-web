@@ -106,3 +106,24 @@ test('production execution never produces a fixture result or sends a compute re
   assert.equal(canExecute({ ...selection(), session: { ...session, execution_available: false } }), false);
   assert.equal(canExecute({ ...selection(), session: { ...session, runs_remaining: 0 } }), false);
 });
+
+test('development catalogue uses neutral slots without borrowing production artwork', async () => {
+  const previous = process.env.NODE_ENV;
+  try {
+    process.env.NODE_ENV = 'development';
+    const fixture = createFixture({ delay: 0 });
+    await fixture.startSession({});
+    const catalogue = readCatalogue(await fixture.listAssets({}));
+    assert.equal(catalogue.assets.length, 24);
+    assert.equal(catalogue.assets[0].label, 'Demo asset 01');
+    assert.equal(catalogue.assets[23].label, 'Demo asset 24');
+    for (const asset of catalogue.assets) {
+      assert.equal(asset.preview_url, '/demo-development/neutral-slot');
+      assert.equal(asset.can_reference, true);
+      assert.equal(asset.can_upload, true);
+    }
+  } finally {
+    if (previous === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previous;
+  }
+});

@@ -10,7 +10,7 @@ export default function Preview() {
   const [adapter] = useState(() => createFixture({ classification: 'EXACT', failure: '', delay: 700 }));
   return <>
     <div className={styles.controls}>
-      <p>Development only · existing hero artwork, unregistered as demo inputs</p>
+      <p>Development preview · Neutral asset slots and simulated replies. No live requests.</p>
       <label>Next classification<select defaultValue="EXACT" onChange={(event) => adapter.configure({ classification: event.target.value })}>
         {['EXACT', 'FUZZY', 'NEAR_MISS', 'CLEAN'].map((item) => <option key={item}>{item}</option>)}
       </select></label>
