@@ -89,6 +89,12 @@ test('reference/result validation binds mode, asset, manifest and cycle', () => 
   const result = { classification: 'NEAR_MISS', reference_id: 'ref_1', upload_asset_id: asset.id, mode: 'managed', cycle_revision: 1, request_id: 'request_1' };
   const context = { ...expected, reference_id: 'ref_1', cycle_revision: 1 };
   assert.equal(readResult(result, context).classification, 'NEAR_MISS');
+  const dino = { profile: { algorithm_version: 'dinov2-v1', model_version: 'dinov2-small', configuration_version: 'preprocess-v1' },
+    cosine_similarity: 0.8734, reference_vector: Array(384).fill(0.1), candidate_vector: Array(384).fill(0.2) };
+  assert.equal(readResult({ ...result, dino }, context).dino.candidate_vector.length, 384);
+  assert.throws(() => readResult({ ...result, dino: { ...dino, candidate_vector: [0.2] } }, context));
+  assert.throws(() => readResult({ ...result, dino: { ...dino, cosine_similarity: NaN } }, context));
+  assert.throws(() => readResult({ ...result, mode: 'customer', dino }, { ...context, mode: 'customer' }));
   for (const change of [{ classification: 'NEARMISS' }, { cycle_revision: 2 }, { reference_id: 'ref_other' }, { upload_asset_id: 'other' }, { mode: 'customer' }]) assert.throws(() => readResult({ ...result, ...change }, context));
 });
 
@@ -99,12 +105,22 @@ test('response projections omit credentials and validate authoritative run count
   assert.equal(projected.assets[0].hash, undefined);
 });
 
-test('production execution never produces a fixture result or sends a compute request', async () => {
-  assert.deepEqual(await liveDemoClient.listAssets({}), { available: false, manifest_version: null, assets: [] });
-  for (const operation of ['reportReference', 'checkUpload', 'resetReference']) await assert.rejects(liveDemoClient[operation]({ asset_id: 'fixture' }), { code: 'demo_execution_unavailable' });
+test('production execution uses the gated routes and never synthesizes a fixture result', async () => {
+  const approved = readCatalogue(await liveDemoClient.listAssets({}));
+  assert.equal(approved.available, true);
+  assert.equal(approved.assets.filter((asset) => asset.can_reference).length, 4);
+  assert.equal(approved.assets.filter((asset) => asset.can_upload).length, 31);
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init) => { calls.push({ url, init }); return Response.json({ error: 'demo_session_invalid' }, { status: 401 }); };
+  try {
+    for (const operation of ['reportReference', 'checkUpload', 'resetReference']) await assert.rejects(liveDemoClient[operation]({ asset_id: 'fixture', operation_key: 'request_key' }), { code: 'demo_session_invalid' });
+    assert.deepEqual(calls.map(call => call.url), ['/api/live-demo/report', '/api/live-demo/check', '/api/live-demo/reset']);
+    assert.ok(calls.every(call => call.init.credentials === 'same-origin' && !call.init.headers['x-api-key']));
+  } finally { globalThis.fetch = originalFetch; }
   assert.throws(() => createFixture({}), /Development fixture is disabled/);
   assert.equal(canExecute({ ...selection(), session: { ...session, execution_available: false } }), false);
-  assert.equal(canExecute({ ...selection(), session: { ...session, runs_remaining: 0 } }), false);
+  assert.equal(canExecute({ ...selection(), session: { ...session, runs_remaining: 0 } }), true, 'Reference reporting is free');
 });
 
 test('development catalogue uses neutral slots without borrowing production artwork', async () => {

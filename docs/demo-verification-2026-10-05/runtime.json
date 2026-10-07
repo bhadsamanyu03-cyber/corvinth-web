@@ -1,0 +1,15 @@
+{
+  "verification": "unchanged verifier in exact deployed immutable image; running startup invokes same verifier",
+  "task_revision": 57,
+  "image_digest": "sha256:c9e74c33f94dd1d94570b730a2e44ac80a95b30556449417a6f99d0a3bf8097c",
+  "sdk_version": "1.1.0",
+  "python_version": "3.12.14",
+  "platform": "Linux",
+  "architecture": "x86_64",
+  "libc_version": "glibc-2.41",
+  "native_package_version": "0.2.8+corvinth.fusedluma.1",
+  "native_artifact_sha256": "c2b8f464c1266f1aff4ddd356882639911e6f0611b3ded3ccbdb0ece1ad1b3a2",
+  "canonical_compute_sha256": "484a4e023b03a424cca978e25d94429525b6a8c35d44985bccc24bf018d0dbb4",
+  "preserved_main_sha256": "b1dd3bc52024054a5a1f6ce2b07b2f1a5b809745be0118c045ddcd75510086fa",
+  "interactive_exec_result": "not counted; connection returned no output"
+}

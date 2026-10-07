@@ -1,4 +1,5 @@
 import { DemoError, readSession } from './demo-contract.mjs';
+import { approvedDemoCatalogue } from './demo-catalogue.mjs';
 
 async function sessionRequest(method, token, signal) {
   try {
@@ -15,15 +16,27 @@ async function sessionRequest(method, token, signal) {
   }
 }
 
-const disconnected = async () => { throw new DemoError('demo_execution_unavailable'); };
+async function operationRequest(operation, { signal, ...body }) {
+  try {
+    const response = await fetch('/api/live-demo/' + operation, { method: 'POST', signal,
+      credentials: 'same-origin', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await response.json();
+    if (!response.ok) throw new DemoError(typeof data.error === 'string' ? data.error : 'demo_unavailable');
+    return data;
+  } catch (error) {
+    if (error.name === 'AbortError' || error instanceof DemoError) throw error;
+    throw new DemoError();
+  }
+}
 
 // Execution has one explicit connection point. No guessed routes or fallback results.
 export const liveDemoClient = Object.freeze({
   getSession: ({ signal }) => sessionRequest('GET', undefined, signal),
   startSession: ({ token, signal }) => sessionRequest('POST', token, signal),
   endSession: ({ signal }) => sessionRequest('DELETE', undefined, signal),
-  listAssets: async () => ({ available: false, manifest_version: null, assets: [] }),
-  reportReference: disconnected,
-  checkUpload: disconnected,
-  resetReference: disconnected,
+  listAssets: async () => approvedDemoCatalogue(),
+  getInput: (options) => operationRequest('input', options),
+  reportReference: (options) => operationRequest('report', options),
+  checkUpload: (options) => operationRequest('check', options),
+  resetReference: (options) => operationRequest('reset', options),
 });

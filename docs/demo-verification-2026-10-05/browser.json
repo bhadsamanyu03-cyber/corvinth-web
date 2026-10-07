@@ -1,0 +1,105 @@
+{
+  "status": "passed",
+  "metrics": [
+    {
+      "name": "live-variants-desktop",
+      "width": 1440,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 12
+    },
+    {
+      "name": "live-managed-result-desktop",
+      "width": 1440,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 0
+    },
+    {
+      "name": "live-variants-390",
+      "width": 390,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 8
+    },
+    {
+      "name": "live-selected-390",
+      "width": 390,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 2
+    },
+    {
+      "name": "live-variants-320",
+      "width": 320,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 8
+    },
+    {
+      "name": "live-selected-320",
+      "width": 320,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 2
+    },
+    {
+      "name": "live-customer-result-desktop",
+      "width": 1440,
+      "overflow": false,
+      "images": 0,
+      "visibleChoices": 0
+    }
+  ],
+  "requests": [
+    {
+      "operation": "report",
+      "fields": [
+        "asset_id",
+        "mode",
+        "manifest_version",
+        "operation_key"
+      ]
+    },
+    {
+      "operation": "check",
+      "fields": [
+        "asset_id",
+        "mode",
+        "reference_id",
+        "cycle_revision",
+        "manifest_version",
+        "operation_key"
+      ]
+    },
+    {
+      "operation": "reset",
+      "fields": [
+        "reference_id",
+        "cycle_revision",
+        "operation_key"
+      ]
+    },
+    {
+      "operation": "report",
+      "fields": [
+        "asset_id",
+        "mode",
+        "manifest_version",
+        "operation_key"
+      ]
+    },
+    {
+      "operation": "check",
+      "fields": [
+        "asset_id",
+        "mode",
+        "reference_id",
+        "cycle_revision",
+        "manifest_version",
+        "operation_key"
+      ]
+    }
+  ],
+  "errors": []
+}

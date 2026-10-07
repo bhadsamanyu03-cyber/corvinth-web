@@ -1,0 +1,575 @@
+{
+  "status": "passed",
+  "sdk_server_parity_assets": 32,
+  "real_matcher_calls": 224,
+  "customer_archive_access": "forbidden",
+  "mode_classification_parity": true,
+  "classes": {
+    "EXACT": 10,
+    "FUZZY": 6,
+    "NEAR_MISS": 1,
+    "CLEAN": 95
+  },
+  "pairs": [
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_b2001ee24366999b2aa1ebf3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_9a1a4453ea51489866b5822f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_784a2c620802d84243b97135",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_f2cb75d55f0bc400365f27d9",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_e7a64316b10cd62fce6c23db",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_807508755d0748712b374f30",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_4e18610e82cf755374178534",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_0f897e15eea4aeee5dd3ef1d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_85aba6e9aa0e28d655860ff7",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_3c9229417aa19fcd30693019",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_406af0ec9934290b51ca2f31",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_382d84621214bcea6eb0b40c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_f28d8d98826d178e6e46c232",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_4efac92a50135f09896b1d09",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_b1568b6e1abebcaf8986ef7b",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_f41ff7fe46c1cd6d86cf6aca",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_60ba69767f105c6a809428c0",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_3faf85bd2b2eafc80d31db36",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_22bdf79e6c3479dfa260edda",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_99165be7856a2fdb37faf55d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_f3ba72a093be232dc663f017",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_251fb0aed3384fcf2d914038",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_8f91db7ea58f65b79a138fb3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_5c627db52c7eb4f34dbb469c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_4f80d8727b0eb734520bc075",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_fedc65f564f517a80604095a",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_6da55d04f76f32ffbb78e879",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_0b427d41ce2b386741f78df9",
+      "variant": "demo_20fbce3c80589cad03f10c0f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_b2001ee24366999b2aa1ebf3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_9a1a4453ea51489866b5822f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_784a2c620802d84243b97135",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_f2cb75d55f0bc400365f27d9",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_e7a64316b10cd62fce6c23db",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_807508755d0748712b374f30",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_4e18610e82cf755374178534",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_0f897e15eea4aeee5dd3ef1d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_85aba6e9aa0e28d655860ff7",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_3c9229417aa19fcd30693019",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_406af0ec9934290b51ca2f31",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_382d84621214bcea6eb0b40c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_f28d8d98826d178e6e46c232",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_4efac92a50135f09896b1d09",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_b1568b6e1abebcaf8986ef7b",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_f41ff7fe46c1cd6d86cf6aca",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_60ba69767f105c6a809428c0",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_3faf85bd2b2eafc80d31db36",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_22bdf79e6c3479dfa260edda",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_99165be7856a2fdb37faf55d",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_f3ba72a093be232dc663f017",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_251fb0aed3384fcf2d914038",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_8f91db7ea58f65b79a138fb3",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_5c627db52c7eb4f34dbb469c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_4f80d8727b0eb734520bc075",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_fedc65f564f517a80604095a",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_6da55d04f76f32ffbb78e879",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_3df7c60375901662a2b64937",
+      "variant": "demo_20fbce3c80589cad03f10c0f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_b2001ee24366999b2aa1ebf3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_9a1a4453ea51489866b5822f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_784a2c620802d84243b97135",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_f2cb75d55f0bc400365f27d9",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_e7a64316b10cd62fce6c23db",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_807508755d0748712b374f30",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_4e18610e82cf755374178534",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_0f897e15eea4aeee5dd3ef1d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_85aba6e9aa0e28d655860ff7",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_3c9229417aa19fcd30693019",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_406af0ec9934290b51ca2f31",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_382d84621214bcea6eb0b40c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_f28d8d98826d178e6e46c232",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_4efac92a50135f09896b1d09",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_b1568b6e1abebcaf8986ef7b",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_f41ff7fe46c1cd6d86cf6aca",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_60ba69767f105c6a809428c0",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_3faf85bd2b2eafc80d31db36",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_22bdf79e6c3479dfa260edda",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_99165be7856a2fdb37faf55d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_f3ba72a093be232dc663f017",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_251fb0aed3384fcf2d914038",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_8f91db7ea58f65b79a138fb3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_5c627db52c7eb4f34dbb469c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_4f80d8727b0eb734520bc075",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_fedc65f564f517a80604095a",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_6da55d04f76f32ffbb78e879",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_546cdd08a6dcb588c21a41e6",
+      "variant": "demo_20fbce3c80589cad03f10c0f",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_b2001ee24366999b2aa1ebf3",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_9a1a4453ea51489866b5822f",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_784a2c620802d84243b97135",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_f2cb75d55f0bc400365f27d9",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_e7a64316b10cd62fce6c23db",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_807508755d0748712b374f30",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_4e18610e82cf755374178534",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_0f897e15eea4aeee5dd3ef1d",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_85aba6e9aa0e28d655860ff7",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_3c9229417aa19fcd30693019",
+      "classification": "FUZZY"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_406af0ec9934290b51ca2f31",
+      "classification": "EXACT"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_382d84621214bcea6eb0b40c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_f28d8d98826d178e6e46c232",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_4efac92a50135f09896b1d09",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_b1568b6e1abebcaf8986ef7b",
+      "classification": "NEAR_MISS"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_f41ff7fe46c1cd6d86cf6aca",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_60ba69767f105c6a809428c0",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_3faf85bd2b2eafc80d31db36",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_22bdf79e6c3479dfa260edda",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_99165be7856a2fdb37faf55d",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_f3ba72a093be232dc663f017",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_251fb0aed3384fcf2d914038",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_8f91db7ea58f65b79a138fb3",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_5c627db52c7eb4f34dbb469c",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_4f80d8727b0eb734520bc075",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_fedc65f564f517a80604095a",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_6da55d04f76f32ffbb78e879",
+      "classification": "CLEAN"
+    },
+    {
+      "original": "demo_993abea822b343133e2dd99c",
+      "variant": "demo_20fbce3c80589cad03f10c0f",
+      "classification": "CLEAN"
+    }
+  ]
+}

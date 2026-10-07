@@ -1,0 +1,287 @@
+{
+  "status": "passed",
+  "actual_checks": 56,
+  "display_bytes_verified": 32,
+  "records": [
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/brightness_3_0.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/channel_rotate.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/contrast_0_35.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/darkened.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/grayscale.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/leg_up.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/mirrored_flipped.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/noise_070.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/red_channel_only.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/rot180.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/rot90.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/Screenshot.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/second_person.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/text.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/watermark.png",
+      "classification": "NEAR_MISS"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority1/white.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/coloured.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/decent1 copy 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/decent1 copy 5.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/mirrored.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/only_person.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/rot180 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority2/rot90 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority3/blue.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority3/green.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority3/pose.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority3/sleep.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "managed",
+      "asset": "variants/priority3/white.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/brightness_3_0.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/channel_rotate.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/contrast_0_35.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/darkened.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/grayscale.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/leg_up.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/mirrored_flipped.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/noise_070.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/red_channel_only.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/rot180.png",
+      "classification": "FUZZY"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/rot90.png",
+      "classification": "EXACT"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/Screenshot.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/second_person.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/text.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/watermark.png",
+      "classification": "NEAR_MISS"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority1/white.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/coloured.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/decent1 copy 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/decent1 copy 5.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/mirrored.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/only_person.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/rot180 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority2/rot90 2.png",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority3/blue.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority3/green.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority3/pose.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority3/sleep.jpg",
+      "classification": "CLEAN"
+    },
+    {
+      "mode": "customer",
+      "asset": "variants/priority3/white.jpg",
+      "classification": "CLEAN"
+    }
+  ]
+}

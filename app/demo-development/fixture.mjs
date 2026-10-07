@@ -26,11 +26,11 @@ export function createFixture(initialControl) {
       if (signal?.aborted) abort(); else signal?.addEventListener('abort', abort, { once: true });
     });
   }
-  function execute() {
+  function execute(count = 1) {
     active();
     if (control.failure) throw new DemoError(control.failure);
-    if (!session.runs_remaining) throw new DemoError('demo_rate_limited');
-    session.runs_used += 1; session.runs_remaining -= 1;
+    if (session.runs_remaining < count) throw new DemoError('demo_run_limit');
+    session.runs_used += count; session.runs_remaining -= count;
   }
   return Object.freeze({
     tokenRequests: Object.freeze({ available: true, async submit({ signal }) {
@@ -42,21 +42,23 @@ export function createFixture(initialControl) {
     async startSession({ signal }) {
       await pause(signal);
       session = { status: 'active', expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
-        max_runs: 10, runs_used: 0, runs_remaining: 10, execution_available: true };
+        max_runs: 15, runs_used: 0, runs_remaining: 15, execution_available: true };
       reference = null; return { ...session };
     },
     async endSession({ signal }) { await pause(signal); session = null; reference = null; return null; },
     async listAssets({ signal }) { await pause(signal); active(); return { available: true, manifest_version: 'fixture_manifest_v1', assets }; },
     async reportReference({ asset_id, mode, manifest_version, signal }) {
-      await pause(signal); execute(); revision += 1;
+      await pause(signal); execute(0); revision += 1;
       reference = { status: 'active', reference_id: `fixture_reference_${revision}`, asset_id, mode, manifest_version, cycle_revision: revision };
       return { reference: { ...reference }, session: active() };
     },
-    async checkUpload({ asset_id, reference_id, mode, cycle_revision, signal }) {
-      await pause(signal); execute();
+    async checkUpload({ asset_id, asset_ids, reference_id, mode, cycle_revision, signal }) {
+      await pause(signal);
       if (!reference || reference.reference_id !== reference_id || reference.mode !== mode) throw new DemoError('demo_invalid_response');
-      return { result: { classification: control.classification, upload_asset_id: asset_id,
-        reference_id, mode, cycle_revision, request_id: `fixture_request_${session.runs_used}` }, session: active() };
+      const ids = asset_ids || [asset_id]; execute(ids.length);
+      const result = (id) => ({ classification: control.classification, upload_asset_id: id,
+        reference_id, mode, cycle_revision, request_id: `fixture_request_${session.runs_used}` });
+      return { ...(asset_ids ? { results: ids.map(id => ({ asset_id:id, result:result(id) })) } : { result:result(asset_id) }), session:active() };
     },
     async resetReference({ signal }) { await pause(signal); active(); reference = null; revision += 1; return { status: 'reset', cycle_revision: revision, session: active() }; },
     expire() { if (session) session.expires_at = new Date(Date.now() - 1).toISOString(); },

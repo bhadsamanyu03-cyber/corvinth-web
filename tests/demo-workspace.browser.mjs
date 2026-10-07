@@ -113,14 +113,16 @@ try {
   const redemptions = accessCalls.filter((method) => method === 'POST').length;
   await navigate(`${production}/demo`);
   assert.equal(accessCalls.filter((method) => method === 'POST').length, redemptions);
-  await chooseMode('managed'); await wait(`document.body.textContent.includes('No demo images are available to select right now.')`);
-  assert.equal(await evaluate(`document.querySelector('#demo-workspace').querySelectorAll('img').length`), 0);
-  assert.equal(await evaluate(`document.querySelectorAll('[data-empty-slot]').length`), 6);
-  assert.equal(await evaluate(`document.querySelectorAll('[data-asset-id]').length`), 0, 'Empty slots are not pretend assets');
+  await chooseMode('managed'); await assets(4);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-empty-slot]').length`), 0);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-asset-id]').length`), 4, 'Only four approved originals can be reported');
+  assert.equal(await evaluate(`[...document.querySelectorAll('[data-demo-library] img')].every(image => new URL(image.src).pathname.startsWith('/demo-assets/originals/'))`), true);
+  await evaluate(`document.querySelector('[data-asset-id]').click()`);
+  await wait(`document.querySelector('[data-demo-selection] img')?.naturalWidth > 0`);
   assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent.startsWith('Report image')).disabled`), true);
   assert.equal(await evaluate(`!!document.querySelector('[data-classification]')`), false);
   assert.equal(await evaluate(`document.body.textContent.includes('a fresh, short-lived presigned URL')`), true);
-  await shot('workspace-unavailable-desktop');
+  await shot('workspace-approved-originals-desktop');
   failEnd = true; await click('Exit demo'); await wait(`document.querySelector('[role="alert"]')`);
   assert.equal(await evaluate('location.pathname'), '/demo'); failEnd = false;
   await click('Exit demo'); await wait(`location.pathname==='/' && document.querySelector('#demo-start')`);
@@ -134,6 +136,14 @@ try {
     await shot(`homepage-access-${width}`, '#demo-access', 90);
     await click('Request a token'); await shot(`homepage-request-${width}`, '#demo-access', 90);
     await navigate(`${production}/demo`, width); await shot(`workspace-access-${width}`);
+    await unlock(); await chooseMode('managed'); await assets(4);
+    assert.equal(await evaluate(`[...document.querySelectorAll('[data-demo-library] img')].every(image => new URL(image.src).pathname.startsWith('/demo-assets/originals/'))`), true);
+    await evaluate(`document.querySelector('[data-asset-id]').click()`);
+    await wait(`document.querySelector('[data-demo-selection] img')?.naturalWidth > 0`);
+    await shot(`workspace-approved-originals-${width}`);
+    await shot(`workspace-approved-preview-${width}`, '[data-demo-selection]');
+    assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(button => button.textContent.startsWith('Report image')).disabled`), true);
+    await click('Exit demo'); await wait(`location.pathname==='/'`);
   }
 
   await navigate(`${development}/demo-development`);

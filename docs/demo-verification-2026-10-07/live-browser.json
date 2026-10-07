@@ -1,0 +1,120 @@
+{
+  "status": "passed",
+  "browser": "Chrome CDP 154",
+  "metrics": [
+    {
+      "name": "mode-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "originals-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 4
+    },
+    {
+      "name": "variants-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 12
+    },
+    {
+      "name": "variants-390",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 10
+    },
+    {
+      "name": "variants-320",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 10
+    },
+    {
+      "name": "managed-results-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "managed-details-390",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "managed-dino-390",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "managed-details-320",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "managed-dino-320",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "customer-input-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 4
+    },
+    {
+      "name": "customer-results-desktop",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "customer-results-390",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    },
+    {
+      "name": "customer-results-320",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0,
+      "libraryVisible": 0
+    }
+  ],
+  "managed_classes": [
+    "EXACT",
+    "FUZZY",
+    "CLEAN"
+  ],
+  "customer_classes": [
+    "EXACT",
+    "EXACT",
+    "FUZZY"
+  ],
+  "url_view_copy": "exact real URL; initially collapsed",
+  "vectors": "candidate and reference 384-d expandable",
+  "slides": "exact 12/12/7; selections retained across pages; search stays on active slide",
+  "allowance": "15 -> free report -> 12 after 3 checks -> free reset/report -> 9 after 3 checks",
+  "resume_exit": "passed",
+  "runtime_exceptions": []
+}

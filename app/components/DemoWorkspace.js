@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { liveDemoClient } from '../lib/demo-client.mjs';
 import DemoAccess from './DemoAccess';
-import DemoImageWorkspace, { AssetImage, ImagePreview } from './DemoImageWorkspace';
+import DemoImageWorkspace, { AssetImage } from './DemoImageWorkspace';
+import DemoResult from './DemoResult';
 import useDemo from './useDemo';
 import styles from './DemoWorkspace.module.css';
 
@@ -18,16 +19,16 @@ const messages = {
   demo_unavailable: 'We couldn’t complete that request. Please try again.',
   demo_invalid_response: 'We couldn’t confirm that response. Please try again.',
   demo_execution_unavailable: 'Image checks aren’t available right now. No check was completed.',
-};
-const results = {
-  EXACT: { title: 'EXACT', text: 'Corvinth returned an exact match.' },
-  FUZZY: { title: 'FUZZY', text: 'Corvinth returned a fuzzy match.' },
-  NEAR_MISS: { title: 'NEARMISS', text: 'Corvinth returned a near-miss result.' },
-  CLEAN: { title: 'CLEAN', text: 'Corvinth returned no match for this check.' },
+  demo_busy: 'Another demo check is running. Please try again shortly.',
+  demo_operation_pending: 'Your request is still processing. Please try again shortly.',
+  demo_operation_conflict: 'This request no longer matches your current selection. Reload your demo to continue.',
+  demo_reference_conflict: 'Your active reference has changed. Reload your demo to continue.',
+  demo_run_limit: 'You’ve used your demo allowance. You can still reset or exit the demo.',
+  demo_input_expired: 'This image input has expired. Try again to use a fresh input.',
 };
 const modes = [
   { id: 'managed', label: 'Managed compute', text: 'Corvinth fetches the selected image through a short-lived presigned URL and computes the matching signals.' },
-  { id: 'customer', label: 'Customer compute', text: 'Your platform computes the matching signals locally with the Corvinth SDK. Only derived signals reach Corvinth.' },
+  { id: 'customer', label: 'Customer compute', text: 'Your platform computes the image hashes locally with the Corvinth SDK. Only the derived hashes reach Corvinth.' },
 ];
 const modeName = (mode) => modes.find((item) => item.id === mode)?.label;
 
@@ -76,7 +77,7 @@ export default function DemoWorkspace({ adapter = liveDemoClient, requests, deve
       <Link className={styles.brand} href="/" aria-label="Corvinth home"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 1 38 11v8l-9 4v-7l-9-5-10 6v10l10 6 9-5v-6l9 4v7L20 43 2 33V11L20 1Z" /></svg><span>Corvinth</span></Link>
       <span className={styles.shellLabel}>Live demo</span>
       <div className={styles.headerActions}>
-        {session && <span className={styles.allowance} title="Reporting an image and checking an upload share this allowance." aria-live="polite"><strong>{session.runs_remaining}</strong> runs remaining</span>}
+        {session && <span className={styles.allowance} title="Only checked images use runs. Reporting and resetting a reference are free." aria-live="polite"><strong>{session.runs_remaining}</strong> runs remaining</span>}
         {session ? <button className={styles.exit} disabled={Boolean(state.pending)} onClick={exitDemo}>{state.pending?.operation === 'end' ? 'Leaving…' : 'Exit demo'} <span aria-hidden="true">↗</span></button>
           : <Link className={styles.exit} href="/#demo">Back to Corvinth</Link>}
       </div>
@@ -100,27 +101,20 @@ export default function DemoWorkspace({ adapter = liveDemoClient, requests, deve
           {selecting && <div className={styles.imageStage}>
             <div className={styles.stageHeading}>
               {stage === 'reference' ? <h2 ref={heading} tabIndex={-1}>Report an image</h2> : <h1 ref={heading} tabIndex={-1}>Try a re-upload</h1>}
-              <p>{stage === 'reference' ? 'Choose the image you want Corvinth to find.' : 'Choose another image to check against your active reference.'}</p>
+              <p>{stage === 'reference' ? 'Choose the image you want Corvinth to find.' : 'Choose up to 3 images to check against your active reference. One checked image uses one run.'}</p>
             </div>
             {reference && <div className={styles.activeReference}>
               <div className={styles.referenceThumbnail}><AssetImage asset={reference.asset} neutral={neutral} /></div>
-              <div><span className={styles.activeLabel}>Reference active</span><strong>{reference.asset.label}</strong></div>
+              <div><span className={styles.activeLabel}>Reference active</span><strong>{reference.asset?.label || 'Reported image'}</strong></div>
               <span className={styles.modeBadge}>{modeName(reference.mode)}</span>
               <button className={styles.textButton} disabled={busy} onClick={demo.reset}>{state.pending?.operation === 'reset' ? 'Resetting reference…' : 'Choose another reference'}</button>
             </div>}
             <DemoImageWorkspace key={stage + state.mode} demo={demo} neutral={neutral} />
           </div>}
 
-          {stage === 'result' && state.result && <>
+          {stage === 'result' && state.results.length > 0 && <>
             <div className={styles.stageHeading}><h1 ref={heading} tabIndex={-1}>Your match result</h1><p>{modeName(state.mode)} · Checked against your reported image.</p></div>
-            <div className={styles.result} data-classification={state.result.classification}>
-              <div><p className={styles.eyebrow}>{neutral ? 'Simulated classification' : 'Corvinth classification'}</p><strong>{results[state.result.classification].title}</strong></div>
-              <p>{results[state.result.classification].text}</p>
-            </div>
-            <div className={styles.comparison}><ImagePreview asset={reference.asset} label="Reported image" neutral={neutral} /><ImagePreview asset={state.upload} label="Attempted upload" neutral={neutral} /></div>
-            <details className={styles.requestDetails}><summary>Request details</summary><dl>
-              <div><dt>Compute model</dt><dd>{modeName(state.result.mode)}</dd></div><div><dt>Classification</dt><dd>{state.result.classification}</dd></div><div><dt>Request</dt><dd>{state.result.request_id}</dd></div>
-            </dl><details><summary>Response fields</summary><pre>{JSON.stringify(state.result, null, 2)}</pre></details></details>
+            {state.results.map((entry, index) => <DemoResult key={entry.asset_id} entry={entry} reference={reference} neutral={neutral} index={index} total={state.results.length} />)}
             <div className={styles.resultActions}><button className={styles.primary} disabled={busy || !session.runs_remaining} onClick={demo.anotherUpload}>Try another upload <span aria-hidden="true">→</span></button>
               <button className={styles.textButton} disabled={busy} onClick={demo.reset}>{state.pending?.operation === 'reset' ? 'Resetting reference…' : 'Choose another reference'}</button></div>
           </>}

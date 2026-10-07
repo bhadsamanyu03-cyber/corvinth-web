@@ -1,0 +1,20 @@
+{
+  "base_deployment": "dpl_D88hkYGmH9x3QC2RSbcxTYNkpgXf",
+  "reused_production_files": 93,
+  "restored_production_files": [],
+  "overrides": [
+    "app/components/DemoImageWorkspace.js",
+    "app/components/DemoWorkspace.js",
+    "app/components/DemoWorkspace.module.css",
+    "app/components/useDemo.js",
+    "app/components/DemoResult.js",
+    "app/lib/demo-client.mjs",
+    "app/lib/demo-contract.mjs",
+    "app/lib/demo-gateway.mjs",
+    "app/lib/demo-state.mjs",
+    "app/lib/demo-catalogue.mjs",
+    "app/lib/demo-display-manifest.mjs",
+    "app/demo-development/fixture.mjs"
+  ],
+  "approved_assets": 35
+}

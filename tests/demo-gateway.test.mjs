@@ -106,7 +106,7 @@ test('missing config, insecure remote backend and unexpected session contracts f
     const response = await handleDemoSession(request(), { ...config, ...overrides }, async () => { throw new Error('must not fetch'); });
     assert.equal(response.status, 503);
   }
-  for (const overrides of [{ execution_available: true }, { runs_remaining: 100 }, { session_secret: 'unsafe\r\n' }, { expires_at: '2000-01-01' }]) {
+  for (const overrides of [{ execution_available: 'true' }, { runs_remaining: 100 }, { session_secret: 'unsafe\r\n' }, { expires_at: '2000-01-01' }]) {
     const response = await handleDemoSession(request(), config, async () => Response.json({ ...session(), session_secret: bearer, ...overrides }));
     assert.equal(response.status, 503);
     assert.equal(response.headers.get('set-cookie'), null);

@@ -1,0 +1,160 @@
+{
+  "status": "passed",
+  "approved_public_byte_digests": 35,
+  "modes": [
+    {
+      "mode": "managed",
+      "default_allowance": 15,
+      "report_reset_cost": 0,
+      "batches": [
+        {
+          "size": 1,
+          "seconds": 0.928,
+          "runs_used": 1,
+          "results": [
+            {
+              "asset": "filtered",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest",
+              "cosine": 0.7034086100828344,
+              "dimensions": 384
+            }
+          ]
+        },
+        {
+          "size": 2,
+          "seconds": 1.214,
+          "runs_used": 3,
+          "results": [
+            {
+              "asset": "mirrored",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest",
+              "cosine": 0.7405840034225926,
+              "dimensions": 384
+            },
+            {
+              "asset": "coffee",
+              "classification": "CLEAN",
+              "hamming_distance": 120,
+              "pair_kind": "closest",
+              "cosine": 0.11326357896876349,
+              "dimensions": 384
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "seconds": 1.616,
+          "runs_used": 6,
+          "results": [
+            {
+              "asset": "posed",
+              "classification": "CLEAN",
+              "hamming_distance": 112,
+              "pair_kind": "closest",
+              "cosine": 0.6454378798420831,
+              "dimensions": 384
+            },
+            {
+              "asset": "brightness",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest",
+              "cosine": 0.6601090853296423,
+              "dimensions": 384
+            },
+            {
+              "asset": "text",
+              "classification": "CLEAN",
+              "hamming_distance": 44,
+              "pair_kind": "closest",
+              "cosine": 0.9006232934470153,
+              "dimensions": 384
+            }
+          ]
+        }
+      ],
+      "after_reference_change_check": {
+        "runs_used": 7,
+        "remaining": 8
+      },
+      "resume": "passed",
+      "idempotent_replay": "passed"
+    },
+    {
+      "mode": "customer",
+      "default_allowance": 15,
+      "report_reset_cost": 0,
+      "batches": [
+        {
+          "size": 1,
+          "seconds": 0.324,
+          "runs_used": 1,
+          "results": [
+            {
+              "asset": "filtered",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest"
+            }
+          ]
+        },
+        {
+          "size": 2,
+          "seconds": 0.29,
+          "runs_used": 3,
+          "results": [
+            {
+              "asset": "mirrored",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest"
+            },
+            {
+              "asset": "coffee",
+              "classification": "CLEAN",
+              "hamming_distance": 120,
+              "pair_kind": "closest"
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "seconds": 0.285,
+          "runs_used": 6,
+          "results": [
+            {
+              "asset": "posed",
+              "classification": "CLEAN",
+              "hamming_distance": 112,
+              "pair_kind": "closest"
+            },
+            {
+              "asset": "brightness",
+              "classification": "CLEAN",
+              "hamming_distance": 116,
+              "pair_kind": "closest"
+            },
+            {
+              "asset": "text",
+              "classification": "CLEAN",
+              "hamming_distance": 44,
+              "pair_kind": "closest"
+            }
+          ]
+        }
+      ],
+      "after_reference_change_check": {
+        "runs_used": 7,
+        "remaining": 8
+      },
+      "resume": "passed",
+      "idempotent_replay": "passed"
+    }
+  ],
+  "insufficient_whole_batch": "rejected before admission; no operation or usage",
+  "reference_report_at_zero_remaining": "passed"
+}
