@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import DemoPreview from './components/DemoPreview';
+import FoundingPartner from './components/FoundingPartner';
 
 function Screen12FaqItem({ index, topic, q, a, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -734,6 +735,8 @@ export default function Home() {
       </section>
 
       <hr/>
+
+      <FoundingPartner />
 
       {/* ── CONTACT / WAITLIST FORM ───────────────────────────────────────────── */}
       <section id="contact" className="contact-section">

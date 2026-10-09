@@ -1,0 +1,72 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { reportHref, jobHref } from '../../lib/console-catalog.mjs';
+import { useConsoleData, consoleRequest, query, date, label } from './data';
+import { Heading, Badge, DataState, Empty, Pagination, Facts, ConfirmAction } from './primitives';
+import { actionStatus, StorageReference, MatchedReference } from './Detections';
+import { StartHistoricalScan } from './HistoricalScans';
+
+export function Cases() {
+  const [kind, setKind] = useState('pdq');
+  const [skip, setSkip] = useState(0);
+  const reports = useConsoleData(`reports?${query({ kind, skip })}`);
+  return <><Heading eyebrow="Reports & evidence" title="Reported cases" action={<Link href={`/console/report/${kind}`} className="cc-button cc-primary">Report content +</Link>}>Each report keeps its lifecycle and associated matches together.</Heading><div className="cc-tabs" role="tablist" aria-label="Report type">{['pdq', 'pulse'].map(value => <button key={value} role="tab" aria-selected={kind === value} onClick={() => { setKind(value); setSkip(0); }}>{value === 'pdq' ? 'PDQ' : 'DINOv2 / Pulse'}</button>)}</div><section className="cc-panel"><DataState resource={reports}>{data => <>{data.items.length ? <div className="cc-table-wrap"><table><thead><tr><th>Case reference</th><th>Status</th><th>Created</th><th>Scan state</th><th>Matches</th></tr></thead><tbody>{data.items.map(item => <tr key={item.reference}><td><Link href={reportHref(kind, item.reference)}>{item.case_id} ↗</Link><small>{kind === 'pdq' ? 'Confirmed reference report' : item.reference}</small></td><td><Badge value={item.status}/></td><td>{date(item.created_at)}</td><td>{item.scan_status ? <Badge value={item.scan_status}/> : <small>{kind === 'pdq' ? 'No retained association' : 'No scan recorded'}</small>}</td><td>{item.match_count === null ? 'Not available' : item.match_count}<small>{kind === 'pdq' ? 'Recorded detection cases' : 'Initial library results'}</small></td></tr>)}</tbody></table></div> : <Empty title="No reports on this page">Create a confirmed-content report to start following its results.</Empty>}<Pagination skip={skip} next={data.next_skip} onChange={setSkip}/></>}</DataState></section></>;
+}
+
+function MatchList({ kind, reference, full = false }) {
+  const [skip, setSkip] = useState(0);
+  const [source, setSource] = useState('initial');
+  const [job, setJob] = useState('');
+  const [jobKind, setJobKind] = useState('storage');
+  const [jobSkip, setJobSkip] = useState(0);
+  const jobs = useConsoleData(kind === 'pulse' && full ? `jobs?${query({ kind: jobKind, complaint_id: reference, skip: jobSkip })}` : null);
+  const matches = useConsoleData(`matches?${query({ kind, reference, skip, limit: full ? 20 : 5, source, job_id: job || undefined })}`);
+  const availability = { not_retained: 'These results were not retained in the current backend record. This does not mean no matches were found.', withdrawn: 'This report has been withdrawn. Its results are no longer exposed here.', calibration_pending: 'Match results are withheld until the backend’s calibration gate is satisfied.', initial_library_top_50: 'Initial library search results, capped by the backend at 50. Open a scan below to inspect its recorded matches.', completed_scan_matches: 'Only committed, completed item matches are shown. An unfinished scan may return more results later.', recorded_cases: 'Detection cases linked to this report’s confirmed reference hashes.', recorded_scan_results: 'Recorded results for the selected URL scan. Counts may change while the job is running.' };
+  return <>{kind === 'pulse' && full && <section className="cc-panel cc-panel-body" style={{ marginBottom: 20 }}><h2>Result source</h2><div className="cc-actions"><button className={`cc-button ${source === 'initial' ? 'cc-primary' : 'cc-secondary'}`} onClick={() => { setSource('initial'); setJob(''); setSkip(0); }}>Initial library search</button><button className="cc-button cc-secondary" onClick={() => { setJobKind(jobKind === 'storage' ? 'url' : 'storage'); setJobSkip(0); }}>{jobKind === 'storage' ? 'Browse URL scans' : 'Browse storage scans'}</button></div><p className="cc-help" style={{ marginTop: 16 }}>Select a {jobKind === 'storage' ? 'storage' : 'URL'} scan to inspect its matches.</p><DataState resource={jobs}>{data => <>{data.items.map(item => <div className="cc-row" key={item.job_id}><div><strong>{item.client_job_id || item.job_id}</strong><small>{label(item.status)}</small></div><button className={`cc-button ${job === item.job_id ? 'cc-primary' : 'cc-secondary'}`} onClick={() => { setSource(jobKind); setJob(item.job_id); setSkip(0); }}>Show matches</button></div>)}{!data.items.length && <p className="cc-help">No associated scans on this page.</p>}<Pagination skip={jobSkip} next={data.next_skip} onChange={setJobSkip}/></>}</DataState></section>}<section className="cc-panel"><div className="cc-panel-head"><h2>{full ? 'Matched content' : 'Associated matches'}</h2>{!full && <Link className="cc-text-button" href={`${reportHref(kind, reference)}/matches`}>View all matches ↗</Link>}</div><DataState resource={matches}>{data => <><div className="cc-panel-body"><p className="cc-help">{availability[data.availability] || 'Available results for this report.'}</p></div>{data.items.length ? data.items.map((item, index) => <div className="cc-row" key={item.case_uuid || item.item_id || `${item.platform_content_id}:${index}`}><div><strong>{item.action_reference?.object_key || item.platform_content_id || item.client_reference_id || item.case_uuid || item.item_id}</strong>{item.action_reference && <small>{item.action_reference.storage_bucket} · Version: {item.action_reference.object_version || 'Immutable key'}</small>}<small>{item.similarity != null ? `Similarity: ${Number(item.similarity).toFixed(4)}` : item.classification ? `${item.classification} · Hamming distance: ${item.hamming_distance ?? 'Not available'}` : 'Recorded match'}</small></div>{item.case_uuid ? <Link href={`/console/detections/${encodeURIComponent(item.case_uuid)}`} className="cc-text-button">Open case ↗</Link> : <Badge value="match"/>}</div>) : <Empty title={['not_retained','withdrawn','calibration_pending'].includes(data.availability) ? 'Results unavailable' : 'No recorded matches in this view'}>Check the report and scan status for the latest available evidence.</Empty>}{full && <Pagination skip={skip} next={data.next_skip} onChange={setSkip}/>}</>}</DataState></section></>;
+}
+
+export function CaseDetail({ kind, reference, matchesOnly = false }) {
+  const report = useConsoleData(`report?${query({ kind, reference })}`);
+  const lifecycle = useConsoleData(kind === 'pulse' ? `pulse/${encodeURIComponent(reference)}` : null);
+  return <><Heading eyebrow={kind === 'pdq' ? 'PDQ report' : 'DINOv2 / Pulse report'} title={matchesOnly ? 'Matches for this report' : 'Report details'} action={<Link href={matchesOnly ? reportHref(kind, reference) : '/console/cases'} className="cc-button cc-secondary">← {matchesOnly ? 'Report details' : 'All reports'}</Link>}>{reference}</Heading>{!matchesOnly && <div className="cc-stack" style={{ marginBottom: 22 }}><section className="cc-panel cc-panel-body"><DataState resource={report}>{data => <><Facts entries={[
+    ['Case reference', data.case_id], ['Status', <Badge key="state" value={data.status}/>], ['Created', date(data.created_at)],
+    ['Available matches', data.match_count === null ? 'Not available' : data.match_count], ['Match scope', data.match_scope], ['Withdrawn', data.withdrawn_at ? date(data.withdrawn_at) : '—'],
+    [kind === 'pdq' ? 'Initial archive scan' : 'Latest scan', data.latest_scan ? <Link key="latest-scan" href={jobHref(data.latest_scan.kind, data.latest_scan.scan_id || data.latest_scan.job_id)}>{label(data.scan_status)} · Inspect ↗</Link> : kind === 'pdq' ? (data.scan_status ? `${label(data.scan_status)} · ${label(data.scan_phase)}` : 'No retained scan association') : 'No scan job recorded'],
+  ]}/><div className="cc-actions"><ConfirmAction title="Withdraw this report?" description={kind === 'pdq' ? 'Withdraw your platform’s claims for this reference. Shared references owned by other reports are retained.' : 'Withdraw this complaint and initiate associated scan cancellation and cleanup. This does not confirm removal of platform content.'} button="Withdraw report" disabled={data.status === 'withdrawn'} onConfirm={async () => { await consoleRequest(kind === 'pdq' ? 'withdraw/pdq' : `pulse/${encodeURIComponent(reference)}`, { method: kind === 'pdq' ? 'POST' : 'DELETE', ...(kind === 'pdq' ? { body: { reference } } : {}) }); report.reload(); lifecycle.reload(); }}/></div></>}</DataState></section>{kind === 'pulse' && <section className="cc-panel cc-panel-body"><h2 style={{ marginBottom: 20 }}>Processing & lifecycle</h2><DataState resource={lifecycle}>{data => <Facts entries={[
+    ['Vector', data.vector_stored ? 'Stored' : 'Not stored'], ['Scan status', label(data.scan_status)], ['Processed', date(data.processed_at)], ['Failure', data.failure_code || 'None recorded'], ['Withdrawal cleanup', data.withdrawal_cleanup_status || 'Not applicable'], ['Linked URL scan', data.scan_job_id ? <Link key="job" href={jobHref('url', data.scan_job_id)}>Inspect scan ↗</Link> : 'No linked URL scan'],
+  ]}/>}</DataState></section>}</div>}{kind === 'pulse' && !matchesOnly && report.data?.status === 'active' && <StartHistoricalScan complaintId={reference}/>}<MatchList key={`${kind}:${reference}:${report.data?.status}`} kind={kind} reference={reference} full={matchesOnly}/></>;
+}
+
+export function DetectionCase({ reference }) {
+  const resource = useConsoleData(`detection/${encodeURIComponent(reference)}`, 15000);
+  const audit = useConsoleData(`audit/${encodeURIComponent(reference)}`, 15000);
+  const refresh = () => { resource.reload(); audit.reload(); };
+  return <><Heading eyebrow="Detection case" title="Case lifecycle" action={<Link href="/console/detections" className="cc-button cc-secondary">← Detections</Link>}>{reference}</Heading>
+    <div className="cc-panel-head"><p className="cc-help">Refreshes every 15 seconds. A newly detected case may still be processing.</p><button className="cc-text-button" onClick={refresh}>Refresh</button></div>
+    <div className="cc-stack"><section className="cc-panel cc-panel-body"><DataState resource={resource}>{data => <><Facts entries={[
+      ['Status', <Badge key="state" value={data.state}/>], ['Classification', data.classification],
+      ['Action status', actionStatus(data)], ['Recorded action', label(data.action_taken)],
+      ['Created', date(data.created_at)], ['Last updated', date(data.last_updated)],
+      ['Hours remaining', data.hours_remaining == null ? 'Not available' : data.hours_remaining.toFixed(1)],
+      ['Detected content', <StorageReference key="object" reference={data.action_reference}/>],
+      ['Client reference', data.client_reference_id], ['Platform content ID', data.platform_content_id],
+      ['Matched reference', <MatchedReference key="match" reference={data.matched_reference} legacy={data.matched_case_id}/>],
+      ['Hamming distance', data.hamming_distance],
+      ...(data.withdrawn_at ? [['Withdrawn', date(data.withdrawn_at)], ['Withdrawn by', data.withdrawn_by], ['Withdrawal reason', data.withdrawal_reason]] : []),
+    ]}/><div className="cc-actions">
+      <ConfirmAction title="Confirm removal?" description="Confirm only after your platform has physically removed this content from all storage layers." button="Confirm removal" disabled={['CONFIRMED', 'WITHDRAWN', 'AUTO_RESOLVED', 'AUTO_RESOLVED_NO_PLATFORM'].includes(data.state)} onConfirm={async () => { await consoleRequest(`detection/${encodeURIComponent(reference)}/confirm`, { method: 'POST', body: {} }); refresh(); }}/>
+      <ConfirmAction title="Withdraw this detection case?" description="Record why your platform is withdrawing this case. This does not withdraw the original reported reference." button="Withdraw case" reason disabled={data.state === 'WITHDRAWN'} onConfirm={async reason => { await consoleRequest(`detection/${encodeURIComponent(reference)}/withdraw`, { method: 'POST', body: { reason } }); refresh(); }}/>
+    </div></>}</DataState></section>
+    <section className="cc-panel"><div className="cc-panel-head"><h2>Audit trail</h2></div><DataState resource={audit}>{data => <>
+      <div className="cc-panel-body"><Badge value={data.chain_verified ? 'verified' : 'verification_failed'}/></div>
+      {data.events.map((event, index) => <div className="cc-row" key={`${event.sequence}:${index}`}><div>
+        <strong>{label(event.event_type)}</strong><small>{event.withdrawal_reason || event.reason || label(event.action)}</small>
+        {(event.withdrawn_by || event.confirmed_by_platform) && <small>Recorded by: {event.withdrawn_by || event.confirmed_by_platform}</small>}
+        {event.action_reference && <small><StorageReference reference={event.action_reference}/></small>}
+        {event.matched_reference && <small>Matched reference: <MatchedReference reference={event.matched_reference}/></small>}
+        {event.pipeline_1_distance != null && <small>Hamming distance: {event.pipeline_1_distance}</small>}
+      </div><small>{date(event.timestamp)}</small></div>)}
+    </>}</DataState></section></div></>;
+}
