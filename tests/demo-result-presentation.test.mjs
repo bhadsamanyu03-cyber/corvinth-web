@@ -5,7 +5,8 @@ import { getDinoDemoBand, getDemoResultSummary } from '../app/lib/demo-result-pr
 test('DINO demo bands use the exact returned score, with inclusive lower boundaries', () => {
   for (const [score, band] of [
     [1, 'MATCH'], [0.85, 'MATCH'], [0.84999, 'NEAR MISS'],
-    [0.70, 'NEAR MISS'], [0.69999, 'CLEAN'], [0, 'CLEAN'], [-1, 'CLEAN'],
+    [0.75, 'NEAR MISS'], [0.74999, 'CLEAN'], [0.70, 'CLEAN'],
+    [0, 'CLEAN'], [-1, 'CLEAN'],
   ]) assert.equal(getDinoDemoBand(score), band, String(score));
 });
 

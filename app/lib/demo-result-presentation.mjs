@@ -3,7 +3,7 @@
 export function getDinoDemoBand(cosineSimilarity) {
   if (!Number.isFinite(cosineSimilarity)) return null;
   if (cosineSimilarity >= 0.85) return 'MATCH';
-  if (cosineSimilarity >= 0.70) return 'NEAR MISS';
+  if (cosineSimilarity >= 0.75) return 'NEAR MISS';
   return 'CLEAN';
 }
 

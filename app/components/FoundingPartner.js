@@ -11,7 +11,7 @@ export default function FoundingPartner() {
 
         <div className={styles.offer}>
           <div className={styles.pricing}>
-            <p className={styles.price}><strong>$99</strong><span>/month</span></p>
+            <p className={styles.price}><strong><span className={styles.currency}>$</span>99</strong><span>/month</span></p>
             <p className={styles.introTerm}>For your first 3 months from go-live.</p>
             <p className={styles.foundingRate}><strong>$299/month thereafter</strong><span> — your exclusive founding-partner rate.</span></p>
             <p className={styles.standardRate}>Standard pricing: <span>$499/month</span></p>
