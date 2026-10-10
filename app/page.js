@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import DemoPreview from './components/DemoPreview';
 import FoundingPartner from './components/FoundingPartner';
 
@@ -149,7 +150,7 @@ export default function Home() {
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <nav className="screen01-nav">
         <a className="logo screen01-logo" href="#top" aria-label="Corvinth home">
-          <svg viewBox="0 0 40 44" aria-hidden="true" focusable="false"><path d="M20 1 38 11v8l-9 4v-7l-9-5-10 6v10l10 6 9-5v-6l9 4v7L20 43 2 33V11L20 1Z"/></svg>
+          <Image src="/favicon.ico" width={34} height={38} alt="" aria-hidden="true" unoptimized />
           <span>Corvinth</span>
         </a>
         <div className="screen01-nav-links">

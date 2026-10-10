@@ -34,7 +34,10 @@ export default function DemoAccess({ onReady, adapter = liveDemoClient, requests
     const controller = new AbortController();
     active.current = controller;
     setPending(operation); setError('');
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    // Processing still has the existing BFF timeout. Only the supported
+    // adapter adds its independent, bounded pre-submission startup allowance.
+    const timeout = setTimeout(() => controller.abort(),
+      operation !== 'request' && adapter.startupWaitSupported ? 192000 : 12000);
     try {
       if (operation === 'request') {
         readTokenRequestReceipt(await requests.submit({ ...readTokenRequest(input), signal: controller.signal }));
@@ -85,7 +88,7 @@ export default function DemoAccess({ onReady, adapter = liveDemoClient, requests
       <label className={styles.srOnly} htmlFor={`${id}-token`}>Demo token</label>
       <input ref={token} id={`${id}-token`} name="token" type="password" required maxLength={100} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="Paste your demo token" disabled={Boolean(pending)} />
       <button className={styles.primary} disabled={Boolean(pending)} type="submit">{pending === 'resume' ? 'Checking your access…' : pending ? 'Opening demo…' : 'Start demo'} <span aria-hidden="true">→</span></button>
-      <p className={styles.note}>Your invitation opens a private, time-limited demo.</p>
+      <p className={styles.note}>Your invitation opens a private, time-limited demo.{pending && adapter.startupWaitSupported ? ' Corvinth may take up to 3 minutes to start before submitting your operation.' : ''}</p>
     </form> : sent ? <div className={styles.receipt} role="status"><h2>Request sent.</h2><p>I’ll send your demo token to your work email.</p>{development && <p className={styles.note}>Development fixture only. No email was sent.</p>}</div>
     : <form onSubmit={request}>
       <h2 ref={heading} tabIndex={-1}>Request a demo token</h2>

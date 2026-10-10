@@ -18,20 +18,27 @@ export default function ConsoleShell({ children }) {
   const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [starting, setStarting] = useState(false);
+  useEffect(() => {
+    const start = () => setStarting(true); const ready = () => setStarting(false);
+    window.addEventListener('corvinth-runtime-starting', start);
+    window.addEventListener('corvinth-runtime-ready', ready);
+    return () => { window.removeEventListener('corvinth-runtime-starting', start); window.removeEventListener('corvinth-runtime-ready', ready); };
+  }, []);
   const [error, setError] = useState('');
   const sessionRevision = useRef(0);
   const mutationPending = useRef(false);
   useEffect(() => {
     let alive = true;
-    const check = async () => {
+    const check = async (passive = false) => {
       if (mutationPending.current) return;
       const revision = sessionRevision.current;
-      try { const data = await consoleRequest('session'); if (alive && revision === sessionRevision.current) { setSession(data.status === 'active' ? data : null); setError(''); } }
-      catch (err) { if (alive && revision === sessionRevision.current) { setSession(null); setError(err.message); } }
+      try { const data = await consoleRequest('session', { passive }); if (alive && revision === sessionRevision.current) { setSession(data.status === 'active' ? data : null); setError(''); } }
+      catch (err) { if (alive && revision === sessionRevision.current && !err.runtimeIdle) { setSession(null); setError(err.message); } }
       finally { if (alive) setChecking(false); }
     };
     check();
-    const interval = setInterval(check, 60000);
+    const interval = setInterval(() => check(true), 60000);
     const resume = () => { if (document.visibilityState === 'visible') check(); };
     const expire = () => { sessionRevision.current += 1; setSession(null); setError('Your session has ended. Enter a new invitation to continue.'); };
     window.addEventListener('corvinth-console-expired', expire);
@@ -56,6 +63,6 @@ export default function ConsoleShell({ children }) {
     catch (err) { setError(err.message); }
     finally { mutationPending.current = false; setBusy(false); }
   }
-  if (checking || !session) return <div className="cc-shell cc-auth"><header><Brand/><span className="cc-eyebrow">Customer console</span></header><main className="cc-login"><div className="cc-icon-tile"><Icon name="shield"/></div><p className="cc-eyebrow">Your platform. Your decisions.</p><h1>Welcome to your<br/>control room.</h1><p>Report content, follow cases, and keep your integration in view.</p>{checking ? <p role="status">Checking your session…</p> : <form onSubmit={login}><Field label="Console invitation" hint="Use the platform invitation issued to you by Corvinth."><input name="token" type="password" autoComplete="off" required maxLength={100} placeholder="Enter your invitation" disabled={busy}/></Field>{error && <p className="cc-error" role="alert">{error}</p>}<button className="cc-button cc-primary" disabled={busy}>{busy ? 'Signing in…' : 'Open console'}<Icon name="arrow"/></button><p className="cc-help">Need access? <a href="mailto:support@corvinth.com">Contact Corvinth</a></p></form>}</main><footer>Corvinth records the evidence. Your platform decides what happens next.</footer></div>;
-  return <SessionContext.Provider value={session}><div className="cc-shell"><a className="cc-skip" href="#console-main">Skip to content</a><aside className="cc-sidebar"><Brand/><p className="cc-sidebar-label">Customer console</p><nav aria-label="Console navigation">{navigation.map(([href, title, icon]) => <Link href={href} key={href} aria-current={(href === '/console' ? pathname === href : pathname.startsWith(href)) ? 'page' : undefined}><Icon name={icon}/>{title}</Link>)}</nav><div className="cc-sidebar-bottom"><span className="cc-eyebrow">Evidence into action</span><p>Detection by Corvinth.<br/>Decisions by your team.</p><Link href="/console/report/pdq" className="cc-button cc-primary">Report content <span aria-hidden="true">+</span></Link></div></aside><div className="cc-body"><header className="cc-topbar"><div><span className="cc-platform-mark">{session.platform_name?.slice(0, 1).toUpperCase()}</span><strong>{session.platform_name}</strong><span className="cc-topbar-divider"/><span>Platform workspace</span></div><button className="cc-text-button" onClick={logout} disabled={busy}>{busy ? 'Signing out…' : 'Sign out'} ↗</button></header><main id="console-main" className="cc-main">{error && <p className="cc-error" role="alert">{error}</p>}{children}</main><footer className="cc-footer"><span>Corvinth customer console</span><span>Platform-scoped access · <Link href="/console/integration">Integration details ↗</Link></span></footer></div></div></SessionContext.Provider>;
+  if (checking || !session) return <div className="cc-shell cc-auth"><header><Brand/><span className="cc-eyebrow">Customer console</span></header><main className="cc-login"><div className="cc-icon-tile"><Icon name="shield"/></div><p className="cc-eyebrow">Your platform. Your decisions.</p><h1>Welcome to your<br/>control room.</h1><p>Report content, follow cases, and keep your integration in view.</p>{starting && <p role="status">Starting Corvinth. This can take up to 3 minutes; your operation has not been submitted.</p>}{checking ? <p role="status">Checking your session…</p> : <form onSubmit={login}><Field label="Console invitation" hint="Use the platform invitation issued to you by Corvinth."><input name="token" type="password" autoComplete="off" required maxLength={100} placeholder="Enter your invitation" disabled={busy}/></Field>{error && <p className="cc-error" role="alert">{error}</p>}<button className="cc-button cc-primary" disabled={busy}>{busy ? 'Signing in…' : 'Open console'}<Icon name="arrow"/></button><p className="cc-help">Need access? <a href="mailto:support@corvinth.com">Contact Corvinth</a></p></form>}</main><footer>Corvinth records the evidence. Your platform decides what happens next.</footer></div>;
+  return <SessionContext.Provider value={session}><div className="cc-shell"><a className="cc-skip" href="#console-main">Skip to content</a><aside className="cc-sidebar"><Brand/><p className="cc-sidebar-label">Customer console</p><nav aria-label="Console navigation">{navigation.map(([href, title, icon]) => <Link href={href} key={href} aria-current={(href === '/console' ? pathname === href : pathname.startsWith(href)) ? 'page' : undefined}><Icon name={icon}/>{title}</Link>)}</nav><div className="cc-sidebar-bottom"><span className="cc-eyebrow">Evidence into action</span><p>Detection by Corvinth.<br/>Decisions by your team.</p><Link href="/console/report/pdq" className="cc-button cc-primary">Report content <span aria-hidden="true">+</span></Link></div></aside><div className="cc-body"><header className="cc-topbar"><div><span className="cc-platform-mark">{session.platform_name?.slice(0, 1).toUpperCase()}</span><strong>{session.platform_name}</strong><span className="cc-topbar-divider"/><span>Platform workspace</span></div><button className="cc-text-button" onClick={logout} disabled={busy}>{busy ? 'Signing out…' : 'Sign out'} ↗</button></header><main id="console-main" className="cc-main">{starting && <p className="cc-note" role="status">Starting Corvinth. This can take up to 3 minutes; your operation has not been submitted.</p>}{error && <p className="cc-error" role="alert">{error}</p>}{children}</main><footer className="cc-footer"><span>Corvinth customer console</span><span>Platform-scoped access · <Link href="/console/integration">Integration details ↗</Link></span></footer></div></div></SessionContext.Provider>;
 }

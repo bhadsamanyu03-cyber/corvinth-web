@@ -23,6 +23,28 @@ function readSession(request) {
   return SESSION.test(value) ? value : '';
 }
 
+async function readiness(request, config, fetchBackend, bearer, token) {
+  if (config.runtimeReadiness !== true) return null;
+  const unsubmitted = () => Response.json({ protocol: 'corvinth-runtime-v1', state: 'starting',
+    submitted: false, message: 'Starting Corvinth. This can take up to 3 minutes.' }, {
+    status: 202, headers: { 'Cache-Control': 'no-store', 'X-Corvinth-Admission': 'not-submitted' },
+  });
+  try {
+    const response = await fetchBackend(new URL('/_corvinth/runtime/ready', config.backendUrl), {
+      method: 'GET', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000),
+      headers: { 'X-Corvinth-Demo-Gateway': config.secret,
+        ...(bearer ? { 'X-Corvinth-Demo-Session': bearer } : {}),
+        ...(token ? { 'X-Corvinth-Demo-Token': token } : {}) },
+    });
+    const body = await response.json().catch(() => ({}));
+    if ([429,502,504].includes(response.status) || (response.status === 503 && body.protocol !== 'corvinth-runtime-v1')
+        || (response.status === 202 && body.protocol === 'corvinth-runtime-v1' && body.state === 'starting')) return unsubmitted();
+    if (response.status === 200 && body.protocol === 'corvinth-runtime-v1' && body.state === 'ready') return null;
+    return reply({ error: [401,403].includes(response.status) ? (token ? 'demo_token_invalid' : 'demo_session_invalid') : 'demo_unavailable' },
+      [401,403].includes(response.status) ? 401 : 503);
+  } catch { return unsubmitted(); } // Only a readiness GET was attempted.
+}
+
 async function readSmallJson(request, operation = false) {
   if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new Error();
   const reader = request.body?.getReader();
@@ -90,6 +112,8 @@ export async function handleDemoOperation(request, operation, config, fetchBacke
         || Object.values(body.input_tokens).some((value) => typeof value !== 'string'
           || value.length > 4096 || !/^[A-Za-z0-9_-]+\.[0-9a-f]{64}$/.test(value)))) throw new Error();
   } catch { return reply({ error: 'demo_invalid_request' }, 400); }
+  const admission = await readiness(request, config, fetchBackend, bearer);
+  if (admission) return admission;
   try {
     const response = await fetchBackend(target.toString(), { method: 'POST', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(45000),
       headers: { 'Content-Type': 'application/json', 'X-Corvinth-Demo-Gateway': config.secret, 'X-Corvinth-Demo-Session': bearer }, body: JSON.stringify(body) });
@@ -152,6 +176,8 @@ export async function handleDemoSession(request, config, fetchBackend = fetch) {
     try { body = await readSmallJson(request); }
     catch { return reply({ error: 'demo_invalid_request' }, 400); }
   }
+  const admission = await readiness(request, config, fetchBackend, method === 'POST' ? '' : bearer, body?.token);
+  if (admission) return admission;
   try {
     const response = await fetchBackend(target.toString(), {
       method, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(8000),

@@ -253,7 +253,7 @@ nav::before {
 }
 .screen01-nav::before { display: none; }
 .screen01-logo { display: inline-flex; align-items: center; gap: 12px; font-size: 24px; letter-spacing: -0.045em; }
-.screen01-logo svg { width: 34px; height: 38px; fill: #00E59B; flex: 0 0 auto; }
+.screen01-logo img { width: 34px; height: 38px; object-fit: contain; flex: 0 0 auto; }
 .screen01-nav-links { display: flex; align-items: center; gap: clamp(22px, 3.2vw, 52px); margin-left: clamp(80px, 11.5vw, 176px); }
 .screen01-nav-links a { color: #e5e9ea; font-size: 15px; line-height: 1; white-space: nowrap; transition: color .2s; }
 .screen01-nav-links a:hover { color: #00E59B; }
@@ -557,7 +557,7 @@ nav::before {
 @media (max-width: 680px) {
   .screen01-nav { height: 66px; padding: 0 20px; }
   .screen01-logo { font-size: 20px; gap: 8px; }
-  .screen01-logo svg { width: 28px; height: 31px; }
+  .screen01-logo img { width: 28px; height: 31px; }
   .screen01-nav-cta { min-width: 118px; height: 39px; padding: 0 11px; font-size: 13px; }
   .screen01-nav ~ .mobile-menu { top: 66px; }
   .hero { padding: 0 20px 95px; }

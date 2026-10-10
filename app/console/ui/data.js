@@ -1,14 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { waitForConsoleRequest } from '../../lib/runtime-readiness.mjs';
 
-export async function consoleRequest(path, { method = 'GET', body, signal } = {}) {
-  const response = await fetch(`/api/console/${path}`, {
+export async function consoleRequest(path, { method = 'GET', body, signal, passive = false, onStarting } = {}) {
+  let response;
+  try { response = await waitForConsoleRequest(() => fetch(`/api/console/${path}`, {
     method, signal, cache: 'no-store', credentials: 'same-origin',
-    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(passive ? { 'X-Corvinth-Runtime-Passive': '1' } : {}) },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  }), { signal, onStarting: () => { window.dispatchEvent(new Event('corvinth-runtime-starting')); onStarting?.(); } });
+  } finally { window.dispatchEvent(new Event('corvinth-runtime-ready')); }
   const data = await response.json().catch(() => ({}));
+  if (response.status === 202 && data.submitted === false) {
+    const error = new Error(data.message || 'Corvinth is starting.');
+    error.runtimeIdle = data.state === 'off';
+    throw error;
+  }
   if (!response.ok) {
     if (response.status === 401 && path !== 'session') window.dispatchEvent(new Event('corvinth-console-expired'));
     const error = new Error(data.message || 'This request could not be completed. Please try again.');
@@ -26,18 +34,18 @@ export function useConsoleData(path, pollMs = 0) {
     const controller = new AbortController();
     let alive = true;
     let timer;
-    async function load() {
+    async function load(passive = false) {
       try {
-        const data = await consoleRequest(path, { signal: controller.signal });
+        const data = await consoleRequest(path, { signal: controller.signal, passive, onStarting: () => { if (alive) setState(current => ({ ...current, starting: true })); } });
         if (alive) setState({ path, data, loading: false, error: null });
       } catch (error) {
-        if (alive) setState({ path, data: null, loading: false, error });
+        if (alive && !error.runtimeIdle) setState({ path, data: null, loading: false, error });
       } finally {
         if (alive && pollMs) timer = setTimeout(tick, pollMs);
       }
     }
     function tick() {
-      if (document.visibilityState === 'visible') load();
+      if (document.visibilityState === 'visible') load(true);
       else timer = setTimeout(tick, pollMs);
     }
     load();

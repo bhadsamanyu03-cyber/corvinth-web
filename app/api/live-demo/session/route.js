@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 function handle(request) {
   return handleDemoSession(request, {
+    runtimeReadiness: process.env.CORVINTH_RUNTIME_READINESS_ENABLED === 'true',
     enabled: process.env.CORVINTH_DEMO_ENABLED === 'true',
     secret: process.env.CORVINTH_DEMO_GATEWAY_SECRET,
     backendUrl: process.env.CORVINTH_DEMO_BACKEND_URL ?? process.env.CORVINTH_API_URL,

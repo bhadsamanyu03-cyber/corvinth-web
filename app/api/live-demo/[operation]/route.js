@@ -8,6 +8,7 @@ export const maxDuration = 60;
 export async function POST(request, context) {
   const { operation } = await context.params;
   return handleDemoOperation(request, operation, {
+    runtimeReadiness: process.env.CORVINTH_RUNTIME_READINESS_ENABLED === 'true',
     enabled: process.env.CORVINTH_DEMO_ENABLED === 'true',
     secret: process.env.CORVINTH_DEMO_GATEWAY_SECRET,
     backendUrl: process.env.CORVINTH_DEMO_BACKEND_URL ?? process.env.CORVINTH_API_URL,

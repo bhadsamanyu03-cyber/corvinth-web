@@ -29,7 +29,8 @@ export default function useDemo(adapter, { autoOpen = false } = {}) {
     running.current = { id, controller };
     dispatch({ type: 'BEGIN', id, operation, silent });
     const timeout = setTimeout(() => controller.abort(new DemoError('demo_unavailable')),
-      ['session', 'start', 'end'].includes(operation) ? 12000 : 60000);
+      (['session', 'start', 'end'].includes(operation) ? 12000 : 60000)
+        + (adapter.startupWaitSupported ? 180000 : 0));
     try {
       let operationKey;
       if (['report', 'check', 'reset'].includes(operation)) {

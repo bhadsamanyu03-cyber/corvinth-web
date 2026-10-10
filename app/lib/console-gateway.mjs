@@ -125,7 +125,7 @@ export async function handleConsole(request, segments, config, fetchBackend = fe
       try {
         response = await fetchBackend(new URL(target, base), { method, cache: 'no-store', redirect: 'error',
           signal: AbortSignal.timeout(method === 'GET' ? 12000 : 90000),
-          headers: { 'Content-Type': 'application/json', ...extraHeaders },
+          headers: { 'Content-Type': 'application/json', ...(request.headers.get('x-corvinth-runtime-passive') === '1' ? { 'X-Corvinth-Runtime-Passive': '1' } : {}), ...extraHeaders },
           ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         });
       } catch { throw new GatewayError(503, upstreamMessage(503, method !== 'GET')); }
@@ -138,12 +138,51 @@ export async function handleConsole(request, segments, config, fetchBackend = fe
     }
     const sessionHeaders = { 'X-Corvinth-Console-Gateway': config.secret,
       ...(bearer ? { 'X-Corvinth-Console-Session': bearer } : {}) };
+    if (isSession && request.method === 'DELETE' && !bearer) return reply({ status: 'ended' }, 200, cookie());
+    if (!bearer && !(isSession && request.method === 'POST')) {
+      return isSession ? reply({ status: 'inactive' }, 200, cookie()) : reply({ message: 'Sign in to open your console.' }, 401, cookie());
+    }
+    if (config.runtimeReadiness === true) {
+      const passive = request.headers.get('x-corvinth-runtime-passive') === '1';
+      const wakeHeaders = { ...sessionHeaders, ...(passive ? { 'X-Corvinth-Runtime-Passive': '1' } : {}) };
+      if (isSession && request.method === 'POST') {
+        const input = await readBody(request.clone());
+        if (Object.keys(input).length !== 1 || !INVITE.test(input.token)) fail('Enter a valid Corvinth console invitation.');
+        wakeHeaders['X-Corvinth-Console-Invitation'] = input.token;
+      }
+      const unsubmitted = (state = 'starting') => Response.json({
+        protocol: 'corvinth-runtime-v1', state, submitted: false,
+        message: state === 'off' ? 'Corvinth is idle.' : 'Starting Corvinth. This can take up to 3 minutes.',
+      }, { status: 202, headers: { 'Cache-Control': 'no-store', 'X-Corvinth-Admission': 'not-submitted' } });
+      let readiness;
+      try {
+        readiness = await fetchBackend(new URL('/_corvinth/runtime/ready', base), {
+          method: 'GET', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000), headers: wakeHeaders,
+        });
+      } catch {
+        // Only the readiness GET was attempted. No business request exists to
+        // replay; the browser's existing 180-second admission budget applies.
+        return unsubmitted(passive ? 'off' : 'starting');
+      }
+      const state = await readiness.json().catch(() => ({}));
+      if ([429, 502, 504].includes(readiness.status) ||
+          (readiness.status === 503 && state.protocol !== 'corvinth-runtime-v1')) {
+        // ALB/Lambda may reject overlapping serialized controller probes. Do
+        // not mistake a transient pre-admission rejection for an image result.
+        return unsubmitted(passive ? 'off' : 'starting');
+      }
+      if (state.protocol === 'corvinth-runtime-v1' &&
+          ((readiness.status === 202 && state.state === 'starting') ||
+           (passive && readiness.status === 503 && state.state === 'off'))) {
+        return unsubmitted(state.state);
+      }
+      if (readiness.status !== 200 || state.protocol !== 'corvinth-runtime-v1' || state.state !== 'ready') {
+        throw new GatewayError([401,403].includes(readiness.status) ? readiness.status : 503, 'Corvinth access or readiness could not be confirmed. No operation was submitted.');
+      }
+    }
     if (isSession && request.method === 'DELETE') {
       if (bearer) await upstream('/console/v1/session', 'DELETE', undefined, sessionHeaders);
       return reply({ status: 'ended' }, 200, cookie());
-    }
-    if (!bearer && !(isSession && request.method === 'POST')) {
-      return isSession ? reply({ status: 'inactive' }, 200, cookie()) : reply({ message: 'Sign in to open your console.' }, 401, cookie());
     }
     let session; let newSecret;
     if (isSession && request.method === 'POST') {

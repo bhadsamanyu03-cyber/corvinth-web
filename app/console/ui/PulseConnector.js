@@ -6,8 +6,8 @@ import { useConsoleData } from './data';
 import { DataState, Field } from './primitives';
 import { connectionReadiness } from '../../lib/pulse-console.mjs';
 
-const BUNDLE = 'd4aca6221eadff56e906f0bb41db5820cb126eed973ed38943d1beca78206a07';
-const DOWNLOAD = '/downloads/pulse-connector/v3';
+const BUNDLE = '32eb36224895baf8e5fab8557a9e20c3125814582564db6b1009442b0e6a2c28';
+const DOWNLOAD = '/downloads/pulse-connector/v4';
 function download(name, data) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)+'\n'], { type: 'application/json' }));
   const link = document.createElement('a'); link.href = url; link.download = name; link.click();

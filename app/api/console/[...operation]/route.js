@@ -7,6 +7,7 @@ async function handle(request, context) {
   const { operation } = await context.params;
   const credentials = consoleCredentials(process.env);
   return handleConsole(request, operation, {
+    runtimeReadiness: process.env.CORVINTH_RUNTIME_READINESS_ENABLED === 'true',
     enabled: process.env.CORVINTH_CONSOLE_ENABLED === 'true',
     backendUrl: process.env.CORVINTH_CONSOLE_BACKEND_URL,
     secret: process.env.CORVINTH_CONSOLE_GATEWAY_SECRET,
