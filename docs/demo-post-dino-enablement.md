@@ -89,12 +89,17 @@ Expected: health 200 with existing readiness checks passing; demo session 401
 ## End-to-end verification — deferred
 
 Run the operator CLI from the backend checkout using its existing dependencies.
-Explicitly supply the existing API Mongo authority through the operator
-environment's `MONGO_URI`; the CLI does not load dotenv and uses database
-`corvinth`. Keep the one-time raw-token output out of persistent logs.
+For current live token issuance/revocation, explicitly select the API Mongo secret
+`corvinth/staging/archive-v2/mongo-uri`; do not rely on inherited `MONGO_URI` or
+the older `corvinth/staging/mongo-uri` cluster. The CLI does not load dotenv and
+uses database `corvinth`. Keep the one-time raw-token output out of persistent logs.
+The remaining checks below describe the historical Phase 1 enablement slice,
+not the current demo execution capabilities.
 
 ```sh
-python3 demo_tokens_cli.py issue --label "Founder access smoke" \
+python3.12 demo_tokens_cli.py \
+  --mongo-secret corvinth/staging/archive-v2/mongo-uri --aws-region us-east-1 \
+  issue --label "Founder access smoke" \
   --expires-days 1 --max-sessions 3 --session-minutes 1 --max-runs 10
 ```
 
@@ -122,7 +127,9 @@ to www; the `__Host-corvinth_demo` cookie is host-specific.
 5. Redeem again (third session). Revoke using the non-secret ID printed at issuance:
 
    ```sh
-   python3 demo_tokens_cli.py revoke --token-id TOKEN_ID_FROM_ISSUANCE
+   python3.12 demo_tokens_cli.py \
+     --mongo-secret corvinth/staging/archive-v2/mongo-uri --aws-region us-east-1 \
+     revoke --token-id TOKEN_ID_FROM_ISSUANCE
    ```
 
    Before this session expires, its next status request must return 401 and clear

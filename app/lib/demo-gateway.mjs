@@ -2,7 +2,7 @@
 import { readBatch, readInput, readReference, readResult, readSession as parseSession } from './demo-contract.mjs';
 export const DEMO_COOKIE = '__Host-corvinth_demo';
 const SESSION = /^cds_[A-Za-z0-9_-]{43}$/;
-const TOKEN = /^cdt_[A-Za-z0-9_-]{43}$/;
+const TOKEN = /^(?:cdt_[A-Za-z0-9_-]{43}|(?=[a-z0-9-]{1,91}_)[a-z0-9]+(?:-[a-z0-9]+)*_[a-z0-9]{8})(?![\s\S])/;
 
 function reply(body, status = 200, cookie) {
   const headers = { 'Cache-Control': 'no-store', Pragma: 'no-cache' };

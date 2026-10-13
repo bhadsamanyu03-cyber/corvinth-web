@@ -39,6 +39,12 @@ one transaction. Refresh resumes a cookie; it does not issue another session.
 
 Founder operations are documented in the backend's `DEMO_ACCESS.md`. There is no
 public issuance route. An inbound buyer emails founder@corvinth.com manually.
+New invitations use `[appname]_[8chartoken]`: lowercase app names, spaces replaced
+by hyphens, and eight cryptographically random lowercase letters/digits. The
+existing founder CLI uses `--label "Foto App"` to name the app. Legacy `cdt_`
+tokens remain accepted until expiry/revocation. These values still authorize
+demo access, not tracking alone. API, gateway and wake-controller validators
+must all be deployed before using the new format live.
 
 ## Limits and failures
 

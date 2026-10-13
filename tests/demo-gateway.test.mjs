@@ -11,6 +11,29 @@ const request = (method = 'POST', options = {}) => new Request('https://corvinth
   ...(method === 'POST' ? { body: options.body ?? JSON.stringify({ token }) } : {}),
 });
 
+test('app-named lowercase tokens and legacy tokens reach the existing exchange', async () => {
+  for (const value of ['plura_a7m2q9xb', 'foto-app_a7m2q9xb', '3fun_12345678', 'snicky_a7m2q9xb', 'a'.repeat(91) + '_a7m2q9xb', token]) {
+    let calls = 0;
+    const response = await handleDemoSession(request('POST', { body: JSON.stringify({ token: value }) }), config, async (_url, init) => {
+      calls++;
+      assert.equal(JSON.parse(init.body).token, value);
+      return Response.json({ ...session(), session_secret: bearer });
+    });
+    assert.equal(response.status, 200);
+    assert.equal(calls, 1);
+    assert.ok(response.headers.get('set-cookie').includes('HttpOnly'));
+  }
+});
+
+test('malformed app-named tokens are rejected before contacting the backend', async () => {
+  for (const value of ['Plura_a7m2q9xb', 'plura_A7m2q9xb', 'foto app_a7m2q9xb', 'plura_1234567', 'plura_123456789', '-plura_a7m2q9xb', 'plura-_a7m2q9xb', 'a'.repeat(92) + '_a7m2q9xb', 'plura_a7m2q9xb\n']) {
+    let calls = 0;
+    const response = await handleDemoSession(request('POST', { body: JSON.stringify({ token: value }) }), config, async () => { calls++; });
+    assert.equal(response.status, 400);
+    assert.equal(calls, 0);
+  }
+});
+
 test('exchange sets secure opaque cookie and never exposes backend credentials in JSON', async () => {
   let calls = 0;
   const response = await handleDemoSession(request(), config, async (url, init) => {

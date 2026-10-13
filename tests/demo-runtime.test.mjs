@@ -8,6 +8,11 @@ test('cold demo validates token and sends only readiness GET before redemption',
  const calls=[];const r=await handleDemoSession(request(),config,async(url,init)=>{calls.push([url,init]);return Response.json({protocol:'corvinth-runtime-v1',state:'starting'},{status:202});});
  assert.equal(r.status,202);assert.equal(r.headers.get('x-corvinth-admission'),'not-submitted');assert.equal(calls.length,1);assert.equal(calls[0][1].method,'GET');assert.equal(calls[0][1].headers['X-Corvinth-Demo-Token'],token);assert.equal((await r.json()).submitted,false);
 });
+test('app-named token reaches wake admission unchanged before redemption',async()=>{
+ const value='foto-app_a7m2q9xb';let calls=0;
+ const r=await handleDemoSession(request('POST',{token:value}),config,async(url,init)=>{calls++;assert.equal(init.method,'GET');assert.equal(init.headers['X-Corvinth-Demo-Token'],value);return Response.json({protocol:'corvinth-runtime-v1',state:'starting'},{status:202});});
+ assert.equal(r.status,202);assert.equal(calls,1);assert.equal((await r.json()).submitted,false);
+});
 test('demo invalid local inputs and fresh credential denial cannot submit',async()=>{
  let calls=0;let r=await handleDemoSession(request('POST',{token:'invalid'}),config,async()=>{calls++;});assert.equal(r.status,400);assert.equal(calls,0);
  r=await handleDemoSession(request(),config,async()=>{calls++;return Response.json({error_code:'runtime_access_denied'},{status:401});});assert.equal(r.status,401);assert.equal(calls,1);
