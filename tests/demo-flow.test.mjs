@@ -109,7 +109,7 @@ test('production execution uses the gated routes and never synthesizes a fixture
   const approved = readCatalogue(await liveDemoClient.listAssets({}));
   assert.equal(approved.available, true);
   assert.equal(approved.assets.filter((asset) => asset.can_reference).length, 4);
-  assert.equal(approved.assets.filter((asset) => asset.can_upload).length, 31);
+  assert.equal(approved.assets.filter((asset) => asset.can_upload).length, 32);
   const originalFetch = globalThis.fetch;
   const calls = [];
   globalThis.fetch = async (url, init) => { calls.push({ url, init }); return Response.json({ error: 'demo_session_invalid' }, { status: 401 }); };

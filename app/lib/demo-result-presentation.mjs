@@ -9,10 +9,10 @@ export function getDinoDemoBand(cosineSimilarity) {
 
 export function getDemoResultSummary(pdqClassification, dinoBand) {
   const pdq = {
-    EXACT: 'PDQ matched',
-    FUZZY: 'PDQ matched',
-    NEAR_MISS: 'PDQ returned a near-miss result',
-    CLEAN: 'PDQ returned no match',
+    EXACT: 'Image matching found a match',
+    FUZZY: 'Image matching found a match',
+    NEAR_MISS: 'Image matching returned a near miss',
+    CLEAN: 'Image matching found no match',
   }[pdqClassification];
   const range = {
     MATCH: 'demo match',
@@ -21,5 +21,5 @@ export function getDemoResultSummary(pdqClassification, dinoBand) {
   }[dinoBand];
   if (!pdq || !range) return null;
   const also = dinoBand === 'MATCH' && ['EXACT', 'FUZZY'].includes(pdqClassification) ? ' also' : '';
-  return `${pdq}; DINOv2 similarity${also} falls in the ${range} range.`;
+  return `${pdq}; semantic similarity is${also} in the ${range} range.`;
 }

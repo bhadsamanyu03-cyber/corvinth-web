@@ -16,19 +16,19 @@ const session = { status: 'active', expires_at: new Date(Date.now() + 600000).to
 const complete = (state, operation, data) => demoReducer(
   demoReducer(state, { type: 'BEGIN', id: 1, operation }), { type: 'DONE', id: 1, data });
 
-test('approved catalogue has four reference-only originals and the explicit 31-variant slides', () => {
-  assert.equal(catalogue.assets.length, 35);
+test('approved catalogue has four reference-only originals and the explicit 32-variant slides', () => {
+  assert.equal(catalogue.assets.length, 36);
   assert.equal(originals.length, 4);
-  assert.equal(variants.length, 31);
+  assert.equal(variants.length, 32);
   assert.deepEqual(originals.map((asset) => asset.label), ['Original 01', 'Original 02', 'Original 03', 'Original 04']);
   for (const asset of catalogue.assets) {
     assert.notEqual(asset.can_reference, asset.can_upload);
     assert.ok(asset.preview_url.startsWith(asset.can_reference ? '/demo-assets/originals/' : '/demo-assets/variants/'));
   }
   const slides = {
-    slide1: ['filtered','mirrored','coffee','posed','brightness','text','grayscale','rot90','second_person','pose_variant','channel_rotate','brightened'],
-    slide2: ['rot180 2','half_cropped','rot180','desk','dog','darkened','contrast_035','red_channel','rot90 2','white_filtered','darkened copy','mirrored_flipped'],
-    slide3: ['zoomed_out','noise_070','watermark','white','beach','coffee','zoomed'],
+    slide1: ['Center Band Crop','mirrored','coffee','posed','brightness','text','Top Crop','rot90','second_person','pose_variant','channel_rotate','brightened'],
+    slide2: ['rot180 2','Full-Height Crop','rot180','desk','dog','darkened','contrast_035','red_channel','rot90 2','white_filtered','darkened copy','mirrored_flipped'],
+    slide3: ['zoomed_out','noise_070','watermark','white_outfit','Bottom Crop','coffee','zoomed','Left-Shifted Portrait Crop'],
   };
   for (const [slide, labels] of Object.entries(slides)) {
     assert.deepEqual(variants.filter((asset) => asset.slide === slide).map((asset) => asset.label), labels);
@@ -49,8 +49,10 @@ test('all display files retain approved SHA-256 digests, sizes, filenames and ne
     assert.equal(bytes.length, item.byte_length, item.path);
     assert.equal(sha(bytes), item.content_sha256, item.path);
     // Replacing approved bytes must not change the existing variant identity.
-    const replacementId = item.path === 'variants/slide3/zoomed_out.png'
-      ? 'demo_fa80929909eb140b501fe5b0' : null;
+    const replacementId = {
+      'variants/slide3/zoomed_out.png': 'demo_fa80929909eb140b501fe5b0',
+      'variants/slide3/white_outfit.jpg': 'demo_54ef88836af4aaf5daea0b9c',
+    }[item.path];
     assert.equal(item.id, replacementId || 'demo_' + sha(item.path + '\0' + item.content_sha256).slice(0, 24));
   }
 });

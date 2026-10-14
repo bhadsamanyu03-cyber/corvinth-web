@@ -47,7 +47,6 @@ export default function DemoResult({ entry, reference, neutral, index, total }) 
             <span className={styles.demoInterpretation}>Demo interpretation</span>
           </div>
           {dinoBand && <strong data-demo-similarity-band={dinoBand}>{dinoBand}</strong>}
-          <p>UI-only similarity band, not a production classification.</p>
           <p className={styles.similarityEvidence}>Cosine similarity: <code>{result.dino.cosine_similarity}</code></p>
           <p>{result.dino.profile.model_version}</p>
           <p>{result.dino.profile.algorithm_version} · {result.dino.profile.configuration_version}</p>

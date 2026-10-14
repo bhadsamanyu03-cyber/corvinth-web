@@ -1,6 +1,6 @@
 // Generated from the approved image bytes and explicit buyer-facing order.
 export const displayManifest = {
-  "manifest_version": "display_fc46c3aa4d42e2b5fbca4d94",
+  "manifest_version": "display_1cd1351ee37a53c0270852c5",
   "assets": [
     {
       "id": "demo_a34228a51f063d320c9f66b1",
@@ -35,13 +35,13 @@ export const displayManifest = {
       "byte_length": 184138
     },
     {
-      "id": "demo_21a8a1f6b7cd036450854efa",
-      "path": "variants/slide1/filtered.png",
+      "id": "demo_b486896a31214b54a24c29d4",
+      "path": "variants/slide1/Center Band Crop.png",
       "kind": "variant",
-      "label": "filtered",
+      "label": "Center Band Crop",
       "slide": "slide1",
-      "content_sha256": "9a7ccdcf6c84bd6a40f3ccd2671fcdea68055e36ab8dd16f9ea8c402d2774fd2",
-      "byte_length": 2660523
+      "content_sha256": "769d3abe7309dfedd779def6643766ff5222e88af217e6047230d80635954c18",
+      "byte_length": 1185438
     },
     {
       "id": "demo_c58f291ec525d0c37b0b9124",
@@ -89,13 +89,13 @@ export const displayManifest = {
       "byte_length": 2421840
     },
     {
-      "id": "demo_516d87920be1fc487aa754df",
-      "path": "variants/slide1/grayscale.png",
+      "id": "demo_0fa7c7a57af73389c52c2063",
+      "path": "variants/slide1/Top Crop.png",
       "kind": "variant",
-      "label": "grayscale",
+      "label": "Top Crop",
       "slide": "slide1",
-      "content_sha256": "74ec16816922a67e248fcda6c8fa00dd17bc6328ac15d1141c62a489940075b9",
-      "byte_length": 338134
+      "content_sha256": "cc9cb6691a15ba2212828ec5397a375d8db32ff40f2f8448addd5faf66c68d7d",
+      "byte_length": 1151039
     },
     {
       "id": "demo_0c7ed64850533f3ee3627e93",
@@ -152,13 +152,13 @@ export const displayManifest = {
       "byte_length": 2127814
     },
     {
-      "id": "demo_eb4434d3d68472d3888b7300",
-      "path": "variants/slide2/half_cropped.png",
+      "id": "demo_268b7778f5e56e95ded8039e",
+      "path": "variants/slide2/Full-Height Crop.png",
       "kind": "variant",
-      "label": "half_cropped",
+      "label": "Full-Height Crop",
       "slide": "slide2",
-      "content_sha256": "435b3640f43f709136479063fb72207b5e73523e6b2128303ced60645436ffbc",
-      "byte_length": 1199761
+      "content_sha256": "da545a73085b8aa1f26c4fb3bf8f22c7baae24eac84231695ef899edecd2838c",
+      "byte_length": 1156657
     },
     {
       "id": "demo_1f3cc5a19443ac9486f52c70",
@@ -279,21 +279,21 @@ export const displayManifest = {
     },
     {
       "id": "demo_54ef88836af4aaf5daea0b9c",
-      "path": "variants/slide3/white.jpg",
+      "path": "variants/slide3/white_outfit.jpg",
       "kind": "variant",
-      "label": "white",
+      "label": "white_outfit",
       "slide": "slide3",
       "content_sha256": "1755dd29e4b96770f274547dc76de20a8048a7009a30f437a6697c700f13d550",
       "byte_length": 186512
     },
     {
-      "id": "demo_7f2d585edb506e09320f1584",
-      "path": "variants/slide3/beach.png",
+      "id": "demo_3d9789014f3c303e1819dc68",
+      "path": "variants/slide3/Bottom Crop.png",
       "kind": "variant",
-      "label": "beach",
+      "label": "Bottom Crop",
       "slide": "slide3",
-      "content_sha256": "50e206cfa03b0e87425e0f7b8d8f4f94c7fca08104a68a993403adc286243164",
-      "byte_length": 406150
+      "content_sha256": "603b8f6061431d1b9c68815ded8e22b9c2f7e6f4c55463251edd961d5b3b1d7d",
+      "byte_length": 1169768
     },
     {
       "id": "demo_74f4f668dc58878cb2a3f814",
@@ -312,6 +312,15 @@ export const displayManifest = {
       "slide": "slide3",
       "content_sha256": "cf8b727264b887ed5e4fe4fb935d9deabb7c9ad4794921138a1d3ed82b4bbfed",
       "byte_length": 915704
+    },
+    {
+      "id": "demo_2611f3b4e74a1c92db9a3544",
+      "path": "variants/slide3/Left-Shifted Portrait Crop.png",
+      "kind": "variant",
+      "label": "Left-Shifted Portrait Crop",
+      "slide": "slide3",
+      "content_sha256": "7f036801e54a5249ce42887b81faba632b12d3e07573608dc634570e06af09ed",
+      "byte_length": 1167089
     }
   ]
 };

@@ -18,17 +18,17 @@ test('missing or invalid similarity is never presented as a clean result', () =>
 });
 
 test('summary distinguishes authoritative PDQ from the DINO demo similarity range', () => {
-  assert.equal(getDemoResultSummary('EXACT', 'MATCH'), 'PDQ matched; DINOv2 similarity also falls in the demo match range.');
-  assert.equal(getDemoResultSummary('FUZZY', 'CLEAN'), 'PDQ matched; DINOv2 similarity falls in the clean range.');
-  assert.equal(getDemoResultSummary('CLEAN', 'MATCH'), 'PDQ returned no match; DINOv2 similarity falls in the demo match range.');
-  assert.equal(getDemoResultSummary('CLEAN', 'CLEAN'), 'PDQ returned no match; DINOv2 similarity falls in the clean range.');
+  assert.equal(getDemoResultSummary('EXACT', 'MATCH'), 'Image matching found a match; semantic similarity is also in the demo match range.');
+  assert.equal(getDemoResultSummary('FUZZY', 'CLEAN'), 'Image matching found a match; semantic similarity is in the clean range.');
+  assert.equal(getDemoResultSummary('CLEAN', 'MATCH'), 'Image matching found no match; semantic similarity is in the demo match range.');
+  assert.equal(getDemoResultSummary('CLEAN', 'CLEAN'), 'Image matching found no match; semantic similarity is in the clean range.');
   for (const classification of ['EXACT', 'FUZZY', 'NEAR_MISS', 'CLEAN']) {
-    assert.match(getDemoResultSummary(classification, 'NEAR MISS'), /DINOv2 similarity falls in the near-miss range\.$/);
+    assert.match(getDemoResultSummary(classification, 'NEAR MISS'), /semantic similarity is in the near-miss range\.$/);
     for (const band of ['MATCH', 'NEAR MISS', 'CLEAN']) {
       assert.doesNotMatch(getDemoResultSummary(classification, band), /DINOv2 (detected|classified|matched)/);
     }
   }
-  assert.equal(getDemoResultSummary('NEAR_MISS', 'MATCH'), 'PDQ returned a near-miss result; DINOv2 similarity falls in the demo match range.');
+  assert.equal(getDemoResultSummary('NEAR_MISS', 'MATCH'), 'Image matching returned a near miss; semantic similarity is in the demo match range.');
 });
 
 test('PDQ-only and failed results get no invented two-lane summary', () => {
@@ -42,6 +42,6 @@ test('presentation reads real result fields without adding classification or thr
   const result = Object.freeze({ classification: 'CLEAN', dino: Object.freeze({ cosine_similarity: 0.8734 }) });
   assert.equal(getDinoDemoBand(result.dino.cosine_similarity), 'MATCH');
   assert.equal(getDemoResultSummary(result.classification, getDinoDemoBand(result.dino.cosine_similarity)),
-    'PDQ returned no match; DINOv2 similarity falls in the demo match range.');
+    'Image matching found no match; semantic similarity is in the demo match range.');
   assert.deepEqual(result, { classification: 'CLEAN', dino: { cosine_similarity: 0.8734 } });
 });
