@@ -158,7 +158,7 @@ export default function Home() {
           <a href="#architecture">Architecture</a>
           <a href="#demo">Live demo</a>
           <a href="#tida">Why now</a>
-          <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a href="/docs" target="_blank" rel="noopener noreferrer">Docs</a>
         </div>
         <div className="nav-right screen01-nav-actions">
           <a className="screen01-nav-cta" href="#contact">Request API access</a>
@@ -174,7 +174,7 @@ export default function Home() {
         <a href="#architecture" onClick={() => setMobileMenuOpen(false)}>Architecture</a>
         <a href="#demo"    onClick={() => setMobileMenuOpen(false)}>Live demo</a>
         <a href="#tida" onClick={() => setMobileMenuOpen(false)}>Why now</a>
-        <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
+        <a href="/docs" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Docs</a>
         <a href="#contact" className="mobile-cta" onClick={() => setMobileMenuOpen(false)}>Request API access</a>
       </div>
 
@@ -823,7 +823,7 @@ export default function Home() {
           <a href="#how">how it works</a>
           <a href="#shield">shield</a>
           <a href="#integration">integration</a>
-          <a href="https://corvinth-api.onrender.com/docs" target="_blank" rel="noopener noreferrer">docs</a>
+          <a href="/docs" target="_blank" rel="noopener noreferrer">docs</a>
           <a href="mailto:founder@corvinth.com">founder@corvinth.com</a>
         </div>
       </footer>
